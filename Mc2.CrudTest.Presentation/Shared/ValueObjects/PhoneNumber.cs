@@ -19,7 +19,7 @@ namespace Mc2.CrudTest.Presentation.Shared.ValueObjects
             var phoneNumberUtil = PhoneNumbers.PhoneNumberUtil.GetInstance();
             try
             {
-                var numberProto = phoneNumberUtil.Parse(value, null);
+                var numberProto = phoneNumberUtil.Parse(value, "CH");
                 return phoneNumberUtil.IsValidNumber(numberProto);
             }
             catch (PhoneNumbers.NumberParseException)

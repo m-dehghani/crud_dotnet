@@ -9,7 +9,7 @@ public class UnitTest1
     public void Apply_CustomerDeletedEvent_SetsDeletedFlag()
     {
         // Arrange
-        var customer = new Customer(Guid.NewGuid(), "Mohammad", "Dehghani", "1234567890", "a@gmail.com", "123456");
+        var customer = new Customer(Guid.NewGuid(), "Mohammad", "Dehghani", "044 668 18 00", "a@gmail.com", "123456");
         var deletedEvent = new CustomerDeletedEvent(customer.Id);
 
         // Act
@@ -27,7 +27,7 @@ public class UnitTest1
              Guid.NewGuid(),
              "Mohammad",
              "Dehghani",
-             "00989010596159",
+             "044 668 18 00",
              "a@gmail.com",
              "1234564"
         );
