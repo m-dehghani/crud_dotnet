@@ -6,14 +6,13 @@ using StackExchange.Redis;
 
 namespace Mc2.CrudTest.Presentation.DomainServices
 {
-    public class CustomerService
+    public class CustomerService: ICustomerService
     {
         private readonly IEventRepository _eventStore; 
-        static  ConnectionMultiplexer _redis;
         static  IDatabase _redisDB; 
-        public CustomerService(IEventRepository eventStore, IRedis redis)
+        public CustomerService(IEventRepository eventStore, IDatabase redis)
         {
-            _redisDB = _redis.GetDatabase();
+            _redisDB = redis;
             
             _eventStore = eventStore;
         }

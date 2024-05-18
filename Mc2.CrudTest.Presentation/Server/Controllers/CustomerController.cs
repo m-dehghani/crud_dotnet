@@ -16,8 +16,10 @@ public class CustomerController : Controller
 
     }
     
-    public async Task<Customer> GetCustomer(Guid id)
+    [HttpGet]
+    public async Task<Customer> Get(Guid id)
     {
+        Console.WriteLine("the customer list is hit");
         var customer = await  _customerService.GetCustomer(id);
         return customer;
     }

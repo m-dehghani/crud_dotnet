@@ -46,7 +46,8 @@
 
     protected override async Task OnInitializedAsync()
     {
-        Customers =  await Http.GetFromJsonAsync<List<Customer>>("Customer/GetCustomers");
+        Console.WriteLine("init customers list page");
+        Customers =  await Http.GetFromJsonAsync<List<Customer>>("Customer");
     }
 
     private async Task EditCustomer(Customer customer)
