@@ -45,7 +45,12 @@
     {
         try
         {
-          if(_newCustomer.IsValid())  
+            bool validateAllProperties = false;
+            var result = new List<ValidationResult>();
+            var isValid = Validator.TryValidateObject(_newCustomer, new ValidationContext(_newCustomer, null, null), 
+                result, validateAllProperties);
+
+          if(isValid)  
             await Http.PostAsJsonAsync("Customer/Customer", _newCustomer);
             // Redirect to customer list or show success message
         }

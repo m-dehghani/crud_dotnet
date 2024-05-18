@@ -4,8 +4,8 @@ using Mc2.CrudTest.Presentation.Shared.ValueObjects;
 namespace Mc2.CrudTest.Presentation.Shared.Entities{
 public class Customer {
 	public Guid Id { get; private set; }
-    public Name FirstName { get; private set; }
-    public Name LastName { get; private set; }
+    public string FirstName { get; private set; }
+    public string LastName { get; private set; }
     public BankAccount BankAccount { get; private set; }
     public DateOfBirth DateOfBirth { get; private set; }
     public PhoneNumber PhoneNumber { get; private set; }
@@ -16,8 +16,8 @@ public class Customer {
     public Customer(Guid id, string firstName, string lastName, string phoneNumber, string email, string bankAccount)
     {
         Id = id;
-        FirstName = new Name(firstName) ?? throw new ArgumentNullException(nameof(firstName));
-        LastName = new Name(lastName) ?? throw new ArgumentNullException(nameof(lastName));
+        FirstName =firstName ?? throw new ArgumentNullException(nameof(firstName));
+        LastName = lastName ?? throw new ArgumentNullException(nameof(lastName));
         PhoneNumber = new PhoneNumber(phoneNumber) ?? throw new ArgumentNullException(nameof(phoneNumber));
         Email = new Email(email) ?? throw new ArgumentNullException(nameof(email));
         BankAccount = new BankAccount(bankAccount) ?? throw new ArgumentException(bankAccount);
@@ -27,8 +27,8 @@ public class Customer {
     
     public Customer(string firstName, string lastName, string phoneNumber, string email, string bankAccount)
     {
-        FirstName = new Name(firstName) ?? throw new ArgumentNullException(nameof(firstName));
-        LastName = new Name(lastName) ?? throw new ArgumentNullException(nameof(lastName));
+        FirstName = firstName ?? throw new ArgumentNullException(nameof(firstName));
+        LastName = lastName ?? throw new ArgumentNullException(nameof(lastName));
         PhoneNumber = new PhoneNumber(phoneNumber) ?? throw new ArgumentNullException(nameof(phoneNumber));
         Email = new Email(email) ?? throw new ArgumentNullException(nameof(email));
         BankAccount = new BankAccount(bankAccount) ?? throw new ArgumentException(bankAccount);
@@ -62,8 +62,8 @@ public class Customer {
     protected void Apply(CustomerCreatedEvent @event)
     {
         Id = @event.Id;
-        FirstName = new Name(@event.FirstName);
-        LastName = new Name(@event.LastName);
+        FirstName = @event.FirstName;
+        LastName = @event.LastName;
         Email = new Email(@event.Email);
         PhoneNumber = new PhoneNumber(@event.PhoneNumber);
         BankAccount = new BankAccount(@event.BankAccount);
@@ -72,8 +72,8 @@ public class Customer {
 
     protected void Apply(CustomerUpdatedEvent @event)
     {
-        FirstName = new Name(@event.FirstName);
-        LastName = new Name(@event.LastName);
+        FirstName = @event.FirstName;
+        LastName = @event.LastName;
         Email = new Email(@event.Email);
         PhoneNumber = new PhoneNumber(@event.PhoneNumber);
         BankAccount = new BankAccount(@event.BankAccount);

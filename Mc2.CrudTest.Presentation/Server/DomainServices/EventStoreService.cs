@@ -15,7 +15,7 @@ public class EventStoreService
         _context = context;
     }
 
-    public async Task<Customer> RehydratePersonAsync(Guid personId)
+    public async Task<Customer> RehydrateCustomerAsync(Guid personId)
     {
         var events = await _context.Events
             .Where(e => e.AggregateId == personId)
@@ -24,9 +24,9 @@ public class EventStoreService
 
         var customer = new Customer(); 
 
-        foreach (EventBase event in events)
+        foreach (EventBase @event in events)
         {
-            var eventData = JsonConvert.DeserializeObject(event.eventData);
+            var eventData = JsonConvert.DeserializeObject(@event.Data);
             customer.Apply(eventData);
         }
 
