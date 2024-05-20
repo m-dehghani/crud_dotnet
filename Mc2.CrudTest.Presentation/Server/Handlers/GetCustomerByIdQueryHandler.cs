@@ -7,7 +7,7 @@ using MediatR;
 
 namespace Mc2.CrudTest.Presentation.Handlers;
 
-public class GetCustomerByIdQueryHandler: INotification
+public class GetCustomerByIdQueryHandler : IRequestHandler<GetCustomerByIdQuery, Customer>
 {
     private readonly ICustomerService  _readService;
 
@@ -17,9 +17,6 @@ public class GetCustomerByIdQueryHandler: INotification
     }
     public async Task<Customer> Handle(GetCustomerByIdQuery request, CancellationToken cancellationToken)
     {
-       //Read from db and map to read Mpodel
-
-       return await _readService.GetCustomer(request.CustomerId);
+        return  await _readService.GetCustomer(request.CustomerId);
     }
-    
 }

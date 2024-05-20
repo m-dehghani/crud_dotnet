@@ -10,10 +10,11 @@ public class Customer {
     public DateOfBirth DateOfBirth { get; private set; }
     public PhoneNumber PhoneNumber { get; private set; }
     public Email Email { get; private set; }
-    public bool IsDeleted { get; }
+    public int Version { get; private set; }
+    public bool IsDeleted { get; private set; }
 
     // Constructor for rehydration
-    public Customer(Guid id, string firstName, string lastName, string phoneNumber, string email, string bankAccount)
+    public Customer(Guid id, string firstName, string lastName, string phoneNumber, string email, string bankAccount, string dateOfBirth)
     {
         Id = id;
         FirstName =firstName ?? throw new ArgumentNullException(nameof(firstName));
@@ -21,17 +22,19 @@ public class Customer {
         PhoneNumber = new PhoneNumber(phoneNumber) ?? throw new ArgumentNullException(nameof(phoneNumber));
         Email = new Email(email) ?? throw new ArgumentNullException(nameof(email));
         BankAccount = new BankAccount(bankAccount) ?? throw new ArgumentException(bankAccount);
+        DateOfBirth = new DateOfBirth(dateOfBirth);
         IsDeleted = false;
     }
 
     
-    public Customer(string firstName, string lastName, string phoneNumber, string email, string bankAccount)
+    public Customer(string firstName, string lastName, string phoneNumber, string email, string bankAccount,string dateOfBirth)
     {
         FirstName = firstName ?? throw new ArgumentNullException(nameof(firstName));
         LastName = lastName ?? throw new ArgumentNullException(nameof(lastName));
         PhoneNumber = new PhoneNumber(phoneNumber) ?? throw new ArgumentNullException(nameof(phoneNumber));
         Email = new Email(email) ?? throw new ArgumentNullException(nameof(email));
         BankAccount = new BankAccount(bankAccount) ?? throw new ArgumentException(bankAccount);
+        DateOfBirth = new DateOfBirth(dateOfBirth);
         IsDeleted = false;
     }
 
@@ -41,23 +44,16 @@ public class Customer {
     }
 
 
-    public static Customer Create(string firstName, string lastName, string phoneNumber, string email, string bankAccount)
-    {
-        var customer = new Customer(firstName:firstName, lastName: lastName, phoneNumber:phoneNumber, email, bankAccount);
-        customer.Apply(new CustomerCreatedEvent(customer.Id, firstName, lastName,phoneNumber, email, bankAccount));
-        return customer;
-    }
+    // public static Customer Create(string firstName, string lastName, string phoneNumber, string email, string bankAccount)
+    // {
+    //     var customer = new Customer(firstName:firstName, lastName: lastName, phoneNumber:phoneNumber, email, bankAccount);
+    //     customer.Apply(new CustomerCreatedEvent(customer.Id, firstName, lastName,phoneNumber, email, bankAccount));
+    //     return customer;
+    // }
 
-    public static void Delete(Guid id)
-    {
-        // remove customer form store
-    }
+   
 
-    public static void Update(Guid id, string firstName, string lastName, string phoneNumber, string email,
-        string bankAccount)
-    {
-        // update customer with CustomerId == id
-    }
+   
     // Apply methods
     protected void Apply(CustomerCreatedEvent @event)
     {
@@ -67,7 +63,8 @@ public class Customer {
         Email = new Email(@event.Email);
         PhoneNumber = new PhoneNumber(@event.PhoneNumber);
         BankAccount = new BankAccount(@event.BankAccount);
-       
+        Version = 0;
+
     }
 
     protected void Apply(CustomerUpdatedEvent @event)
@@ -78,12 +75,14 @@ public class Customer {
         PhoneNumber = new PhoneNumber(@event.PhoneNumber);
         BankAccount = new BankAccount(@event.BankAccount);
         Id = @event.CustomerId;
-
+        Version += 1;
     }
 
     protected void Apply(CustomerDeletedEvent @event)
     {
         Id = @event.AggregateId;
+        IsDeleted = true;
+        Version += 1;
     }
     
     
@@ -91,17 +90,8 @@ public class Customer {
     public void Apply(object @event)
     {
         ((dynamic)this).Apply((dynamic)@event);
+        Version += 1;
     }
    
-    
-    public Customer Rehydrate(IEnumerable<EventBase> events)
-    {
-        var customer = new Customer();
-        foreach (var @event in events)
-        {
-            customer.Apply(@event);
-        }
-        return customer;
-    }
 }
 }

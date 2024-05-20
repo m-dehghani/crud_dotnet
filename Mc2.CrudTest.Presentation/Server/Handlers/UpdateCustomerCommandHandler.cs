@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Mc2.CrudTest.Presentation.Handlers;
 
-public class UpdateCustomerCommandHandler : INotification
+public class UpdateCustomerCommandHandler : INotificationHandler<UpdateCustomerCommand>
 {
     private readonly IEventRepository _eventStore;
 
@@ -14,10 +14,9 @@ public class UpdateCustomerCommandHandler : INotification
         _eventStore = eventStore;
     }
 
-    public async Task<Unit> Handle(UpdateCustomerCommand command, CancellationToken cancellationToken)
+    public async Task Handle(UpdateCustomerCommand command, CancellationToken cancellationToken)
     {
-        var @event = new CustomerUpdatedEvent(command.CustomerId, command.FirstName, command.LastName, command.Email, command.PhoneNumber, command.BankAccount);
+        var @event = new CustomerUpdatedEvent(command.CustomerId, command.FirstName, command.LastName, command.Email, command.PhoneNumber, command.BankAccount, command.DateOfBirth);
         await _eventStore.SaveEventAsync(@event);
-        return Unit.Value;
-    }
+     }
 }

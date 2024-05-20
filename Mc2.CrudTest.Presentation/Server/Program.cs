@@ -21,7 +21,10 @@ namespace Mc2.CrudTest.Presentation
                 options.UseNpgsql(builder.Configuration["ConnectionStrings:EventStoreConnection"]));
             builder.Services.AddDbContext<ReadModelDbContext>(options =>
                 options.UseNpgsql(builder.Configuration["ConnectionStrings:EventStoreConnection"]));
-
+            builder.Services.AddSwaggerGen();
+            builder.Services.AddMediatR(cfg => {
+                cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
+            });
             builder.Services.AddScoped<IDatabase>(cfg =>
             {
                 IConnectionMultiplexer multiplexer = ConnectionMultiplexer.Connect($"{builder.Configuration["RedisUrl"]},password={builder.Configuration["RedisPassword"]}");
@@ -29,12 +32,15 @@ namespace Mc2.CrudTest.Presentation
             });
             builder.Services.AddTransient<ICustomerService, CustomerService>();
             builder.Services.AddTransient<IEventRepository, EventStoreRepository>();
+          
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseWebAssemblyDebugging();
+                app.UseSwagger();
+                app.UseSwaggerUI();
             }
             else
             {

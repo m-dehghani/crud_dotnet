@@ -16,6 +16,11 @@ public class ApplicationDbContext: DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<EventBase>().HasKey(e => e.EventId);
-      // Additional configuration as needed
+        modelBuilder.Entity<EventBase>()
+            .HasDiscriminator<string>("event_type")
+            .HasValue<CustomerCreatedEvent>("customer_create")
+            .HasValue<CustomerUpdatedEvent>("customer_update")
+            .HasValue<CustomerDeletedEvent>("customer_delete");
+        // Additional configuration as needed
     }
 }

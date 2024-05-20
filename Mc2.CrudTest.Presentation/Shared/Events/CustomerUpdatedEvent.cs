@@ -8,8 +8,9 @@ public class CustomerUpdatedEvent: EventBase
     public string PhoneNumber { get; }
     public string BankAccount { get; }
     public string Email { get; }
+    public DateTime  DateOfBirth { get; set; }
 
-    public CustomerUpdatedEvent(Guid customerId, string firstName, string lastName, string email, string phoneNumber, string bankAccount)
+    public CustomerUpdatedEvent(Guid customerId, string firstName, string lastName, string email, string phoneNumber, string bankAccount,  DateTime dateOfBirth)
     {
         CustomerId = customerId;
         FirstName = firstName;
@@ -17,5 +18,9 @@ public class CustomerUpdatedEvent: EventBase
         PhoneNumber = phoneNumber;
         Email = email;
         BankAccount = bankAccount;
+        CreatedAt = DateTime.Now;
+        DateOfBirth = dateOfBirth;
     }
+    
+    public CustomerUpdatedEvent(){}
 }
