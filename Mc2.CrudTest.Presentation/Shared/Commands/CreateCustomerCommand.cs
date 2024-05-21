@@ -5,7 +5,7 @@ namespace Mc2.CrudTest.Presentation.Shared.Commands;
 
 public class CreateCustomerCommand: IRequest, INotification
 {
-    public CreateCustomerCommand(string firstName, string lastName, string phoneNumber, string email, string bankAccount, DateTime dateOfBirth)
+    public CreateCustomerCommand(string firstName, string lastName, string phoneNumber, string email, string bankAccount, string dateOfBirth)
     {
         CustomerId = new Guid();
         FirstName = firstName;
@@ -13,7 +13,7 @@ public class CreateCustomerCommand: IRequest, INotification
         PhoneNumber = phoneNumber;
         Email = email;
         BankAccount = bankAccount;
-        DateOfBirth = dateOfBirth;
+        DateOfBirth = DateTime.Parse(dateOfBirth);
     }
     public Guid CustomerId { get; set; }
     public string FirstName { get; set; }
