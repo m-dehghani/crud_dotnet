@@ -3,12 +3,13 @@
 @using System.ComponentModel.DataAnnotations
 @using Mc2.CrudTest.Presentation.Shared.ValueObjects
 @inject HttpClient Http
+@inject NavigationManager NavigationManager
 
 <h3>Create New Customer</h3>
 
 <EditForm Model="@_newCustomer" OnValidSubmit="CreateCustomer">
     <DataAnnotationsValidator />
-    <p class="danger">@_errorMessage</p>
+    
     <div class="form-group">
         <label for="firstName">First Name</label>
         <InputText id="firstName" @bind-Value="_newCustomer.FirstName" class="form-control" />
@@ -35,7 +36,13 @@
         <ValidationMessage For="@(() => _newCustomer.DateOfBirth)" />
     </div>
 
-  <button type="submit" class="btn btn-primary">Create</button>
+    <div class="form-group">
+        <label for="bankAccount">BankAccount</label>
+        <InputText id="bankAccount" @bind-Value="_newCustomer.BankAccount" class="form-control" />
+        <ValidationMessage For="@(() => _newCustomer.BankAccount)" />
+    </div>
+
+    <button class="btn btn-primary" @onclick="CreateCustomer">Create</button> <div>@_errorMessage</div>
 </EditForm>
 
 @code {
@@ -46,12 +53,15 @@
         try
         {
             bool validateAllProperties = false;
-            var result = new List<ValidationResult>();
+            var validationResult = new List<ValidationResult>();
             var isValid = Validator.TryValidateObject(_newCustomer, new ValidationContext(_newCustomer, null, null), 
-                result, validateAllProperties);
+                validationResult, validateAllProperties);
 
-          if(isValid)  
-            await Http.PostAsJsonAsync("Customer/Customer", _newCustomer);
+            var result =    await Http.PostAsJsonAsync("Customer", _newCustomer);
+            if (result.IsSuccessStatusCode)
+                NavigationManager.NavigateTo("customers");
+            else
+                _errorMessage = await result.Content.ReadAsStringAsync();
             // Redirect to customer list or show success message
         }
         

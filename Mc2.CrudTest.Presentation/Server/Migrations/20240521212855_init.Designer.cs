@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Mc2.CrudTest.Presentation.Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240519211808_editeventTable")]
-    partial class editeventTable
+    [Migration("20240521212855_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -44,9 +44,50 @@ namespace Mc2.CrudTest.Presentation.Server.Migrations
                     b.Property<DateTimeOffset>("OccurredOn")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("event_type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("EventId");
 
                     b.ToTable("Events");
+
+                    b.HasDiscriminator<string>("event_type").HasValue("EventBase");
+
+                    b.UseTphMappingStrategy();
+                });
+
+            modelBuilder.Entity("Mc2.CrudTest.Presentation.Shared.Events.CustomerCreatedEvent", b =>
+                {
+                    b.HasBaseType("Mc2.CrudTest.Presentation.Shared.Events.EventBase");
+
+                    b.Property<DateTime>("DateOfBirth")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.ToTable("Events", t =>
+                        {
+                            t.Property("DateOfBirth")
+                                .HasColumnName("CustomerCreatedEvent_DateOfBirth");
+                        });
+
+                    b.HasDiscriminator().HasValue("customer_create");
+                });
+
+            modelBuilder.Entity("Mc2.CrudTest.Presentation.Shared.Events.CustomerDeletedEvent", b =>
+                {
+                    b.HasBaseType("Mc2.CrudTest.Presentation.Shared.Events.EventBase");
+
+                    b.HasDiscriminator().HasValue("customer_delete");
+                });
+
+            modelBuilder.Entity("Mc2.CrudTest.Presentation.Shared.Events.CustomerUpdatedEvent", b =>
+                {
+                    b.HasBaseType("Mc2.CrudTest.Presentation.Shared.Events.EventBase");
+
+                    b.Property<DateTime>("DateOfBirth")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasDiscriminator().HasValue("customer_update");
                 });
 #pragma warning restore 612, 618
         }

@@ -9,6 +9,7 @@ using System.Net.Http.Json;
 using System.Threading.Tasks;
 using FluentAssertions.Common;
 using Mc2.CrudTest.Presentation;
+using Mc2.CrudTest.Presentation.Shared.Commands;
 using Mc2.CrudTest.Presentation.ViewModels;
 using MediatR;
 using Newtonsoft.Json;
@@ -86,7 +87,7 @@ namespace MC2.CrudTest.UnitTests
             // Arrange
             var newCustomer = new Customer("Mohammad", "Dehghani", "044 668 18 00", "dehghany@gmail.com", "65468489464","2015-02-04");
          
-            await _controller.CreateCustomer(new CustomerViewModel( "Mohammad",  "Dehghani",  "044 668 18 00",  "dehghany@gmail.com",  "65468489464", "2015-02-04"));
+            await _controller.CreateCustomer(new ( "Mohammad",  "Dehghani",  "044 668 18 00",  "dehghany@gmail.com",  "65468489464", "2015-02-04"));
             var duplicateEmail = newCustomer.Email;
 
             // Act
@@ -101,7 +102,7 @@ namespace MC2.CrudTest.UnitTests
         [Fact]
         public async Task CreateCustomer_ValidInput_CallsAddCustomerAsync()
         {
-            var newCustomer = new CustomerViewModel("Mohammad111", "Dehghani", "044 668 18 00", "dehghan1y@ggggggghmail.com", "65468489464","2015-05-06");
+            var newCustomer = new CustomerViewModel("Mohammad1111", "Dehghani", "044 668 18 00", "dehghan1y@gggkgggghmail.com", "65468489464","2015-05-06");
          
          
             var request = new HttpRequestMessage(new HttpMethod("POST"), "/customer");
@@ -109,8 +110,8 @@ namespace MC2.CrudTest.UnitTests
             var response2 = await _client.PostAsJsonAsync("/customer", newCustomer);
             
             //var response = await _client.SendAsync(request);
-            
-            Console.WriteLine(response2);
+            var res = await response2.Content.ReadAsStringAsync();
+            Console.WriteLine(res);
 
             // _mockCustomerService.Verify(s => s.CreateCustomerAsync(newCustomer), Times.Once);
         }
@@ -131,7 +132,7 @@ namespace MC2.CrudTest.UnitTests
         {
             var id = new Guid();
 
-            var res = await Record.ExceptionAsync(async () => await _controller.DeleteCustomer(id)); 
+            var res = await Record.ExceptionAsync(async () => await _controller.DeleteCustomer(new DeleteCustomerCommand(new Guid()))); 
             
             Assert.Null(res);
         }

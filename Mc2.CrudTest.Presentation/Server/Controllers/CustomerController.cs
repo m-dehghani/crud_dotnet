@@ -25,12 +25,16 @@ public class CustomerController : Controller
     [HttpGet]
     public   Task<IActionResult> Get(GetCustomerByIdQuery  getCustomerByIdQuery)
     =>  RequestHandler.HandleQuery<Customer>(getCustomerByIdQuery, _mediator, Log);
-    
+
 
     [HttpPost]
-    public Task<IActionResult> CreateCustomer(CreateCustomerCommand newCustomerCmd)
-        => RequestHandler.HandleCommand(newCustomerCmd, _mediator, Log);
-   
+    public async Task<IActionResult> CreateCustomer(CustomerViewModel newCustomer)
+    {
+        CreateCustomerCommand command = new CreateCustomerCommand(newCustomer.FirstName, newCustomer.LastName,
+            newCustomer.PhoneNumber, newCustomer.Email, newCustomer.BankAccount, newCustomer.DateOfBirth);
+         return await RequestHandler.HandleCommand(command, _mediator, Log);
+    }
+
 
     [HttpPut]
     public Task<IActionResult> UdateCustomer(UpdateCustomerCommand customerUpdateCmd)

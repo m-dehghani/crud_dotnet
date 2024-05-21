@@ -4,7 +4,7 @@
 @page "/customers"
 
 <h3>Customer List</h3>
-
+<a class="btn btn-danger" href="create-customer">New Customer</a>
 <table class="table">
     <thead>
     <tr>
@@ -47,7 +47,7 @@
     protected override async Task OnInitializedAsync()
     {
         Console.WriteLine("init customers list page");
-        Customers =  await Http.GetFromJsonAsync<List<Customer>>("Customer");
+        Customers = new List<Customer>();//  await Http.GetFromJsonAsync<List<Customer>>("Customer");
     }
 
     private async Task EditCustomer(Customer customer)

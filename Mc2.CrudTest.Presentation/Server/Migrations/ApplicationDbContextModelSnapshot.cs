@@ -35,7 +35,6 @@ namespace Mc2.CrudTest.Presentation.Server.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Data")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTimeOffset>("OccurredOn")
@@ -58,13 +57,51 @@ namespace Mc2.CrudTest.Presentation.Server.Migrations
                 {
                     b.HasBaseType("Mc2.CrudTest.Presentation.Shared.Events.EventBase");
 
+                    b.Property<string>("BankAccount")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.ToTable("Events", t =>
                         {
+                            t.Property("BankAccount")
+                                .HasColumnName("CustomerCreatedEvent_BankAccount");
+
                             t.Property("DateOfBirth")
                                 .HasColumnName("CustomerCreatedEvent_DateOfBirth");
+
+                            t.Property("Email")
+                                .HasColumnName("CustomerCreatedEvent_Email");
+
+                            t.Property("FirstName")
+                                .HasColumnName("CustomerCreatedEvent_FirstName");
+
+                            t.Property("LastName")
+                                .HasColumnName("CustomerCreatedEvent_LastName");
+
+                            t.Property("PhoneNumber")
+                                .HasColumnName("CustomerCreatedEvent_PhoneNumber");
                         });
 
                     b.HasDiscriminator().HasValue("customer_create");
@@ -81,8 +118,31 @@ namespace Mc2.CrudTest.Presentation.Server.Migrations
                 {
                     b.HasBaseType("Mc2.CrudTest.Presentation.Shared.Events.EventBase");
 
+                    b.Property<string>("BankAccount")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasDiscriminator().HasValue("customer_update");
                 });

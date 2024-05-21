@@ -17,12 +17,12 @@ public class CustomerCreatedEvent: EventBase, INotification
     }
     public CustomerCreatedEvent(){}
     
-    public Guid Id { get; }
-    public string FirstName { get;  }
-    public string LastName { get; }
-    public string PhoneNumber { get; }
-    public string Email { get;}
-    public string BankAccount { get; }
+    public Guid Id { get; set;}
+    public string FirstName { get;  set;}
+    public string LastName { get; set;}
+    public string PhoneNumber { get; set;}
+    public string Email { get;set;}
+    public string BankAccount { get; set;}
     public DateTime DateOfBirth { get; set; }
 
     

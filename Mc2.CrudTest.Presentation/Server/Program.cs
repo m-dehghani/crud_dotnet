@@ -1,6 +1,8 @@
 using System.Configuration;
 using Mc2.CrudTest.Presentation.DomainServices;
 using Mc2.CrudTest.Presentation.Infrastructure;
+using Mc2.CrudTest.Presentation.Server.Controllers;
+using MediatR;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
@@ -32,7 +34,7 @@ namespace Mc2.CrudTest.Presentation
             });
             builder.Services.AddTransient<ICustomerService, CustomerService>();
             builder.Services.AddTransient<IEventRepository, EventStoreRepository>();
-          
+         
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
