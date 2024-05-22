@@ -15,7 +15,7 @@ public class ReadModelDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<CustomerReadModel>().ToTable("Events");
+        modelBuilder.Entity<CustomerReadModel>().ToTable("Events").HasNoKey();
         // Additional configuration as needed
     }
 }

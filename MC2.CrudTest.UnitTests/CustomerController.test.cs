@@ -20,58 +20,82 @@ using Newtonsoft.Json;
 using Xunit;
 
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using StackExchange.Redis;
 
 namespace MC2.CrudTest.UnitTests
 {
     
     public class CustomerControllerTests: IClassFixture<WebApplicationFactory<Program>>
     {
-        private Mock<ICustomerService> _mockCustomerService;
+        private ICustomerService _customerService;
         private CustomerController _controller;
         private readonly HttpClient _client;
         private Mock<IMediator> _mediator;
-       
+        private ApplicationDbContext context;
         public CustomerControllerTests(WebApplicationFactory<Program> factory)
         {
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(databaseName: "TestDb")
+                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+                .Options;
+               
+               context = new ApplicationDbContext(options);
              _mediator = new  Mock<IMediator>();
-             _mockCustomerService = new Mock<ICustomerService>();
-             _controller = new CustomerController(_mockCustomerService.Object, _mediator.Object);
+           
              _client = factory.CreateClient();
         }
         
         [Fact]
         public async Task CreateCustomer_DuplicateEmail_ReturnsBadRequest()
-        {
+        { 
             // Arrange
-            var newCustomer = new Customer("Mohammad",  "Dehghani", "044 668 18 00", "dehghany.m@gmail.com",
+            var mockMultiplexer = new Mock<IConnectionMultiplexer>();
+
+            mockMultiplexer.Setup(_ => _.IsConnected).Returns(false);
+
+            var mockDatabase = new Mock<IDatabase>();
+
+            mockMultiplexer
+                .Setup(_ => _.GetDatabase(It.IsAny<int>(), It.IsAny<object>()))
+                .Returns(mockDatabase.Object);
+
+            var cacheHandler = new RedisCacheHandler(mockMultiplexer.Object);
+            
+            var newCustomer = new CustomerViewModel("Mohammadd",  "Dehghaniii", "044 668 18 00", "dehghany.m@gmail.com",
                 "1231564654","2015-02-04" );
+           
+            
+            _customerService = new CustomerService(new EventStoreRepository(context, null), mockDatabase.Object);
+            _controller = new CustomerController(_customerService, _mediator.Object);
+            
+            
+           
             var requestUri = new Uri("/customer", UriKind.Relative);
-          //  var request = new HttpRequestMessage(new HttpMethod("GET"), "/customer");
-          
+            
             // Act
             var response1 = await _client.PostAsJsonAsync(requestUri, newCustomer);
             var response2 = await _client.PostAsJsonAsync(requestUri, newCustomer);
-            
-           // var response = await _client.SendAsync(request);
-            
-            // Assert
-           // response.EnsureSuccessStatusCode();
-            Assert.Equal(HttpStatusCode.Created, response1.StatusCode);
-            Assert.Equal(HttpStatusCode.BadRequest, response2.StatusCode);
-
+            var msgInData = await response1.Content.ReadAsStringAsync();
             var errorResponse = await response2.Content.ReadAsStringAsync();
             var errorDetails = JsonConvert.DeserializeAnonymousType(errorResponse, new { Message = "" });
-            Assert.Contains("Email address already exists", errorDetails.Message);
+            HttpRequestMessage deleteRequestMessage = new HttpRequestMessage(HttpMethod.Delete, requestUri);
+            var response3 = await _client.SendAsync(deleteRequestMessage);
+            
+            // Assert
+            
+            Assert.Equal(HttpStatusCode.Created, response1.StatusCode);
+            var customer = new Customer(Guid.NewGuid(),newCustomer.FirstName, newCustomer.LastName, newCustomer.PhoneNumber, newCustomer.Email, newCustomer.BankAccount, newCustomer.DateOfBirth);
+            
+            cacheHandler.SetCustomerData(customer);
+            // Act
+            Assert.Equal(HttpStatusCode.BadRequest, response2.StatusCode);
+
+            Assert.Contains("Email address already exists", errorDetails?.Message);
+            
         }
-        
-        
-        private readonly List<Customer> _customers =
-        [
-            // new Customer( Guid.NewGuid(),  "john",  "Doe", "044 668 18 00", "john.doe@example.com",
-            //     "1231564654"),
-            // new Customer( new Guid(),  "test",  "test", "044 668 18 00",
-            //     "jane.smith@example.com", "1231564654")
-        ];
+      
 
         [Fact]
         public async Task NewCustomer_EmailIsUnique_ShouldPass()
@@ -88,23 +112,7 @@ namespace MC2.CrudTest.UnitTests
             Assert.Equal(new OkResult(), resp);
         }
 
-        [Fact]
-        public async Task ExistingCustomer_DuplicateEmail_ShouldFail()
-        {
-            // Arrange
-            var newCustomer = new Customer("Mohammad", "Dehghani", "044 668 18 00", "dehghany@gmail.com", "65468489464","2015-02-04");
-         
-            await _controller.CreateCustomer(new ( "Mohammad",  "Dehghani",  "044 668 18 00",  "dehghany@gmail.com",  "65468489464", "2015-02-04"));
-            var duplicateEmail = newCustomer.Email;
-
-            // Act
-            var isUnique = !_customers.Any(c => c.Id != newCustomer.Id && c.Email.Equals(duplicateEmail));
-            
-            // Assert
-            Assert.False(isUnique, "Email should not be duplicated for existing customers.");
-        }
-    
-        
+       
         
         [Fact]
         public async Task CreateCustomer_ValidInput_CallsAddCustomerAsync()
@@ -137,7 +145,7 @@ namespace MC2.CrudTest.UnitTests
         {
             var id = new Guid();
 
-            var res = await Record.ExceptionAsync(async () => await _controller.DeleteCustomer(new DeleteCustomerCommand(new Guid()))); 
+            var res = await Record.ExceptionAsync(async () => await _controller.DeleteCustomer(string.Empty)); 
             
             Assert.Null(res);
         }

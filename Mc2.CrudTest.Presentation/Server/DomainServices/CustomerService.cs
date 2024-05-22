@@ -24,29 +24,24 @@ namespace Mc2.CrudTest.Presentation.DomainServices
         {
             //check for the existence of the Email value in Redis DB. If it couldn't find the value for the email so the email is unique else should return an error indicating 'This email has used before'.
             //also check for the combination of the Firstname, Lastname, and DateOfBirth
-            try
+
+
+            var customerCreatedEvent = new CustomerCreatedEvent(customer.Id, customer.FirstName, customer.LastName,
+                customer.PhoneNumber.Value, customer.Email.Value, customer.BankAccount.Value,
+                customer.DateOfBirth.Value)
             {
-                
-                var customerCreatedEvent = new CustomerCreatedEvent(customer.Id, customer.FirstName, customer.LastName,
-                    customer.PhoneNumber.Value, customer.Email.Value, customer.BankAccount.Value,
-                    customer.DateOfBirth.Value)
-                {
-                    Data = JsonConvert.SerializeObject(customer)
-                };
-                
-                await _eventStore.SaveEventAsync(customerCreatedEvent, () => SetCustomerInRedis(customer));
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message);
-            }
+                Data = JsonConvert.SerializeObject(customer)
+            };
+
+            await _eventStore.SaveEventAsync(customerCreatedEvent, () => SetCustomerInRedis(customer));
+
         }
 
-        private static void SetCustomerInRedis(Customer customer) 
+        public static void SetCustomerInRedis(Customer customer) 
         {
             var customerData = $"{customer.Id}-{customer.FirstName}-{customer.LastName}-{customer.DateOfBirth.Value}";
             if (!string.IsNullOrEmpty(_redisDB.StringGet(customer.Email.Value)))
-                throw new ArgumentException("email is not unique");
+                throw new ArgumentException("Email address already exists");
 
             if (!string.IsNullOrEmpty(_redisDB.StringGet(customerData)))
                 throw new ArgumentException("This user has registered before");

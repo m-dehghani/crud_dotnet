@@ -14,6 +14,7 @@ public class CustomerCreatedEvent: EventBase, INotification
         BankAccount = bankAccount;
         DateOfBirth = dateOfBirth;
         EventId = new Guid();
+        AggregateId = id;
     }
     public CustomerCreatedEvent(){}
     

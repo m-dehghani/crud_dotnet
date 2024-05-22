@@ -30,6 +30,7 @@ public class EventStoreRepository: IEventRepository
         catch (Exception ex)
         {
             await trx.RollbackAsync();
+            throw ex;
         }
     }
     
