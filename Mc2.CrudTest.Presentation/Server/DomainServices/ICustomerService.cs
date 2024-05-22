@@ -10,4 +10,5 @@ public interface ICustomerService
     public Task UpdateCustomerAsync(Customer customer);
     public Task DeleteCustomerAsync(Guid customerId);
     public Task<Customer> GetCustomer(Guid customerId);
+    public Task<IEnumerable<Customer>> GetAllCustomers();
 }

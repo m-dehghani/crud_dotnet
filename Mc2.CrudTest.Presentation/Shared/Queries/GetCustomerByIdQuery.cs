@@ -7,5 +7,9 @@ namespace Mc2.CrudTest.Presentation.Shared.Queries;
 public class GetCustomerByIdQuery : IRequest<CustomerReadModel>, INotification, IRequest<Customer>
 
 {
+    public GetCustomerByIdQuery(Guid customerId)
+    {
+        CustomerId = customerId;
+    }
     public Guid CustomerId { get; set; }
 }

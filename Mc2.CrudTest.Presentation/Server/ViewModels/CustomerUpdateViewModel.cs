@@ -6,13 +6,13 @@ public class CustomerUpdateViewModel
         public CustomerUpdateViewModel(Guid id,string firstName, string lastName, string phoneNumber,  string email, string bankAccount, string dateOfBirth)
         {
 
-            this.Id = id;
-            this.FirstName = firstName;
-            this.LastName = lastName;
-            this.BankAccount = bankAccount;
-            this.DateOfBirth = dateOfBirth;
-            this.PhoneNumber = phoneNumber;
-            this.Email = email;
+            Id = id;
+            FirstName = firstName;
+            LastName = lastName;
+            BankAccount = bankAccount;
+            DateOfBirth = dateOfBirth;
+            PhoneNumber = phoneNumber;
+            Email = email;
             
         }
 

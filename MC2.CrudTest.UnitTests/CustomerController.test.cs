@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Mc2.CrudTest.Presentation.DomainServices;
 using Mc2.CrudTest.Presentation.Server.Controllers;
 using Mc2.CrudTest.Presentation.Shared.Entities;
@@ -9,9 +10,12 @@ using System.Net.Http.Json;
 using System.Threading.Tasks;
 using FluentAssertions.Common;
 using Mc2.CrudTest.Presentation;
+using Mc2.CrudTest.Presentation.Infrastructure;
 using Mc2.CrudTest.Presentation.Shared.Commands;
 using Mc2.CrudTest.Presentation.ViewModels;
 using MediatR;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Xunit;
 
@@ -25,13 +29,13 @@ namespace MC2.CrudTest.UnitTests
         private Mock<ICustomerService> _mockCustomerService;
         private CustomerController _controller;
         private readonly HttpClient _client;
-        private IMediator _mediator;
-     
+        private Mock<IMediator> _mediator;
+       
         public CustomerControllerTests(WebApplicationFactory<Program> factory)
         {
-            
+             _mediator = new  Mock<IMediator>();
              _mockCustomerService = new Mock<ICustomerService>();
-           //  _controller = new CustomerController(_mockCustomerService.Object);
+             _controller = new CustomerController(_mockCustomerService.Object, _mediator.Object);
              _client = factory.CreateClient();
         }
         
@@ -39,17 +43,19 @@ namespace MC2.CrudTest.UnitTests
         public async Task CreateCustomer_DuplicateEmail_ReturnsBadRequest()
         {
             // Arrange
-            var newCustomer = new { Name = "Alice", Email = "alice@example.com" };
+            var newCustomer = new Customer("Mohammad",  "Dehghani", "044 668 18 00", "dehghany.m@gmail.com",
+                "1231564654","2015-02-04" );
             var requestUri = new Uri("/customer", UriKind.Relative);
-            var request = new HttpRequestMessage(new HttpMethod("GET"), "/customer");
+          //  var request = new HttpRequestMessage(new HttpMethod("GET"), "/customer");
           
             // Act
             var response1 = await _client.PostAsJsonAsync(requestUri, newCustomer);
             var response2 = await _client.PostAsJsonAsync(requestUri, newCustomer);
-            var response = await _client.SendAsync(request);
+            
+           // var response = await _client.SendAsync(request);
             
             // Assert
-            response.EnsureSuccessStatusCode();
+           // response.EnsureSuccessStatusCode();
             Assert.Equal(HttpStatusCode.Created, response1.StatusCode);
             Assert.Equal(HttpStatusCode.BadRequest, response2.StatusCode);
 
@@ -68,17 +74,18 @@ namespace MC2.CrudTest.UnitTests
         ];
 
         [Fact]
-        public void NewCustomer_EmailIsUnique_ShouldPass()
+        public async Task NewCustomer_EmailIsUnique_ShouldPass()
         {
             // Arrange
-            var newCustomer = new Customer (  "Mohammad",  "Dehghani", "044 668 18 00", "dehghany.m@gmail.com",
+            var newCustomer = new CustomerViewModel(  "Mohammad",  "Dehghani", "044 668 18 00", "dehghany.m@gmail.com",
                 "1231564654","2015-02-04");
 
             // Act
-            var isUnique = !_customers.Any(c => c.Email.Equals(newCustomer.Email));
+            var resp=  await _controller.CreateCustomer(newCustomer);
+           //  var isUnique = !_customers.Any(c => c.Email.Equals(newCustomer.Email));
 
             // Assert
-            Assert.True(isUnique, "Email should be unique for new customers.");
+            Assert.Equal(new OkResult(), resp);
         }
 
         [Fact]
@@ -102,18 +109,16 @@ namespace MC2.CrudTest.UnitTests
         [Fact]
         public async Task CreateCustomer_ValidInput_CallsAddCustomerAsync()
         {
+            // Arrange
             var newCustomer = new CustomerViewModel("Mohammad1111", "Dehghani", "044 668 18 00", "dehghan1y@gggkgggghmail.com", "65468489464","2015-05-06");
          
-         
-            var request = new HttpRequestMessage(new HttpMethod("POST"), "/customer");
             // Act
             var response2 = await _client.PostAsJsonAsync("/customer", newCustomer);
-            
-            //var response = await _client.SendAsync(request);
+           
+            // Assert
+            Assert.Equal(HttpStatusCode.OK,response2.StatusCode);
             var res = await response2.Content.ReadAsStringAsync();
-            Console.WriteLine(res);
-
-            // _mockCustomerService.Verify(s => s.CreateCustomerAsync(newCustomer), Times.Once);
+            Debug.WriteLine(res);
         }
 
         [Fact]

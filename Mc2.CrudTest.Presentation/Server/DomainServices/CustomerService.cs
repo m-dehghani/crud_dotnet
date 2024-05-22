@@ -35,8 +35,6 @@ namespace Mc2.CrudTest.Presentation.DomainServices
                 };
                 
                 await _eventStore.SaveEventAsync(customerCreatedEvent, () => SetCustomerInRedis(customer));
-            
-                
             }
             catch (Exception ex)
             {
@@ -44,9 +42,9 @@ namespace Mc2.CrudTest.Presentation.DomainServices
             }
         }
 
-        private static void SetCustomerInRedis(Customer customer)
+        private static void SetCustomerInRedis(Customer customer) 
         {
-            var customerData = $"{customer.FirstName}-{customer.LastName}-{customer.DateOfBirth.Value}";
+            var customerData = $"{customer.Id}-{customer.FirstName}-{customer.LastName}-{customer.DateOfBirth.Value}";
             if (!string.IsNullOrEmpty(_redisDB.StringGet(customer.Email.Value)))
                 throw new ArgumentException("email is not unique");
 
@@ -61,21 +59,25 @@ namespace Mc2.CrudTest.Presentation.DomainServices
         // Command: Update an existing customer
         public async Task UpdateCustomerAsync(Customer customer)
         {
-            var customerData = $"{customer.FirstName}-{customer.LastName}-{customer.DateOfBirth.Value}";
-            if (! string.IsNullOrEmpty(_redisDB.StringGet(customer.Email.Value) ))
-                throw new ArgumentException("email is not unique");
-            //
-            // if(!string.IsNullOrEmpty(_redisDB.StringGet(customerData)))
-            //     throw new ArgumentException("This user has registered before");
-
             var customerUpdatedEvent = new CustomerUpdatedEvent(customer.Id, customer.FirstName, customer.LastName, customer.PhoneNumber.Value, customer.Email.Value,customer.BankAccount.Value, customer.DateOfBirth.Value)
             {
                 Data = JsonConvert.SerializeObject(customer),
                 AggregateId = customer.Id
             };
             
-            await _eventStore.SaveEventAsync(customerUpdatedEvent, () => {});
+            await _eventStore.SaveEventAsync(customerUpdatedEvent, () => UpdateCustomerInRedis(customer));
             
+        }
+
+        private static void UpdateCustomerInRedis(Customer customer)
+        {
+            var customerData = $"{customer.Id}-{customer.FirstName}-{customer.LastName}-{customer.DateOfBirth.Value}";
+            if (! string.IsNullOrEmpty(_redisDB.StringGet(customer.Email.Value) ))
+                throw new ArgumentException("email is not unique");
+            
+            if(!string.IsNullOrEmpty(_redisDB.StringGet(customerData)))
+                throw new ArgumentException("This user has registered before");
+          
             _redisDB.StringSet(customer.Email.Value, 1);
             _redisDB.StringSet(customerData, 1);
         }
@@ -100,6 +102,24 @@ namespace Mc2.CrudTest.Presentation.DomainServices
             }
 
             return customer;
+        }
+    
+        public async Task<IEnumerable<Customer>> GetAllCustomers()
+        {
+            var events = await _eventStore.GetAllEventsAsync();
+            
+            var customers = new Dictionary<Guid,Customer>();
+            foreach (var @event in events)
+            {
+                if(customers.ContainsKey(@event.AggregateId))
+                    customers[@event.AggregateId].Apply(@event);
+                else
+                {
+                    customers.Add(@event.AggregateId,JsonConvert.DeserializeObject<Customer>(@event.Data));
+                }
+            }
+
+            return customers.Values;
         }
     }
 }

@@ -7,4 +7,5 @@ public interface IEventRepository
 {
     public Task SaveEventAsync(EventBase @event, Action functionToRun);
     public Task<List<CustomerReadModel>> GetEventsAsync(Guid aggregateId);
+    public Task<List<CustomerReadModel>> GetAllEventsAsync();
 }

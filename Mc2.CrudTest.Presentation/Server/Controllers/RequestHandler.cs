@@ -24,9 +24,10 @@ public static class RequestHandler
             });
         }
     }
-        
+    
+  
     public static async Task<IActionResult> HandleQuery<TModel>(
-        GetCustomerByIdQuery query,IMediator mediator, ILogger log)
+        TModel query,IMediator mediator, ILogger log)
     {
         try
         {

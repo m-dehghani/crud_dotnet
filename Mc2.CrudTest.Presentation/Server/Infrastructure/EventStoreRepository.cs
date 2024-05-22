@@ -20,7 +20,6 @@ public class EventStoreRepository: IEventRepository
         var trx = await _context.Database.BeginTransactionAsync();
         try
         {
-           
             _context.Events.Add(@event);
             await _context.SaveChangesAsync();
 
@@ -42,6 +41,14 @@ public class EventStoreRepository: IEventRepository
             .OrderBy(e => e.OccurredOn)
             .ToListAsync();
     }
+    public async Task<List<CustomerReadModel>> GetAllEventsAsync()
+    {
+        // Retrieve events for the specified aggregate ID
+        return await _readContext.CustomerEvents
+            .OrderBy(e => e.OccurredOn)
+            .ToListAsync();
+    }
+    
 }
 
 

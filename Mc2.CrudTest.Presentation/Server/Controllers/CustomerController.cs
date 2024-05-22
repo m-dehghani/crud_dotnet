@@ -1,7 +1,9 @@
+using Asp.Versioning;
 using Mc2.CrudTest.Presentation.DomainServices;
 using Mc2.CrudTest.Presentation.Shared.Commands;
 using Mc2.CrudTest.Presentation.Shared.Entities;
 using Mc2.CrudTest.Presentation.Shared.Queries;
+using Mc2.CrudTest.Presentation.Shared.ValueObjects;
 using Mc2.CrudTest.Presentation.ViewModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -21,12 +23,24 @@ public class CustomerController : Controller
         _customerService = customerService;
         _mediator = mediator;
     }
-    
+
+    [ApiVersion(1.0)]
+    [HttpGet("{id}")]
+    public async Task<IActionResult> Get(string id)
+    {
+        GetCustomerByIdQuery getCustomerByIdQuery = new (Guid.Parse(id)); 
+        return await RequestHandler.HandleQuery(getCustomerByIdQuery, _mediator, Log);
+    }
+
+    [ApiVersion(1.0)]
     [HttpGet]
-    public   Task<IActionResult> Get(GetCustomerByIdQuery  getCustomerByIdQuery)
-    =>  RequestHandler.HandleQuery<Customer>(getCustomerByIdQuery, _mediator, Log);
+    public async Task<IActionResult> GetAll()
+    {
+        GetAllCustomersQuery getAllCustomersQuery = new GetAllCustomersQuery(); 
+        return await RequestHandler.HandleQuery(getAllCustomersQuery, _mediator, Log);
+    }
 
-
+    [ApiVersion(1.0)]
     [HttpPost]
     public async Task<IActionResult> CreateCustomer(CustomerViewModel newCustomer)
     {
@@ -35,14 +49,22 @@ public class CustomerController : Controller
          return await RequestHandler.HandleCommand(command, _mediator, Log);
     }
 
+    [ApiVersion(1.0)]
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UdateCustomer(string id, CustomerUpdateViewModel updatedCustomer)
+    {
+        var customerUpdateCmd = new UpdateCustomerCommand(Guid.Parse(id), updatedCustomer.FirstName,
+            updatedCustomer.LastName,
+            updatedCustomer.PhoneNumber, updatedCustomer.Email, updatedCustomer.BankAccount,
+            new DateOfBirth(updatedCustomer.DateOfBirth).Value);
+        return await RequestHandler.HandleCommand(customerUpdateCmd, _mediator, Log);
+    }
 
-    [HttpPut]
-    public Task<IActionResult> UdateCustomer(UpdateCustomerCommand customerUpdateCmd)
-        => RequestHandler.HandleCommand(customerUpdateCmd, _mediator, Log);
-    
-    
-
-    [HttpDelete]
-    public Task DeleteCustomer(DeleteCustomerCommand customerDeleteCmd)
-        => RequestHandler.HandleCommand(customerDeleteCmd, _mediator, Log);
+    [ApiVersion(1.0)]
+    [HttpDelete("{id}")]
+    public async Task DeleteCustomer(string id)
+    {
+        DeleteCustomerCommand customerDeleteCmd = new (Guid.Parse(id));
+        await RequestHandler.HandleCommand(customerDeleteCmd, _mediator, Log);
+    }
 }

@@ -1,4 +1,5 @@
 using System.Configuration;
+using Asp.Versioning;
 using Mc2.CrudTest.Presentation.DomainServices;
 using Mc2.CrudTest.Presentation.Infrastructure;
 using Mc2.CrudTest.Presentation.Server.Controllers;
@@ -34,7 +35,12 @@ namespace Mc2.CrudTest.Presentation
             });
             builder.Services.AddTransient<ICustomerService, CustomerService>();
             builder.Services.AddTransient<IEventRepository, EventStoreRepository>();
-         
+            builder.Services.AddApiVersioning(options =>
+            {
+                options.ReportApiVersions = true;
+                options.DefaultApiVersion = new ApiVersion(1, 0);
+                options.AssumeDefaultVersionWhenUnspecified = true;
+            });
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
