@@ -1,106 +1,141 @@
 <!-- CreateCustomer.razor -->
 @page "/create-customer"
+@implements IDisposable
 @using System.ComponentModel.DataAnnotations
 @using Mc2.CrudTest.Presentation.Shared.ValueObjects
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
+@inject ILogger<CustomerCreate> Logger
+
 
 <h3>Create New Customer</h3>
 
-<EditForm Model="@_newCustomer" OnValidSubmit="CreateCustomer">
+<EditForm EditContext="editContext"   OnValidSubmit="CreateCustomer" FormName="CustomerCreate">
     <DataAnnotationsValidator />
     
     <div class="form-group">
         <label for="firstName">First Name</label>
-        <InputText id="firstName" @bind-Value="_newCustomer.FirstName" class="form-control" />
-        <ValidationMessage For="@(() => _newCustomer.FirstName)" />
+        <InputText id="firstName" @bind-Value="Model!.FirstName" class="form-control" />
+        <ValidationMessage For="() => Model!.FirstName" />
     </div>
     <div class="form-group">
         <label for="lastName">Last Name</label>
-        <InputText id="lastName" @bind-Value="_newCustomer.LastName" class="form-control" />
-        <ValidationMessage For="@(() => _newCustomer.FirstName)" />
+        <InputText id="lastName" @bind-Value="Model!.LastName" class="form-control" />
+        <ValidationMessage For="() => Model!.LastName" />
     </div>
     <div class="form-group">
         <label for="email">Email</label>
-        <InputText id="email" @bind-Value="_newCustomer.Email" class="form-control" />
-        <ValidationMessage For="@(() => _newCustomer.Email)" />
+        <InputText id="email" @bind-Value="Model!.Email" class="form-control" />
+        <ValidationMessage For="() => Model!.Email" />
     </div>
     <div class="form-group">
         <label for="phoneNumber">Phone Number</label>
-        <InputText id="phoneNumber" @bind-Value="_newCustomer.PhoneNumber" class="form-control" />
-        <ValidationMessage For="@(() => _newCustomer.PhoneNumber)" />
+        <InputText id="phoneNumber" @bind-Value="Model!.PhoneNumber" class="form-control" />
+        <ValidationMessage For="() => Model!.PhoneNumber" />
     </div>
     <div class="form-group">
         <label for="dateOfBirth">DateOfBirth</label>
-        <InputText id="dateOfBirth" @bind-Value="_newCustomer.DateOfBirth" class="form-control" />
-        <ValidationMessage For="@(() => _newCustomer.DateOfBirth)" />
+        <InputDate id="dateOfBirth" @bind-Value="Model!.DateOfBirth" class="form-control" />
+        <ValidationMessage For="() => Model!.DateOfBirth" />
     </div>
 
     <div class="form-group">
         <label for="bankAccount">BankAccount</label>
-        <InputText id="bankAccount" @bind-Value="_newCustomer.BankAccount" class="form-control" />
-        <ValidationMessage For="@(() => _newCustomer.BankAccount)" />
+        <InputText id="bankAccount" @bind-Value="Model!.BankAccount" class="form-control" />
+        <ValidationMessage For="() => Model!.BankAccount" />
     </div>
 
-    <button class="btn btn-primary" @onclick="CreateCustomer">Create</button> <div>@_errorMessage</div>
+    <button type="submit" class="btn btn-primary">Create</button> <div>@_errorMessage</div>
 </EditForm>
 
+
+
 @code {
-    private CustomerCreateModel _newCustomer = new CustomerCreateModel();
+
+    private EditContext? editContext;
+
     private string _errorMessage = "";
     private async Task CreateCustomer()
     {
         try
         {
-            bool validateAllProperties = false;
-            var validationResult = new List<ValidationResult>();
-            var isValid = Validator.TryValidateObject(_newCustomer, new ValidationContext(_newCustomer, null, null), 
-                validationResult, validateAllProperties);
-
-            var result =    await Http.PostAsJsonAsync("Customer", _newCustomer);
+            Logger.LogInformation("sending start: sending the form to customer controller");
+           
+            var result =    await Http.PostAsJsonAsync("Customer", Model);
             if (result.IsSuccessStatusCode)
                 NavigationManager.NavigateTo("customers");
             else
                 _errorMessage = await result.Content.ReadAsStringAsync();
-            // Redirect to customer list or show success message
+           
         }
-        
+
         catch (Exception ex)
         {
             _errorMessage += "An error has been occured. Please try again later.";
         }
     }
 
-    private class CustomerCreateModel : IValidatableObject
+    private void Submit()
+    {
+        Logger.LogInformation("Submit called: Processing the form");
+    }
+
+    [SupplyParameterFromForm]
+    private CustomerCreateModel? Model { get; set; }
+
+    private ValidationMessageStore? messageStore;
+
+    protected override void OnInitialized()
+    {
+        Model ??= new();
+        editContext = new(Model);
+        editContext.OnValidationRequested += HandleValidationRequested;
+        messageStore = new(editContext);
+    }
+
+
+
+    private void HandleValidationRequested(object? sender,
+       ValidationRequestedEventArgs args)
+    {
+        messageStore?.Clear();
+
+        try
+        {
+            _ = new Email(Model.Email);
+        }
+        catch
+        {
+            messageStore?.Add(() => Model.Email, "Enter valid email");
+        }
+        try
+        {
+            _ = new BankAccount(Model.BankAccount);
+        }
+        catch
+        {
+            messageStore?.Add(() => Model.BankAccount, "Enter valid Bank Account");
+        }
+        
+       
+    }
+
+    private class CustomerCreateModel 
     {
         public string FirstName { get;  set; }
         public string LastName { get;  set; }
         public string BankAccount { get;  set; }
-        public string DateOfBirth { get;  set; }
+        public DateTime DateOfBirth { get; set; } = DateTime.UtcNow;
         public string PhoneNumber { get;  set; }
         public string Email { get;  set; }
 
+    }
 
-        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    public void Dispose()
+    {
+        if (editContext is not null)
         {
-            var results = new List<ValidationResult>();
-          
-                try
-                {
-                    _ = new Email(this.Email);
-                }catch
-                {
-                    results.Add(new ValidationResult("Enter valid email"));
-                }
-                try
-                {
-                    _ = new BankAccount(this.BankAccount);
-                }catch
-                {
-                    results.Add(new ValidationResult("Enter valid Bank Account"));
-                }
-          
-            return results;
+            editContext.OnValidationRequested -= HandleValidationRequested;
         }
     }
 }
