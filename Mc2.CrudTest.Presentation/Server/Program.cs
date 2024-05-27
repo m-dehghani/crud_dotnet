@@ -15,6 +15,7 @@ namespace Mc2.CrudTest.Presentation
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            builder.AddServiceDefaults();
 
             // Add services to the container.
 
@@ -42,6 +43,7 @@ namespace Mc2.CrudTest.Presentation
                 options.AssumeDefaultVersionWhenUnspecified = true;
             });
             var app = builder.Build();
+            app.MapDefaultEndpoints();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsAspireHost>true</IsAspireHost>
+    <UserSecretsId>4992bad4-a1d8-4f76-9061-d8bcb2251841</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="8.0.0" />
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="8.0.1" />
+    <PackageReference Include="Aspire.Hosting.Redis" Version="8.0.1" />
+    <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Mc2.CrudTest.Presentation\Server\Mc2.CrudTest.Presentation.Server.csproj" />
+    <ProjectReference Include="..\Mc2.CrudTest.Presentation\Shared\Mc2.CrudTest.Presentation.Shared.csproj" />
+  </ItemGroup>
+
+</Project>
