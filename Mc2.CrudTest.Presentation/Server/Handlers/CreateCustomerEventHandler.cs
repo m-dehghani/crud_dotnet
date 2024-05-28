@@ -9,17 +9,14 @@ namespace Mc2.CrudTest.Presentation.Handlers;
 
 public class CreateCustomerEventHandler : IRequestHandler<CreateCustomerCommand>
 {
-private readonly IEventRepository _eventStore;
 private readonly ICustomerService _service;
-public CreateCustomerEventHandler(IEventRepository eventStore, ICustomerService service)
+public CreateCustomerEventHandler(ICustomerService service)
 {
-    _eventStore = eventStore;
     _service = service;
 }
 
 public async Task Handle(CreateCustomerCommand command, CancellationToken cancellationToken)
 {
-    //var @event = new CustomerCreatedEvent(command.CustomerId, command.FirstName, command.LastName, command.PhoneNumber, command.Email, command.BankAccount, DateTime.Parse(command.DateOfBirth));
 
     await _service.CreateCustomerAsync(new Customer(command.CustomerId, command.FirstName, command.LastName, command.PhoneNumber,
         command.Email, command.BankAccount, command.DateOfBirth));

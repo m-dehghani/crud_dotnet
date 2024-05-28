@@ -39,7 +39,8 @@ namespace Mc2.CrudTest.Presentation.DomainServices
 
         public static void SetCustomerInRedis(Customer customer) 
         {
-            var customerData = $"{customer.Id}-{customer.FirstName}-{customer.LastName}-{customer.DateOfBirth.Value}";
+            var customerData = $"{customer.FirstName}-{customer.LastName}-{customer.DateOfBirth.Value}";
+            var res = _redisDB.StringGet(customer.Email.Value);
             if (!string.IsNullOrEmpty(_redisDB.StringGet(customer.Email.Value)))
                 throw new ArgumentException("Email address already exists");
 

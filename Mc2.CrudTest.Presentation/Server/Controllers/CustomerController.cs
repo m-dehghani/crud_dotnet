@@ -15,12 +15,10 @@ namespace Mc2.CrudTest.Presentation.Server.Controllers;
 [Route("[controller]")]
 public class CustomerController : Controller
 {
-    private ICustomerService _customerService;
     private IMediator _mediator;
     private static readonly ILogger Log = Serilog.Log.ForContext<CustomerController>();
-    public CustomerController(ICustomerService customerService, IMediator mediator)
+    public CustomerController(IMediator mediator)
     {
-        _customerService = customerService;
         _mediator = mediator;
     }
 

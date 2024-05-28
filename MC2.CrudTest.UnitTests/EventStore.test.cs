@@ -5,15 +5,17 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Moq;
 
 namespace MC2.CrudTest.UnitTests;
-
+/// <summary>
+/// this class just test the eventStore class withou checking for uniquness. It will be cheched by another test class
+/// </summary>
 public class EventStore_test
 {
     [Fact]
     public async Task SaveEventAsync_Should_SaveEventAndCommitTransaction()
     {
         // Arrange
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(databaseName: "TestDb")
+         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseInMemoryDatabase(databaseName: "customers")
             .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
             .Options;
 
@@ -29,10 +31,9 @@ public class EventStore_test
         var result = await context.Events.CountAsync();
         // Assert
 
-        Assert.Null(exception);
+        Assert.Null(exception.Exception);
         Assert.Equal(1, result);
         // Verify that the event was saved and transaction committed
-        // You can check the in-memory database or mock the context
     }
 
     [Fact]
@@ -40,14 +41,14 @@ public class EventStore_test
     {
         // Arrange
         var readDbContextOptions = new DbContextOptionsBuilder<ReadModelDbContext>()
-            .UseInMemoryDatabase(databaseName: "TestDb")
+            .UseInMemoryDatabase(databaseName: "customers")
             .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
             .Options;
 
         await using var readContext = new ReadModelDbContext(readDbContextOptions);
         
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(databaseName: "TestDb")
+            .UseInMemoryDatabase(databaseName: "customers")
             .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
             .Options;
 
@@ -65,6 +66,6 @@ public class EventStore_test
 
         // Assert
        
-        Assert.NotNull(events);
+        Assert.NotEmpty(events);
     }
 }

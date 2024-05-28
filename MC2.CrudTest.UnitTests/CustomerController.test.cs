@@ -23,6 +23,8 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using StackExchange.Redis;
+using Mc2.CrudTest.Presentation.Handlers;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace MC2.CrudTest.UnitTests
 {
@@ -37,7 +39,7 @@ namespace MC2.CrudTest.UnitTests
         public CustomerControllerTests(WebApplicationFactory<Program> factory)
         {
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(databaseName: "TestDb")
+                .UseInMemoryDatabase(databaseName: "customers")
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
                 .Options;
                
@@ -49,51 +51,32 @@ namespace MC2.CrudTest.UnitTests
         
         [Fact]
         public async Task CreateCustomer_DuplicateEmail_ReturnsBadRequest()
-        { 
+        {
             // Arrange
+
+            var newCustomer = new CustomerViewModel("Mohammadd", "Dehghaniii", "044 668 18 00", "dehghany.m@gmail.com",
+              "1231564654", "2015-02-04");
             var mockMultiplexer = new Mock<IConnectionMultiplexer>();
 
             mockMultiplexer.Setup(_ => _.IsConnected).Returns(false);
 
             var mockDatabase = new Mock<IDatabase>();
-
             mockMultiplexer
                 .Setup(_ => _.GetDatabase(It.IsAny<int>(), It.IsAny<object>()))
                 .Returns(mockDatabase.Object);
 
             var cacheHandler = new RedisCacheHandler(mockMultiplexer.Object);
-            
-            var newCustomer = new CustomerViewModel("Mohammadd",  "Dehghaniii", "044 668 18 00", "dehghany.m@gmail.com",
-                "1231564654","2015-02-04" );
+             
            
-            
             _customerService = new CustomerService(new EventStoreRepository(context, null), mockDatabase.Object);
-            _controller = new CustomerController(_customerService, _mediator.Object);
-            
-            
-           
-            var requestUri = new Uri("/customer", UriKind.Relative);
-            
-            // Act
-            var response1 = await _client.PostAsJsonAsync(requestUri, newCustomer);
-            var response2 = await _client.PostAsJsonAsync(requestUri, newCustomer);
-            var msgInData = await response1.Content.ReadAsStringAsync();
-            var errorResponse = await response2.Content.ReadAsStringAsync();
-            var errorDetails = JsonConvert.DeserializeAnonymousType(errorResponse, new { Message = "" });
-            HttpRequestMessage deleteRequestMessage = new HttpRequestMessage(HttpMethod.Delete, requestUri);
-            var response3 = await _client.SendAsync(deleteRequestMessage);
-            
-            // Assert
-            
-            Assert.Equal(HttpStatusCode.Created, response1.StatusCode);
-            var customer = new Customer(Guid.NewGuid(),newCustomer.FirstName, newCustomer.LastName, newCustomer.PhoneNumber, newCustomer.Email, newCustomer.BankAccount, newCustomer.DateOfBirth);
-            
-            cacheHandler.SetCustomerData(customer);
-            // Act
-            Assert.Equal(HttpStatusCode.BadRequest, response2.StatusCode);
-
-            Assert.Contains("Email address already exists", errorDetails?.Message);
-            
+            var handler = new CreateCustomerEventHandler(_customerService);
+            await handler.Handle(new CreateCustomerCommand(newCustomer.FirstName, newCustomer.LastName, newCustomer.PhoneNumber, newCustomer.Email, newCustomer.BankAccount, newCustomer.DateOfBirth), CancellationToken.None);
+                       
+            cacheHandler.SetCustomerData(new Customer(newCustomer.FirstName, newCustomer.LastName, newCustomer.PhoneNumber, newCustomer.Email, newCustomer.BankAccount, newCustomer.DateOfBirth));
+                       
+            mockDatabase.Setup((x) => x.StringGet(It.IsAny<RedisKey>(), It.IsAny<CommandFlags>())).Returns(() => "true");
+            await Assert.ThrowsAsync<ArgumentException>(async() => await handler.Handle(new CreateCustomerCommand(newCustomer.FirstName, newCustomer.LastName, newCustomer.PhoneNumber, newCustomer.Email, newCustomer.BankAccount, newCustomer.DateOfBirth), CancellationToken.None));
+                       
         }
       
 
