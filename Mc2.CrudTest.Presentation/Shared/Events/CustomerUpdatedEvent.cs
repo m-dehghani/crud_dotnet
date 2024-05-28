@@ -8,9 +8,9 @@ public class CustomerUpdatedEvent: EventBase
     public string PhoneNumber { get; set;}
     public string BankAccount { get; set;}
     public string Email { get; set;}
-    public DateTime  DateOfBirth { get; set; }
+    public DateTime DateOfBirth { get; set; }
 
-    public CustomerUpdatedEvent(Guid customerId, string firstName, string lastName, string email, string phoneNumber, string bankAccount,  DateTime dateOfBirth)
+    public CustomerUpdatedEvent(Guid customerId, string firstName, string lastName, string email, string phoneNumber, string bankAccount, DateTime dateOfBirth)
     {
         CustomerId = customerId;
         FirstName = firstName;

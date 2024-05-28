@@ -22,6 +22,14 @@ public class CustomerController : Controller
         _mediator = mediator;
     }
 
+
+    // for testing
+    public CustomerController GetInstance()
+    {
+        return this;
+    }
+
+
     [ApiVersion(1.0)]
     [HttpGet("{id}")]
     public async Task<IActionResult> Get(string id)
