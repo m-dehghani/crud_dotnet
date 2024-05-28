@@ -54,7 +54,7 @@ namespace MC2.CrudTest.UnitTests
         {
             // Arrange
 
-            var newCustomer = new CustomerViewModel("Mohammadd", "Dehghaniii", "044 668 18 00", "dehghany.m@gmail.com",
+            var newCustomer = new CustomerViewModel("Mohammadd", "Dehghaniii", "+989010596159", "dehghany.m@gmail.com",
               "1231564654", "2015-02-04");
             var mockMultiplexer = new Mock<IConnectionMultiplexer>();
 
@@ -75,6 +75,7 @@ namespace MC2.CrudTest.UnitTests
             cacheHandler.SetCustomerData(new Customer(newCustomer.FirstName, newCustomer.LastName, newCustomer.PhoneNumber, newCustomer.Email, newCustomer.BankAccount, newCustomer.DateOfBirth));
                        
             mockDatabase.Setup((x) => x.StringGet(It.IsAny<RedisKey>(), It.IsAny<CommandFlags>())).Returns(() => "true");
+
             await Assert.ThrowsAsync<ArgumentException>(async() => await handler.Handle(new CreateCustomerCommand(newCustomer.FirstName, newCustomer.LastName, newCustomer.PhoneNumber, newCustomer.Email, newCustomer.BankAccount, newCustomer.DateOfBirth), CancellationToken.None));
                        
         }
