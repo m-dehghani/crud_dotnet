@@ -22,9 +22,8 @@ namespace Mc2.CrudTest.Presentation.DomainServices
         // Command: Create a new customer
         public async Task CreateCustomerAsync(Customer customer)
         {
-            //check for the existence of the Email value in Redis DB. If it couldn't find the value for the email so the email is unique else should return an error indicating 'This email has used before'.
+            //check for the existence of the Email value in Redis DB. If couldn't find the value for the email so the email is unique else should return an error indicating 'This email has used before'.
             //also check for the combination of the Firstname, Lastname, and DateOfBirth
-
 
             var customerCreatedEvent = new CustomerCreatedEvent(customer.Id, customer.FirstName, customer.LastName,
                 customer.PhoneNumber.Value, customer.Email.Value, customer.BankAccount.Value,
@@ -40,7 +39,7 @@ namespace Mc2.CrudTest.Presentation.DomainServices
         public static void SetCustomerInRedis(Customer customer) 
         {
             var customerData = $"{customer.FirstName}-{customer.LastName}-{customer.DateOfBirth.Value}";
-            var res = _redisDB.StringGet(customer.Email.Value);
+
             if (!string.IsNullOrEmpty(_redisDB.StringGet(customer.Email.Value)))
                 throw new ArgumentException("Email address already exists");
 
@@ -48,8 +47,9 @@ namespace Mc2.CrudTest.Presentation.DomainServices
                 throw new ArgumentException("This user has registered before");
 
               
-            _redisDB.StringSet(customer.Email.Value, 1);
-            _redisDB.StringSet(customerData, 1);
+            _redisDB.StringSet(customer.Email.Value, $"{customer.Id}");
+
+            _redisDB.StringSet(customerData, $"{customer.Id}");
         }
 
         // Command: Update an existing customer
@@ -67,7 +67,7 @@ namespace Mc2.CrudTest.Presentation.DomainServices
 
         private static void UpdateCustomerInRedis(Customer customer)
         {
-            var customerData = $"{customer.Id}-{customer.FirstName}-{customer.LastName}-{customer.DateOfBirth.Value}";
+            var customerData = $"{customer.FirstName}-{customer.LastName}-{customer.DateOfBirth.Value}";
             if (! string.IsNullOrEmpty(_redisDB.StringGet(customer.Email.Value) ))
                 throw new ArgumentException("email is not unique");
             

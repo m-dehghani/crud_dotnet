@@ -62,7 +62,7 @@ public class CustomerController : Controller
         var customerUpdateCmd = new UpdateCustomerCommand(Guid.Parse(id), updatedCustomer.FirstName,
             updatedCustomer.LastName,
             updatedCustomer.PhoneNumber, updatedCustomer.Email, updatedCustomer.BankAccount,
-            new DateOfBirth(updatedCustomer.DateOfBirth).Value);
+            updatedCustomer.DateOfBirth);
         return await RequestHandler.HandleCommand(customerUpdateCmd, _mediator, Log);
     }
 

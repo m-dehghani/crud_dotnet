@@ -1,3 +1,4 @@
+using System.Data.SqlTypes;
 using System.Text.Json.Serialization;
 using Mc2.CrudTest.Presentation.Shared.Entities;
 using MediatR;
@@ -9,7 +10,7 @@ public class CreateCustomerCommand: IRequest, INotification
     
     public CreateCustomerCommand(string firstName, string lastName, string phoneNumber, string email, string bankAccount, string dateOfBirth)
     {
-        CustomerId = new Guid();
+        CustomerId = Guid.NewGuid();
         FirstName = firstName;
         LastName = lastName;
         PhoneNumber = phoneNumber;
