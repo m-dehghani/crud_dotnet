@@ -1,11 +1,16 @@
 using Mc2.CrudTest.Presentation.Shared.Entities;
-using Mc2.CrudTest.Presentation.Shared.ReadModels;
+
 using MediatR;
+using System.Diagnostics;
 
 namespace Mc2.CrudTest.Presentation.Shared.Queries;
 
-public class GetAllCustomersQuery : IRequest<IEnumerable<CustomerReadModel>>, INotification, IRequest<IEnumerable<Customer>>
+public class GetAllCustomersQuery : IRequest<IEnumerable<ViewModels.CustomerViewModel>>, INotification
 {
+    public GetAllCustomersQuery()
+    {
+    }
+
     // TODO: add some parameters to enable searching and pagination
-    
+
 }

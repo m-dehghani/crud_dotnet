@@ -41,7 +41,7 @@ namespace Mc2.CrudTest.Presentation.DomainServices
             var customerData = $"{customer.FirstName}-{customer.LastName}-{customer.DateOfBirth.Value}";
 
             if (!string.IsNullOrEmpty(_redisDB.StringGet(customer.Email.Value)))
-                throw new ArgumentException("Email address already exists");
+                throw new ArgumentException("This email address was taken by another user. Please select another one ");
 
             if (!string.IsNullOrEmpty(_redisDB.StringGet(customerData)))
                 throw new ArgumentException("This user has registered before");
@@ -69,7 +69,7 @@ namespace Mc2.CrudTest.Presentation.DomainServices
         {
             var customerData = $"{customer.FirstName}-{customer.LastName}-{customer.DateOfBirth.Value}";
             if (! string.IsNullOrEmpty(_redisDB.StringGet(customer.Email.Value) ))
-                throw new ArgumentException("email is not unique");
+                throw new ArgumentException("This email address was taken by another user. Please select another one ");
             
             if(!string.IsNullOrEmpty(_redisDB.StringGet(customerData)))
                 throw new ArgumentException("This user has registered before");
@@ -97,7 +97,7 @@ namespace Mc2.CrudTest.Presentation.DomainServices
                customer.Apply(@event);
             }
 
-            return customer;
+            return customer.IsDeleted ? new Customer() : customer;
         }
     
         public async Task<IEnumerable<Customer>> GetAllCustomers()
@@ -111,11 +111,13 @@ namespace Mc2.CrudTest.Presentation.DomainServices
                     customers[@event.AggregateId].Apply(@event);
                 else
                 {
-                    customers.Add(@event.AggregateId,JsonConvert.DeserializeObject<Customer>(@event.Data));
+                    var customer = new Customer();
+                    customer.Apply(@event);
+                    customers.Add(@event.AggregateId, customer);
                 }
             }
 
-            return customers.Values;
+            return customers.Values.Where(customer => !customer.IsDeleted);
         }
     }
 }

@@ -45,7 +45,7 @@ public class EventStoreRepository: IEventRepository
     }
     public async Task<List<EventBase>> GetAllEventsAsync()
     {
-        // Retrieve events for the specified aggregate ID
+        // Retrieve events for All the aggregates
         return await _context.Events
             .OrderBy(e => e.OccurredOn)
             .ToListAsync();

@@ -18,28 +18,39 @@ public static class RequestHandler
         catch (Exception e)
         {
             log.Error(e, "Error handling the command");
-            return new BadRequestObjectResult(new
-            {
-                error = e.Message, stackTrace = e.StackTrace
-            });
+            return ReturnError(e);
         }
     }
-    
-  
+
+
     public static async Task<IActionResult> HandleQuery<TModel>(
-        TModel query,IMediator mediator, ILogger log)
+        TModel query, IMediator mediator, ILogger log)
     {
         try
         {
+            log.Debug("Handling HTTP request of type {type}", typeof(TModel).Name);
             return new OkObjectResult(await mediator.Send(query));
         }
         catch (Exception e)
         {
             log.Error(e, "Error handling the query");
+            return ReturnError(e);
+        }
+    }
+
+    private static IActionResult ReturnError(Exception e)
+    {
+#if DEBUG
+        return new BadRequestObjectResult(new
+        {
+            error = e.Message,
+            stackTrace = e.StackTrace
+        });
+#else
             return new BadRequestObjectResult(new
             {
-                error = e.Message, stackTrace = e.StackTrace
+                error = e.Message
             });
-        }
+#endif
     }
 }

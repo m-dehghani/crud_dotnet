@@ -3,6 +3,7 @@ using Mc2.CrudTest.Presentation.DomainServices;
 using Mc2.CrudTest.Presentation.Shared.Commands;
 using Mc2.CrudTest.Presentation.Shared.Entities;
 using Mc2.CrudTest.Presentation.Shared.Queries;
+using Mc2.CrudTest.Presentation.Shared.ReadModels;
 using Mc2.CrudTest.Presentation.Shared.ValueObjects;
 using Mc2.CrudTest.Presentation.ViewModels;
 using MediatR;
@@ -43,12 +44,13 @@ public class CustomerController : Controller
     public async Task<IActionResult> GetAll()
     {
         GetAllCustomersQuery getAllCustomersQuery = new GetAllCustomersQuery(); 
-        return await RequestHandler.HandleQuery(getAllCustomersQuery, _mediator, Log);
+        var result = await RequestHandler.HandleQuery(getAllCustomersQuery, _mediator, Log);
+        return result;
     }
 
     [ApiVersion(1.0)]
     [HttpPost]
-    public async Task<IActionResult> CreateCustomer(CustomerViewModel newCustomer)
+    public async Task<IActionResult> CreateCustomer(ViewModels.CustomerViewModel newCustomer)
     {
         CreateCustomerCommand command = new CreateCustomerCommand(newCustomer.FirstName, newCustomer.LastName,
             newCustomer.PhoneNumber, newCustomer.Email, newCustomer.BankAccount, newCustomer.DateOfBirth);

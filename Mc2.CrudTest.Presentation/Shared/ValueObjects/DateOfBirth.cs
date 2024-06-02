@@ -9,7 +9,7 @@ namespace Mc2.CrudTest.Presentation.Shared.ValueObjects
             if (string.IsNullOrWhiteSpace(value))
                 throw new ArgumentException("Invalid Date format.", nameof(value));
 
-            Value = DateTime.ParseExact(value, "yyyy-MM-dd",
+            Value = DateTime.Parse(value,
                 System.Globalization.CultureInfo.InvariantCulture);
         }
 

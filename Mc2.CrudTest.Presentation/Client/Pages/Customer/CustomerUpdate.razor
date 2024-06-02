@@ -1,0 +1,13 @@
+﻿@page "/update-customer"
+@inject ILogger<CustomerUpdate> Logger
+@using System.ComponentModel.DataAnnotations
+@using Mc2.CrudTest.Presentation.Shared.ValueObjects
+<title>Update customer page</title>
+@code {
+    private int currentCount = 0;
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+}

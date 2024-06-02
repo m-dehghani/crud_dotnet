@@ -1,6 +1,9 @@
 <!-- CustomerList.razor -->
 @using Mc2.CrudTest.Presentation.Shared.Entities
 @inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject ILogger<CustomerView> Logger
+@inject IJSRuntime JsRuntime
 @page "/customers"
 
 <h3>Customer List</h3>
@@ -29,7 +32,7 @@
             <td>@customer.DateOfBirth</td>
             
             <td>
-                <button class="btn btn-link" @onclick="() => EditCustomer(customer)">
+                <button class="btn btn-link" @onclick="() => UpdateCustomer(customer)">
                     <i class="bi bi-pencil"></i> Edit
                 </button>
                 <button class="btn btn-link text-danger" @onclick="() => DeleteCustomer(customer)">
@@ -42,21 +45,33 @@
 </table>
 
 @code {
-    private List<Customer>? Customers { get; set; }
+    private List<ViewModels.CustomerViewModel>? Customers { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         Console.WriteLine("init customers list page");
-        Customers = new List<Customer>();//  await Http.GetFromJsonAsync<List<Customer>>("Customer");
+        var result = await Http.GetAsync("Customer");
+        if (result.StatusCode == System.Net.HttpStatusCode.OK)
+        {
+            Customers = await result.Content.ReadFromJsonAsync<List<ViewModels.CustomerViewModel>>();
+        }
+        var test = await result.Content.ReadAsStringAsync();
+        System.Diagnostics.Debug.WriteLine( test);
     }
 
-    private async Task EditCustomer(Customer customer)
+    private async Task UpdateCustomer(ViewModels.CustomerViewModel customer)
     {
-         await Http.PutAsJsonAsync("Customer/UpdateCustomer", customer);
+
+        NavigationManager.NavigateTo($"update-customer");
+
     }
 
-    private async Task DeleteCustomer(Customer customer)
+    private async Task DeleteCustomer(ViewModels.CustomerViewModel customer)
     {
-        await Http.DeleteAsync(new Uri($"Customer/UpdateCustomer/{customer.Id}"));
+        bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
+        if (confirmed)
+        {
+            await Http.DeleteAsync(new Uri($"Customer/{customer.Id}"));
+        }
     }
 }

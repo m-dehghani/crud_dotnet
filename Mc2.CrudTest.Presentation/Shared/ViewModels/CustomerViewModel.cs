@@ -1,9 +1,12 @@
+using Mc2.CrudTest.Presentation.Shared.Entities;
+
 namespace Mc2.CrudTest.Presentation.ViewModels;
 
 public class CustomerViewModel
 {
-    public CustomerViewModel(string firstName, string lastName, string phoneNumber,  string email, string bankAccount, string dateOfBirth)
+    public CustomerViewModel(Guid id, string firstName, string lastName, string phoneNumber,  string email, string bankAccount, string dateOfBirth)
     {
+        this.Id = id;
         this.FirstName = firstName;
         this.LastName = lastName;
         this.BankAccount = bankAccount;
@@ -11,10 +14,12 @@ public class CustomerViewModel
         this.PhoneNumber = phoneNumber;
         this.Email = email;
     }
+    public Guid Id { get; set; }
     public string FirstName { get; set; }
     public string LastName { get; set; }
     public string BankAccount { get; set; }
     public string DateOfBirth { get; set; }
     public string PhoneNumber { get; set; }
     public string Email { get; set; }
+        
 }

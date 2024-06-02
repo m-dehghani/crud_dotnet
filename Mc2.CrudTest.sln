@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mc2.CrudTest.AcceptanceTest
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MC2.CrudTest.UnitTests", "MC2.CrudTest.UnitTests\MC2.CrudTest.UnitTests.csproj", "{6F172D02-4195-4A8E-9209-85B0C8FACB4D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mc2.CrudTest.AppHost", "Mc2.CrudTest.AppHost\Mc2.CrudTest.AppHost.csproj", "{4E500E5E-CD42-4516-A9D7-434FC79455D5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mc2.CrudTest.AppHost", "Mc2.CrudTest.AppHost\Mc2.CrudTest.AppHost.csproj", "{4E500E5E-CD42-4516-A9D7-434FC79455D5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mc2.CrudTest.ServiceDefaults", "Mc2.CrudTest.ServiceDefaults\Mc2.CrudTest.ServiceDefaults.csproj", "{84A7A740-BE24-4063-82ED-16F20F6DCC5C}"
 EndProject

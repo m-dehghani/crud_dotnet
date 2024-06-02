@@ -1,11 +1,13 @@
 using System.Configuration;
 using Asp.Versioning;
+using FluentAssertions.Common;
 using Mc2.CrudTest.Presentation.DomainServices;
 using Mc2.CrudTest.Presentation.Infrastructure;
 using Mc2.CrudTest.Presentation.Server.Controllers;
 using MediatR;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using StackExchange.Redis;
 
 namespace Mc2.CrudTest.Presentation

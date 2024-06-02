@@ -5,7 +5,7 @@
 @using Mc2.CrudTest.Presentation.Shared.ValueObjects
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
-@inject ILogger<CustomerCreate> Logger
+@inject ILogger<CustomerUpdate> Logger
 
 
 <h3>Create New Customer</h3>
@@ -45,7 +45,7 @@
         <ValidationMessage For="() => Model!.BankAccount" />
     </div>
 
-    <button type="submit" class="btn btn-primary">Create</button> <div>@_errorMessage</div>
+    <button type="submit" class="btn btn-primary">Create</button> <div class="text-danger">@_errorMessage</div>
 </EditForm>
 
 
@@ -61,7 +61,7 @@
         {
             Logger.LogInformation("sending start: sending the form to customer controller");
            
-            var result =    await Http.PostAsJsonAsync("Customer", Model);
+            var result = await Http.PostAsJsonAsync("Customer", Model);
             if (result.IsSuccessStatusCode)
                 NavigationManager.NavigateTo("customers");
             else
@@ -125,7 +125,7 @@
         public string FirstName { get;  set; }
         public string LastName { get;  set; }
         public string BankAccount { get;  set; }
-        public DateTime DateOfBirth { get; set; } = DateTime.UtcNow;
+        public DateTime DateOfBirth { get; set; } = DateTime.Now;
         public string PhoneNumber { get;  set; }
         public string Email { get;  set; }
 
