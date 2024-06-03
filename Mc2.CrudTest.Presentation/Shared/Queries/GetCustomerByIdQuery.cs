@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Mc2.CrudTest.Presentation.Shared.Queries;
 
-public class GetCustomerByIdQuery : IRequest<CustomerViewModel>, INotification, IRequest<Customer>
+public class GetCustomerByIdQuery : IRequest<ViewModels.CustomerViewModel>, INotification
 
 {
     public GetCustomerByIdQuery(Guid customerId)

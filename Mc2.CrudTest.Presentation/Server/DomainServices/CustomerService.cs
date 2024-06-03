@@ -15,7 +15,6 @@ namespace Mc2.CrudTest.Presentation.DomainServices
         public CustomerService(IEventRepository eventStore, IDatabase redis)
         {
             _redisDB = redis;
-            
             _eventStore = eventStore;
         }
 
@@ -31,7 +30,8 @@ namespace Mc2.CrudTest.Presentation.DomainServices
             {
                 Data = JsonConvert.SerializeObject(customer)
             };
-
+            customerCreatedEvent.OccurredOn = DateTimeOffset.UtcNow;
+          
             await _eventStore.SaveEventAsync(customerCreatedEvent, () => SetCustomerInRedis(customer));
 
         }
@@ -55,12 +55,12 @@ namespace Mc2.CrudTest.Presentation.DomainServices
         // Command: Update an existing customer
         public async Task UpdateCustomerAsync(Customer customer)
         {
-            var customerUpdatedEvent = new CustomerUpdatedEvent(customer.Id, customer.FirstName, customer.LastName, customer.PhoneNumber.Value, customer.Email.Value,customer.BankAccount.Value, customer.DateOfBirth.Value)
+            var customerUpdatedEvent = new CustomerUpdatedEvent(customer.Id, customer.FirstName, customer.LastName, customer.Email.Value, customer.PhoneNumber.Value, customer.BankAccount.Value, customer.DateOfBirth.Value)
             {
                 Data = JsonConvert.SerializeObject(customer),
                 AggregateId = customer.Id
             };
-            
+            customerUpdatedEvent.OccurredOn = DateTimeOffset.UtcNow;
             await _eventStore.SaveEventAsync(customerUpdatedEvent, () => UpdateCustomerInRedis(customer));
             
         }
@@ -68,10 +68,11 @@ namespace Mc2.CrudTest.Presentation.DomainServices
         private static void UpdateCustomerInRedis(Customer customer)
         {
             var customerData = $"{customer.FirstName}-{customer.LastName}-{customer.DateOfBirth.Value}";
-            if (! string.IsNullOrEmpty(_redisDB.StringGet(customer.Email.Value) ))
+            var redisEmail = _redisDB.StringGet(customer.Email.Value);
+            if (!string.IsNullOrEmpty(redisEmail) && redisEmail !=  new RedisValue(customer.Id.ToString()))
                 throw new ArgumentException("This email address was taken by another user. Please select another one ");
             
-            if(!string.IsNullOrEmpty(_redisDB.StringGet(customerData)))
+            if(!string.IsNullOrEmpty(_redisDB.StringGet(customerData)) && customerData != new RedisValue(customer.Id.ToString()))
                 throw new ArgumentException("This user has registered before");
           
             _redisDB.StringSet(customer.Email.Value, 1);
@@ -82,6 +83,7 @@ namespace Mc2.CrudTest.Presentation.DomainServices
         public async Task DeleteCustomerAsync(Guid customerId)
         {
             var customerDeletedEvent = new CustomerDeletedEvent(customerId);
+            customerDeletedEvent.OccurredOn = DateTimeOffset.UtcNow;
             await _eventStore.SaveEventAsync(customerDeletedEvent, () => {});
         }
 

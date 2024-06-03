@@ -20,10 +20,11 @@ public class EventStore_test
             .Options;
 
         await using var context = new ApplicationDbContext(options);
+        ResetDbContext(context);
         var repository = new EventStoreRepository(context, null);
 
         var @event = new CustomerCreatedEvent(new Guid(), "Mohammad", "Dehghani", "044 668 18 00", "a@a.com", "123464",
-            DateTime.Parse("1998-02-01"));
+            DateOnly.Parse("1998-02-01"));
         Action functionToRun = () => { };
 
         // Act
@@ -53,11 +54,11 @@ public class EventStore_test
             .Options;
 
         await using var context = new ApplicationDbContext(options);
-      
+        ResetDbContext(context);
         var repository = new EventStoreRepository(context, readContext);
         
         var @event = new CustomerCreatedEvent(Guid.NewGuid(), "Mohammad", "Dehghani", "044 668 18 00", "a@a.com", "123464",
-            DateTime.Parse("1998-02-01")){Data = ""};
+            DateOnly.Parse("1998-02-01")){Data = ""};
        
         await repository.SaveEventAsync(@event, () => { });
       
@@ -67,5 +68,11 @@ public class EventStore_test
         // Assert
        
         Assert.NotEmpty(events);
+    }
+    private void ResetDbContext(ApplicationDbContext context)
+    {
+        foreach (var entity in context.Events)
+            context.Events.Remove(entity);
+        context.SaveChanges();
     }
 }

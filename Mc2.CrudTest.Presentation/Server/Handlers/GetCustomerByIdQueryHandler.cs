@@ -7,7 +7,7 @@ using MediatR;
 
 namespace Mc2.CrudTest.Presentation.Handlers;
 
-public class GetCustomerByIdQueryHandler : IRequestHandler<GetCustomerByIdQuery, Customer>
+public class GetCustomerByIdQueryHandler : IRequestHandler<GetCustomerByIdQuery, ViewModels.CustomerViewModel>
 {
     private readonly ICustomerService  _readService;
 
@@ -15,8 +15,9 @@ public class GetCustomerByIdQueryHandler : IRequestHandler<GetCustomerByIdQuery,
     {
         _readService = readService;
     }
-    public async Task<Customer> Handle(GetCustomerByIdQuery request, CancellationToken cancellationToken)
+    public async Task<ViewModels.CustomerViewModel> Handle(GetCustomerByIdQuery request, CancellationToken cancellationToken)
     {
-        return  await _readService.GetCustomer(request.CustomerId);
+        var customer = await _readService.GetCustomer(request.CustomerId);
+        return new ViewModels.CustomerViewModel(customer.Id,customer.History.ToArray(), customer.FirstName, customer.LastName, customer.PhoneNumber.Value, customer.Email.Value, customer.BankAccount.Value, customer.DateOfBirth?.Value.ToString());
     }
 }

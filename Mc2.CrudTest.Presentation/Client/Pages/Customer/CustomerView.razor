@@ -1,17 +1,25 @@
 <!-- CustomerList.razor -->
+@using Mc2.CrudTest.Presentation.Client.services
 @using Mc2.CrudTest.Presentation.Shared.Entities
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 @inject ILogger<CustomerView> Logger
 @inject IJSRuntime JsRuntime
+@inject ICustomerService CustomerService
 @page "/customers"
 
 <h3>Customer List</h3>
+@if (Customers == null)
+{
+    <p>Loading customer data...</p>
+}
+else
+{
 <a class="btn btn-danger" href="create-customer">New Customer</a>
 <table class="table">
     <thead>
     <tr>
-        <th>Id</th>
+        <th>History</th>
         <th>First Name</th>
         <th>Last Name</th>
         <th>Email</th>
@@ -24,7 +32,7 @@
     @foreach (var customer in Customers)
     {
         <tr>
-            <td>@customer.Id</td>
+            <td>@string.Join('\n', customer.History)</td>
             <td>@customer.FirstName</td>
             <td>@customer.LastName</td>
             <td>@customer.Email</td>
@@ -43,27 +51,21 @@
     }
     </tbody>
 </table>
-
+}
 @code {
     private List<ViewModels.CustomerViewModel>? Customers { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         Console.WriteLine("init customers list page");
-        var result = await Http.GetAsync("Customer");
-        if (result.StatusCode == System.Net.HttpStatusCode.OK)
-        {
-            Customers = await result.Content.ReadFromJsonAsync<List<ViewModels.CustomerViewModel>>();
-        }
-        var test = await result.Content.ReadAsStringAsync();
-        System.Diagnostics.Debug.WriteLine( test);
+
+        Customers = await CustomerService.GetAll();
+        StateHasChanged();
     }
 
     private async Task UpdateCustomer(ViewModels.CustomerViewModel customer)
     {
-
-        NavigationManager.NavigateTo($"update-customer");
-
+        NavigationManager.NavigateTo($"update-customer/{customer.Id}");
     }
 
     private async Task DeleteCustomer(ViewModels.CustomerViewModel customer)
@@ -71,7 +73,8 @@
         bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
         if (confirmed)
         {
-            await Http.DeleteAsync(new Uri($"Customer/{customer.Id}"));
+            await CustomerService.Delete(customer.Id);
+            StateHasChanged();
         }
     }
 }

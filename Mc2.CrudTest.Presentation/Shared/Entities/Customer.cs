@@ -15,6 +15,7 @@ namespace Mc2.CrudTest.Presentation.Shared.Entities
         public Email Email { get; private set; }
         public int Version { get; private set; } = 0;
         public bool IsDeleted { get; private set; }
+        public List<string> History { get; private set; } = new();
 
         // Constructor for rehydration
         public Customer(Guid id, string firstName, string lastName, string phoneNumber, string email, string bankAccount, string dateOfBirth)
@@ -26,6 +27,7 @@ namespace Mc2.CrudTest.Presentation.Shared.Entities
             Email = new Email(email) ?? throw new ArgumentNullException(nameof(email));
             BankAccount = new BankAccount(bankAccount) ?? throw new ArgumentException(bankAccount);
             DateOfBirth = new DateOfBirth(dateOfBirth);
+            History = new();
             IsDeleted = false;
         }
 
@@ -38,6 +40,7 @@ namespace Mc2.CrudTest.Presentation.Shared.Entities
             Email = new Email(email) ?? throw new ArgumentNullException(nameof(email));
             BankAccount = new BankAccount(bankAccount) ?? throw new ArgumentException(bankAccount);
             DateOfBirth = new DateOfBirth(dateOfBirth);
+            History = new();
             IsDeleted = false;
         }
 
@@ -55,6 +58,8 @@ namespace Mc2.CrudTest.Presentation.Shared.Entities
             Email = new Email(@event.Email);
             PhoneNumber = ParsePhone(@event.PhoneNumber);
             BankAccount = new BankAccount(@event.BankAccount);
+            DateOfBirth = new DateOfBirth(@event.DateOfBirth.ToString());
+            History.Add($"Created at {@event.OccurredOn}");
             Version = 0;
         }
 
@@ -66,10 +71,7 @@ namespace Mc2.CrudTest.Presentation.Shared.Entities
             }
             catch (Exception)
             {
-               
                 Debug.WriteLine($"An error has been occured while reading the phoneNumber of the customer. Bad format. CustomerId: {Id}");
-                
-                //TODO: Change this phone into a default valid phone number
                 return new PhoneNumber("+989010596159");
             }
         }
@@ -81,7 +83,9 @@ namespace Mc2.CrudTest.Presentation.Shared.Entities
             Email = new Email(@event.Email);
             PhoneNumber = ParsePhone(@event.PhoneNumber);
             BankAccount = new BankAccount(@event.BankAccount);
+            DateOfBirth = new DateOfBirth(@event.DateOfBirth.ToString());
             Id = @event.AggregateId;
+            History.Add($"Updated at {@event.OccurredOn}");
             Version += 1;
         }
 
@@ -89,6 +93,7 @@ namespace Mc2.CrudTest.Presentation.Shared.Entities
         {
             Id = @event.AggregateId;
             IsDeleted = true;
+            History.Add($"Deleted at {@event.OccurredOn}");
             Version += 1;
         }
 

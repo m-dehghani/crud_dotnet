@@ -32,11 +32,12 @@ public class CustomerController : Controller
 
 
     [ApiVersion(1.0)]
-    [HttpGet("{id}")]
+    [HttpGet("{id:Guid}")]
     public async Task<IActionResult> Get(string id)
     {
         GetCustomerByIdQuery getCustomerByIdQuery = new (Guid.Parse(id)); 
-        return await RequestHandler.HandleQuery(getCustomerByIdQuery, _mediator, Log);
+        var result = await RequestHandler.HandleQuery(getCustomerByIdQuery, _mediator, Log);
+        return result;
     }
 
     [ApiVersion(1.0)]

@@ -18,11 +18,16 @@ namespace Mc2.CrudTest.Presentation.Server.Migrations
                     EventId = table.Column<Guid>(type: "uuid", nullable: false),
                     AggregateId = table.Column<Guid>(type: "uuid", nullable: false),
                     OccurredOn = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Data = table.Column<string>(type: "text", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    event_type = table.Column<string>(type: "text", nullable: false),
-                    CustomerCreatedEvent_DateOfBirth = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    DateOfBirth = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    Data = table.Column<string>(type: "text", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    FirstName = table.Column<string>(type: "text", nullable: false),
+                    LastName = table.Column<string>(type: "text", nullable: false),
+                    PhoneNumber = table.Column<string>(type: "text", nullable: false),
+                    Email = table.Column<string>(type: "text", nullable: false),
+                    BankAccount = table.Column<string>(type: "text", nullable: false),
+                    DateOfBirth = table.Column<DateOnly>(type: "date", nullable: false),
+                    event_type = table.Column<string>(type: "character varying(21)", maxLength: 21, nullable: false)
                 },
                 constraints: table =>
                 {

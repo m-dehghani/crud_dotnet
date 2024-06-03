@@ -36,5 +36,9 @@
     <ProjectReference Include="..\Shared\Mc2.CrudTest.Presentation.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 
 </Project>

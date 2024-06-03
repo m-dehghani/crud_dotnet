@@ -2,10 +2,13 @@
 @page "/create-customer"
 @implements IDisposable
 @using System.ComponentModel.DataAnnotations
+@using Mc2.CrudTest.Presentation.Client.Models
+@using Mc2.CrudTest.Presentation.Client.services
 @using Mc2.CrudTest.Presentation.Shared.ValueObjects
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
-@inject ILogger<CustomerUpdate> Logger
+@inject ILogger<CustomerCreate> Logger
+@inject ICustomerService CustomerService
 
 
 <h3>Create New Customer</h3>
@@ -44,35 +47,18 @@
         <InputText id="bankAccount" @bind-Value="Model!.BankAccount" class="form-control" />
         <ValidationMessage For="() => Model!.BankAccount" />
     </div>
-
-    <button type="submit" class="btn btn-primary">Create</button> <div class="text-danger">@_errorMessage</div>
+    <br />
+    <button type="submit" class="btn btn-primary">Create</button> <div class="text-danger">@CustomerService.GetErrors()</div>
 </EditForm>
-
-
 
 @code {
 
     private EditContext? editContext;
 
-    private string _errorMessage = "";
     private async Task CreateCustomer()
     {
-        try
-        {
             Logger.LogInformation("sending start: sending the form to customer controller");
-           
-            var result = await Http.PostAsJsonAsync("Customer", Model);
-            if (result.IsSuccessStatusCode)
-                NavigationManager.NavigateTo("customers");
-            else
-                _errorMessage = await result.Content.ReadAsStringAsync();
-           
-        }
-
-        catch (Exception ex)
-        {
-            _errorMessage += "An error has been occured. Please try again later.";
-        }
+            await CustomerService.Create(Model);
     }
 
     private void Submit()
@@ -92,8 +78,6 @@
         editContext.OnValidationRequested += HandleValidationRequested;
         messageStore = new(editContext);
     }
-
-
 
     private void HandleValidationRequested(object? sender,
        ValidationRequestedEventArgs args)
@@ -116,19 +100,6 @@
         {
             messageStore?.Add(() => Model.BankAccount, "Enter valid Bank Account");
         }
-        
-       
-    }
-
-    private class CustomerCreateModel 
-    {
-        public string FirstName { get;  set; }
-        public string LastName { get;  set; }
-        public string BankAccount { get;  set; }
-        public DateTime DateOfBirth { get; set; } = DateTime.Now;
-        public string PhoneNumber { get;  set; }
-        public string Email { get;  set; }
-
     }
 
     public void Dispose()

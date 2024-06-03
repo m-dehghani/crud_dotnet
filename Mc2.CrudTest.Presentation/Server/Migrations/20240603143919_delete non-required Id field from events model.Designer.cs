@@ -12,15 +12,15 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Mc2.CrudTest.Presentation.Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240521212855_init")]
-    partial class init
+    [Migration("20240603143919_delete non-required Id field from events model")]
+    partial class deletenonrequiredIdfieldfromeventsmodel
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.19")
+                .HasAnnotation("ProductVersion", "8.0.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -34,19 +34,34 @@ namespace Mc2.CrudTest.Presentation.Server.Migrations
                     b.Property<Guid>("AggregateId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<string>("BankAccount")
+                        .HasColumnType("text");
 
                     b.Property<string>("Data")
-                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateOnly>("DateOfBirth")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("text");
+
+                    b.Property<string>("FirstName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("LastName")
                         .HasColumnType("text");
 
                     b.Property<DateTimeOffset>("OccurredOn")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("text");
+
                     b.Property<string>("event_type")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(21)
+                        .HasColumnType("character varying(21)");
 
                     b.HasKey("EventId");
 
@@ -61,15 +76,6 @@ namespace Mc2.CrudTest.Presentation.Server.Migrations
                 {
                     b.HasBaseType("Mc2.CrudTest.Presentation.Shared.Events.EventBase");
 
-                    b.Property<DateTime>("DateOfBirth")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.ToTable("Events", t =>
-                        {
-                            t.Property("DateOfBirth")
-                                .HasColumnName("CustomerCreatedEvent_DateOfBirth");
-                        });
-
                     b.HasDiscriminator().HasValue("customer_create");
                 });
 
@@ -83,9 +89,6 @@ namespace Mc2.CrudTest.Presentation.Server.Migrations
             modelBuilder.Entity("Mc2.CrudTest.Presentation.Shared.Events.CustomerUpdatedEvent", b =>
                 {
                     b.HasBaseType("Mc2.CrudTest.Presentation.Shared.Events.EventBase");
-
-                    b.Property<DateTime>("DateOfBirth")
-                        .HasColumnType("timestamp with time zone");
 
                     b.HasDiscriminator().HasValue("customer_update");
                 });

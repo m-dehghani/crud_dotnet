@@ -17,6 +17,6 @@ public class GetAllCustomerQueryHandler: IRequestHandler<GetAllCustomersQuery, I
     }
     public async Task<IEnumerable<ViewModels.CustomerViewModel>> Handle(GetAllCustomersQuery request, CancellationToken cancellationToken)
     {
-        return (await _readService.GetAllCustomers()).Select(customer => new ViewModels.CustomerViewModel(customer.Id, customer.FirstName, customer.LastName, customer.PhoneNumber.Value, customer.Email.Value, customer.BankAccount.Value, customer.DateOfBirth?.Value.ToString()));
+        return (await _readService.GetAllCustomers()).Select(customer => new ViewModels.CustomerViewModel(customer.Id,customer.History.ToArray() ,customer.FirstName, customer.LastName, customer.PhoneNumber.Value, customer.Email.Value, customer.BankAccount.Value, customer.DateOfBirth?.Value.ToString()));
     }
 }
