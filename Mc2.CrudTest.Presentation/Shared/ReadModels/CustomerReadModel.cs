@@ -1,8 +1,9 @@
+using Mc2.CrudTest.Presentation.Shared.Entities;
 using Mc2.CrudTest.Presentation.Shared.Events;
 
 namespace Mc2.CrudTest.Presentation.Shared.ReadModels;
 
-public class CustomerReadModel:EventBase
+public class CustomerViewModel:EventBase
 {
    
     public string FirstName { get; set; }
@@ -12,4 +13,5 @@ public class CustomerReadModel:EventBase
     public string BankAccount { get; set; }
     public Guid AggregateId { get; set; }
     public DateTimeOffset OccurredOn { get; set; }
+
 }

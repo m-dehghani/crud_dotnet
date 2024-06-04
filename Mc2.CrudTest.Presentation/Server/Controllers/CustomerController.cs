@@ -1,6 +1,14 @@
+using Asp.Versioning;
 using Mc2.CrudTest.Presentation.DomainServices;
+using Mc2.CrudTest.Presentation.Shared.Commands;
 using Mc2.CrudTest.Presentation.Shared.Entities;
+using Mc2.CrudTest.Presentation.Shared.Queries;
+using Mc2.CrudTest.Presentation.Shared.ReadModels;
+using Mc2.CrudTest.Presentation.Shared.ValueObjects;
+using Mc2.CrudTest.Presentation.ViewModels;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using ILogger = Serilog.ILogger;
 
 namespace Mc2.CrudTest.Presentation.Server.Controllers;
 
@@ -8,32 +16,57 @@ namespace Mc2.CrudTest.Presentation.Server.Controllers;
 [Route("[controller]")]
 public class CustomerController : Controller
 {
-    private ICustomerService _customerService;
-
-    public CustomerController(ICustomerService customerService)
+    private IMediator _mediator;
+    private static readonly ILogger Log = Serilog.Log.ForContext<CustomerController>();
+    public CustomerController(IMediator mediator)
     {
-        _customerService = customerService;
-
-    }
-    
-    public async Task<Customer> GetCustomer(Guid id)
-    {
-        var customer = await  _customerService.GetCustomer(id);
-        return customer;
+        _mediator = mediator;
     }
 
-    public async Task CreateCustomer(Customer newCustomer)
+
+    [ApiVersion(1.0)]
+    [HttpGet("{id:Guid}")]
+    public async Task<IActionResult> Get(string id)
     {
-        await _customerService.CreateCustomerAsync(newCustomer);
+        GetCustomerByIdQuery getCustomerByIdQuery = new (Guid.Parse(id)); 
+        var result = await RequestHandler.HandleQuery(getCustomerByIdQuery, _mediator, Log);
+        return result;
     }
 
-    public async Task UdateCustomer(Customer customer)
+    [ApiVersion(1.0)]
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
     {
-        await _customerService.UpdateCustomerAsync(customer);
+        GetAllCustomersQuery getAllCustomersQuery = new GetAllCustomersQuery(); 
+        var result = await RequestHandler.HandleQuery(getAllCustomersQuery, _mediator, Log);
+        return result;
     }
 
-    public async Task DeleteCustomer(Guid id)
+    [ApiVersion(1.0)]
+    [HttpPost]
+    public async Task<IActionResult> CreateCustomer(ViewModels.CustomerViewModel newCustomer)
     {
-        await _customerService.DeleteCustomerAsync(id);
+        CreateCustomerCommand command = new CreateCustomerCommand(newCustomer.FirstName, newCustomer.LastName,
+            newCustomer.PhoneNumber, newCustomer.Email, newCustomer.BankAccount, newCustomer.DateOfBirth);
+         return await RequestHandler.HandleCommand(command, _mediator, Log);
+    }
+
+    [ApiVersion(1.0)]
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UdateCustomer(string id, CustomerUpdateViewModel updatedCustomer)
+    {
+        var customerUpdateCmd = new UpdateCustomerCommand(Guid.Parse(id), updatedCustomer.FirstName,
+            updatedCustomer.LastName,
+            updatedCustomer.PhoneNumber, updatedCustomer.Email, updatedCustomer.BankAccount,
+            updatedCustomer.DateOfBirth);
+        return await RequestHandler.HandleCommand(customerUpdateCmd, _mediator, Log);
+    }
+
+    [ApiVersion(1.0)]
+    [HttpDelete("{id}")]
+    public async Task DeleteCustomer(string id)
+    {
+        DeleteCustomerCommand customerDeleteCmd = new (Guid.Parse(id));
+        await RequestHandler.HandleCommand(customerDeleteCmd, _mediator, Log);
     }
 }

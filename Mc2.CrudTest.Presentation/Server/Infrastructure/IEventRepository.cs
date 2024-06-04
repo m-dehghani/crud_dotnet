@@ -5,6 +5,7 @@ namespace Mc2.CrudTest.Presentation.Infrastructure;
 
 public interface IEventRepository
 {
-    public Task SaveEventAsync(EventBase @event);
-    public Task<List<CustomerReadModel>> GetEventsAsync(Guid aggregateId);
+    public Task SaveEventAsync(EventBase @event, Action functionToRun);
+    public Task<List<EventBase>> GetEventsAsync(Guid aggregateId);
+    public Task<List<EventBase>> GetAllEventsAsync();
 }

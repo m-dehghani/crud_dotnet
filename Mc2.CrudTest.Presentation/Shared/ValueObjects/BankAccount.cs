@@ -2,7 +2,7 @@ namespace Mc2.CrudTest.Presentation.Shared.ValueObjects
 {
     public record BankAccount
     {
-        public string Value { get; }
+        public string Value { get; set; }
 
         public BankAccount(string value)
         {
@@ -10,6 +10,10 @@ namespace Mc2.CrudTest.Presentation.Shared.ValueObjects
                 throw new ArgumentException("BankAccount cannot be empty.", nameof(value));
 
             Value = value;
+        }
+        public BankAccount()
+        {
+            
         }
     }
 }

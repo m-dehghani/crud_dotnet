@@ -7,7 +7,7 @@ namespace Mc2.CrudTest.Presentation.Shared.ValueObjects
         public PhoneNumber(string value)
         {
             if (!IsValidNumber(value))
-                throw new ArgumentException("Invalid phone number format.", nameof(value));
+                throw new ArgumentException("Invalid phone number format. phone numbers should start with country code like +1", nameof(value));
 
             Value = value;
         }
@@ -19,7 +19,8 @@ namespace Mc2.CrudTest.Presentation.Shared.ValueObjects
             var phoneNumberUtil = PhoneNumbers.PhoneNumberUtil.GetInstance();
             try
             {
-                var numberProto = phoneNumberUtil.Parse(value, null);
+                var numberProto = phoneNumberUtil.Parse(value,"");
+                var countryCode = numberProto.CountryCode;
                 return phoneNumberUtil.IsValidNumber(numberProto);
             }
             catch (PhoneNumbers.NumberParseException)

@@ -14,7 +14,11 @@ services:
       target: final
     ports:
       - 8080:8080
-
+    links:
+      - db
+      - cache
+    volumes:
+      - ./:/src
 # The commented out section below is an example of how to define a PostgreSQL
 # database that your application can use. `depends_on` tells Docker Compose to
 # start the database before your application. The `db-data` volume persists the
@@ -23,6 +27,8 @@ services:
 # a password of your choosing to it before running `docker compose up`.
     depends_on:
       db:
+        condition: service_healthy
+      cache: 
         condition: service_healthy
   db:
     image: postgres
@@ -42,8 +48,19 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  cache:
+    image: redis/redis-stack:latest
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    volumes: 
+      - cache:/data
 volumes:
   db-data:
+  cache:
+    driver: local
 secrets:
   db-password:
     file: db/password.txt
