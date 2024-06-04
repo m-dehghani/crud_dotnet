@@ -1,5 +1,3 @@
-using Mc2.CrudTest.Presentation.Shared.Entities;
-
 namespace Mc2.CrudTest.Presentation.ViewModels;
 
 public class CustomerViewModel

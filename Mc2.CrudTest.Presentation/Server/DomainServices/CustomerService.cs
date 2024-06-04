@@ -36,7 +36,8 @@ namespace Mc2.CrudTest.Presentation.DomainServices
 
         }
 
-        public static void SetCustomerInRedis(Customer customer) 
+
+        public static void SetCustomerInRedis(Customer customer)
         {
             var customerData = $"{customer.FirstName}-{customer.LastName}-{customer.DateOfBirth.Value}";
 
@@ -46,12 +47,15 @@ namespace Mc2.CrudTest.Presentation.DomainServices
             if (!string.IsNullOrEmpty(_redisDB.StringGet(customerData)))
                 throw new ArgumentException("This user has registered before");
 
-              
+
             _redisDB.StringSet(customer.Email.Value, $"{customer.Id}");
 
             _redisDB.StringSet(customerData, $"{customer.Id}");
         }
-
+        static bool IsEmailUnique(IDatabase db, string email)
+        {
+            return !db.SetContains("taken_emails", email);
+        }
         // Command: Update an existing customer
         public async Task UpdateCustomerAsync(Customer customer)
         {
@@ -69,12 +73,12 @@ namespace Mc2.CrudTest.Presentation.DomainServices
         {
             var customerData = $"{customer.FirstName}-{customer.LastName}-{customer.DateOfBirth.Value}";
             var redisEmail = _redisDB.StringGet(customer.Email.Value);
-            if (!string.IsNullOrEmpty(redisEmail) && redisEmail !=  new RedisValue(customer.Id.ToString()))
+            if (!string.IsNullOrEmpty(redisEmail) && redisEmail != new RedisValue(customer.Id.ToString()))
                 throw new ArgumentException("This email address was taken by another user. Please select another one ");
-            
-            if(!string.IsNullOrEmpty(_redisDB.StringGet(customerData)) && customerData != new RedisValue(customer.Id.ToString()))
+
+            if (!string.IsNullOrEmpty(_redisDB.StringGet(customerData)) && customerData != new RedisValue(customer.Id.ToString()))
                 throw new ArgumentException("This user has registered before");
-          
+
             _redisDB.StringSet(customer.Email.Value, 1);
             _redisDB.StringSet(customerData, 1);
         }

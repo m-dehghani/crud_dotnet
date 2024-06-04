@@ -1,11 +1,11 @@
-using Mc2.CrudTest.Presentation.Shared.Entities;
+using Mc2.CrudTest.Presentation.ViewModels;
 
 using MediatR;
 using System.Diagnostics;
 
 namespace Mc2.CrudTest.Presentation.Shared.Queries;
 
-public class GetAllCustomersQuery : IRequest<IEnumerable<ViewModels.CustomerViewModel>>, INotification
+public class GetAllCustomersQuery : IRequest<IEnumerable<CustomerViewModel>>, INotification
 {
     public GetAllCustomersQuery()
     {

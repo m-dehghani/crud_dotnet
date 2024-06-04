@@ -19,6 +19,7 @@ namespace Mc2.CrudTest.Presentation
             var builder = WebApplication.CreateBuilder(args);
             builder.AddServiceDefaults();
 
+            
             // Add services to the container.
 
             builder.Services.AddControllersWithViews();
@@ -33,9 +34,10 @@ namespace Mc2.CrudTest.Presentation
             });
             builder.Services.AddScoped<IDatabase>(cfg =>
             {
-                IConnectionMultiplexer multiplexer = ConnectionMultiplexer.Connect($"{builder.Configuration["RedisUrl"]},password={builder.Configuration["RedisPassword"]}");
+                IConnectionMultiplexer multiplexer = ConnectionMultiplexer.Connect($"{builder.Configuration["RedisUrl"]}");
                 return multiplexer.GetDatabase();
             });
+            
             builder.Services.AddTransient<ICustomerService, CustomerService>();
             builder.Services.AddTransient<IEventRepository, EventStoreRepository>();
             builder.Services.AddApiVersioning(options =>
@@ -44,7 +46,14 @@ namespace Mc2.CrudTest.Presentation
                 options.DefaultApiVersion = new ApiVersion(1, 0);
                 options.AssumeDefaultVersionWhenUnspecified = true;
             });
+
             var app = builder.Build();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                db.Database.Migrate();
+            }
             app.MapDefaultEndpoints();
 
             // Configure the HTTP request pipeline.

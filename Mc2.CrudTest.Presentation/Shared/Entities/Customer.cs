@@ -1,6 +1,8 @@
 using Mc2.CrudTest.Presentation.Shared.Events;
 using Mc2.CrudTest.Presentation.Shared.ValueObjects;
 using System.Diagnostics;
+using System.Text.Json;
+
 
 namespace Mc2.CrudTest.Presentation.Shared.Entities
 {
@@ -52,38 +54,41 @@ namespace Mc2.CrudTest.Presentation.Shared.Entities
         // Apply methods
         protected void Apply(CustomerCreatedEvent @event)
         {
-            Id = @event.AggregateId;
-            FirstName = @event.FirstName;
-            LastName = @event.LastName;
-            Email = new Email(@event.Email);
-            PhoneNumber = ParsePhone(@event.PhoneNumber);
-            BankAccount = new BankAccount(@event.BankAccount);
-            DateOfBirth = new DateOfBirth(@event.DateOfBirth.ToString());
-            History.Add($"Created at {@event.OccurredOn}");
-            Version = 0;
-        }
-
-        private PhoneNumber ParsePhone(string phoneNumber)
-        {
             try
             {
-                return new PhoneNumber(phoneNumber);
+                
+                //var options = new JsonSerializerOptions() { IncludeFields = true,IgnoreReadOnlyFields = true, IgnoreReadOnlyProperties = true };
+                var customer = JsonSerializer.Deserialize<Test>(@event.Data);// json = null;
+
+                //var test = JsonConvert.DeserializeObject<Test>(@event.Data);
+                //var customer = JsonConvert.DeserializeObject<Customer>(@event.Data);
+                Id = @event.AggregateId;
+                FirstName = customer.FirstName;
+                LastName = customer.LastName;
+                Email = customer.Email;
+                PhoneNumber = customer.PhoneNumber;
+                BankAccount = customer.BankAccount;
+                DateOfBirth = customer.DateOfBirth;
+                History.Add($"Created at {@event.OccurredOn}");
+                Version = 0;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                Debug.WriteLine($"An error has been occured while reading the phoneNumber of the customer. Bad format. CustomerId: {Id}");
-                return new PhoneNumber("+989010596159");
+                Debug.WriteLine(ex.Message);
             }
         }
+
 
         protected void Apply(CustomerUpdatedEvent @event)
         {
-            FirstName = @event.FirstName;
-            LastName = @event.LastName;
-            Email = new Email(@event.Email);
-            PhoneNumber = ParsePhone(@event.PhoneNumber);
-            BankAccount = new BankAccount(@event.BankAccount);
-            DateOfBirth = new DateOfBirth(@event.DateOfBirth.ToString());
+            //var customer =  JsonConvert.DeserializeObject<Customer>(@event.Data);
+            var customer = JsonSerializer.Deserialize<Test>(@event.Data); 
+            FirstName = customer.FirstName;
+            LastName = customer.LastName;
+            Email = customer.Email;
+            PhoneNumber = customer.PhoneNumber;
+            BankAccount = customer.BankAccount;
+            DateOfBirth = customer.DateOfBirth;
             Id = @event.AggregateId;
             History.Add($"Updated at {@event.OccurredOn}");
             Version += 1;
@@ -102,6 +107,26 @@ namespace Mc2.CrudTest.Presentation.Shared.Entities
         {
             ((dynamic)this).Apply((dynamic)@event);
             Version += 1;
+        }
+
+    }
+
+    public class Test
+    {
+
+        public string Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public BankAccount BankAccount { get; set; }
+        public DateOfBirth DateOfBirth { get; set; }
+        public PhoneNumber PhoneNumber { get; set; }
+        public Email Email { get; set; }
+        public int Version { get; set; }
+        public bool IsDeleted { get; set; }
+        public List<object> History { get; set; }
+        public Test()
+        {
+            
         }
 
     }

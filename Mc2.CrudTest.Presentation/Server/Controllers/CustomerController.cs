@@ -24,13 +24,6 @@ public class CustomerController : Controller
     }
 
 
-    // for testing
-    public CustomerController GetInstance()
-    {
-        return this;
-    }
-
-
     [ApiVersion(1.0)]
     [HttpGet("{id:Guid}")]
     public async Task<IActionResult> Get(string id)

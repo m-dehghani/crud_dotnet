@@ -7,7 +7,7 @@ namespace Mc2.CrudTest.Presentation.Shared.ValueObjects
         public PhoneNumber(string value)
         {
             if (!IsValidNumber(value))
-                throw new ArgumentException("Invalid phone number format.", nameof(value));
+                throw new ArgumentException("Invalid phone number format. phone numbers should start with country code like +1", nameof(value));
 
             Value = value;
         }

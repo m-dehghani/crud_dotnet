@@ -2,7 +2,7 @@ namespace Mc2.CrudTest.Presentation.Shared.ValueObjects
 {
     public record DateOfBirth
     {
-        public DateOnly Value { get; }
+        public DateOnly Value { get; set; }
 
         public DateOfBirth(string value)
         {
@@ -11,6 +11,10 @@ namespace Mc2.CrudTest.Presentation.Shared.ValueObjects
 
             Value = DateOnly.Parse(value,
                 System.Globalization.CultureInfo.InvariantCulture);
+        }
+        public DateOfBirth()
+        {
+            
         }
 
 
