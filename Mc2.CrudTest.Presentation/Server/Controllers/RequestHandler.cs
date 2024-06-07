@@ -44,7 +44,7 @@ public static class RequestHandler
         return new BadRequestObjectResult(new
         {
             error = e.Message,
-            stackTrace = e.StackTrace
+           // stackTrace = e.StackTrace
         });
 #else
             return new BadRequestObjectResult(new

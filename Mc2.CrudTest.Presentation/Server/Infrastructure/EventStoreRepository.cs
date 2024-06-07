@@ -43,12 +43,12 @@ public class EventStoreRepository: IEventRepository
             .OrderBy(e => e.OccurredOn)
             .ToListAsync();
     }
-    public async Task<List<CustomerReadModel>> GetAllEventsAsync()
+    public IQueryable<CustomerReadModel> GetAllEvents()
     {
         // Retrieve events for All the aggregates
-        return await _readContext.CustomerEvents
+        return _readContext.CustomerEvents
             .OrderBy(e => e.OccurredOn)
-            .ToListAsync();
+            .AsQueryable();
     }
     
 }

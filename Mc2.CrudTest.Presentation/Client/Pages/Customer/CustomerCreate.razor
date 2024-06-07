@@ -48,7 +48,7 @@
         <ValidationMessage For="() => Model!.BankAccount" />
     </div>
     <br />
-    <button type="submit" class="btn btn-primary">Create</button> <div class="text-danger">@ErrorMessage</div>
+    <button type="submit" class="btn btn-primary">Create</button> <div class="text-danger">@CustomerService.GetErrors().LastOrDefault()</div>
 </EditForm>
 
 @code {
@@ -59,7 +59,7 @@
     {
         Logger.LogInformation("sending start: sending the form to customer controller");
         await CustomerService.Create(Model);
-        ErrorMessage = @CustomerService.GetErrors();
+      
     }
 
     private void Submit()
@@ -72,11 +72,11 @@
 
     private ValidationMessageStore? messageStore;
 
-    private string ErrorMessage{ get; set; }
+   
 
     protected override void OnInitialized()
     {
-        ErrorMessage = string.Empty;
+   
         Model ??= new();
         editContext = new(Model);
         editContext.OnValidationRequested += HandleValidationRequested;

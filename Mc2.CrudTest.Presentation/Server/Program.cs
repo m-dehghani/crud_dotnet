@@ -4,6 +4,7 @@ using FluentAssertions.Common;
 using Mc2.CrudTest.Presentation.DomainServices;
 using Mc2.CrudTest.Presentation.Infrastructure;
 using Mc2.CrudTest.Presentation.Server.Controllers;
+using Mc2.CrudTest.Presentation.Server.DomainServices;
 using MediatR;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
@@ -37,8 +38,9 @@ namespace Mc2.CrudTest.Presentation
                 IConnectionMultiplexer multiplexer = ConnectionMultiplexer.Connect($"{builder.Configuration["RedisUrl"]}");
                 return multiplexer.GetDatabase();
             });
-            
-            builder.Services.AddTransient<ICustomerService, CustomerService>();
+
+            // builder.Services.AddTransient<ICustomerService, CustomerService>();
+            builder.Services.AddTransient<ICustomerService, SlowerCustomerService>();
             builder.Services.AddTransient<IEventRepository, EventStoreRepository>();
             builder.Services.AddApiVersioning(options =>
             {

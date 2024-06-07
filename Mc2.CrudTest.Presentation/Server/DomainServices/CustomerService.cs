@@ -28,21 +28,18 @@ namespace Mc2.CrudTest.Presentation.DomainServices
             {
                 customer.Id = Guid.NewGuid();
             }
+
             var customerCreatedEvent = new CustomerCreatedEvent(customer.Id, customer.FirstName, customer.LastName,
                 customer.PhoneNumber.Value, customer.Email.Value, customer.BankAccount.Value,
                 customer.DateOfBirth.Value)
             {
-                
                 Data = System.Text.Json.JsonSerializer.Serialize(customer),
-                             
             };
           
             customerCreatedEvent.OccurredOn = DateTimeOffset.UtcNow;
           
             await _eventStore.SaveEventAsync(customerCreatedEvent, () => SetCustomerInRedis(customer));
-
         }
-
 
         public static void SetCustomerInRedis(Customer customer)
         {
@@ -59,10 +56,12 @@ namespace Mc2.CrudTest.Presentation.DomainServices
 
             _redisDB.StringSet(customerData, $"{customer.Id}");
         }
+        
         static bool IsEmailUnique(IDatabase db, string email)
         {
             return !db.SetContains("taken_emails", email);
         }
+       
         // Command: Update an existing customer
         public async Task UpdateCustomerAsync(Customer customer, Guid customerId)
         {
@@ -116,7 +115,7 @@ namespace Mc2.CrudTest.Presentation.DomainServices
     
         public async Task<IEnumerable<Customer>> GetAllCustomers()
         {
-            var events = await _eventStore.GetAllEventsAsync();
+            var events = _eventStore.GetAllEvents();
             
             var customers = new Dictionary<Guid,Customer>();
             try
