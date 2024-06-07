@@ -9,10 +9,12 @@ namespace Mc2.CrudTest.Presentation.Shared.ValueObjects
         [JsonConstructor]
         public PhoneNumber(string value)
         {
-            if (!IsValidNumber(value))
+            value = value.Trim(['\"']);
+            String temp = (char)'\u002B' + value.Substring(6, value.Length - 6);
+            if (!IsValidNumber(temp))
                 throw new ArgumentException("Invalid phone number format. phone numbers should start with country code like +1", nameof(value));
 
-            Value = value;
+            Value = temp;
         }
 
         private bool IsValidNumber(string value)

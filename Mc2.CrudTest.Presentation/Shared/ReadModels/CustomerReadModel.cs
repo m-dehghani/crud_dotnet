@@ -21,7 +21,8 @@ namespace Mc2.CrudTest.Presentation.Shared.ReadModels
         [Column("bankaccount")]
         public string BankAccount { get; set; }
         [Column("dateofbirth")]
-        public string DateOfBirth { get; set; }
+        public string _dateOfBirth { get; set; }
+        public DateOnly DateOfBirth { get => DateOnly.Parse(_dateOfBirth.Trim(['\"'])); }
         [Column("AggregateId")]
         public Guid AggregateId { get; set; }
         [Column("OccurredOn")]

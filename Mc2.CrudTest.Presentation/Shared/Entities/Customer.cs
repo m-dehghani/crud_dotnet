@@ -9,7 +9,7 @@ namespace Mc2.CrudTest.Presentation.Shared.Entities
 {
     public class Customer
     {
-        public Guid Id { get; private set; }
+        public Guid Id { get; set; }
         public string FirstName { get; private set; }
         public string LastName { get; private set; }
         public BankAccount BankAccount { get; private set; }
@@ -80,7 +80,7 @@ namespace Mc2.CrudTest.Presentation.Shared.Entities
                 PhoneNumber = new PhoneNumber(@event.PhoneNumber);
                 BankAccount = new BankAccount(@event.BankAccount);
                 DateOfBirth = new DateOfBirth(@event.DateOfBirth.ToString());
-                History.Add($"Created at {@event.OccurredOn}");
+                History.Add($"Created at {@event.OccurredOn.LocalDateTime}");
                 Version = 0;
             }
             catch (Exception ex)
@@ -99,7 +99,7 @@ namespace Mc2.CrudTest.Presentation.Shared.Entities
             PhoneNumber = new PhoneNumber(@event.PhoneNumber);
             BankAccount = new BankAccount(@event.BankAccount);
             DateOfBirth = new DateOfBirth(@event.DateOfBirth.ToString());
-            History.Add($"Updated at {@event.OccurredOn}");
+            History.Add($"Updated at {@event.OccurredOn.LocalDateTime}");
             Version += 1;
         }
 

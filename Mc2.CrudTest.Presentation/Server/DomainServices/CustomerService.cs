@@ -24,15 +24,19 @@ namespace Mc2.CrudTest.Presentation.DomainServices
         {
             //check for the existence of the Email value in Redis DB. If couldn't find the value for the email so the email is unique else should return an error indicating 'This email has used before'.
             //also check for the combination of the Firstname, Lastname, and DateOfBirth
-
+            if (customer.Id == Guid.Empty)
+            {
+                customer.Id = Guid.NewGuid();
+            }
             var customerCreatedEvent = new CustomerCreatedEvent(customer.Id, customer.FirstName, customer.LastName,
                 customer.PhoneNumber.Value, customer.Email.Value, customer.BankAccount.Value,
                 customer.DateOfBirth.Value)
             {
                 
-                Data = System.Text.Json.JsonSerializer.Serialize(customer)
+                Data = System.Text.Json.JsonSerializer.Serialize(customer),
+                             
             };
-           
+          
             customerCreatedEvent.OccurredOn = DateTimeOffset.UtcNow;
           
             await _eventStore.SaveEventAsync(customerCreatedEvent, () => SetCustomerInRedis(customer));
@@ -143,12 +147,15 @@ namespace Mc2.CrudTest.Presentation.DomainServices
             var e = new EventBase();
             switch (customerEvent.EventType)
             {
-                case "customer_create": e = new CustomerCreatedEvent(customerEvent.AggregateId, customerEvent.FirstName, customerEvent.LastName, customerEvent.PhoneNumber, customerEvent.Email, customerEvent.BankAccount, DateOnly.Parse(customerEvent.DateOfBirth)
-                    );
+                case "customer_create":
+                    e = new CustomerCreatedEvent(customerEvent.AggregateId, customerEvent.FirstName, customerEvent.LastName, customerEvent.PhoneNumber, customerEvent.Email, customerEvent.BankAccount, customerEvent.DateOfBirth, customerEvent.OccurredOn);
                     break;
-                case "customer_update": e = new CustomerUpdatedEvent(customerEvent.AggregateId, customerEvent.FirstName, customerEvent.LastName, customerEvent.Email, customerEvent.PhoneNumber, customerEvent.BankAccount, DateOnly.Parse(customerEvent.DateOfBirth));
+
+                case "customer_update": e = new CustomerUpdatedEvent(customerEvent.AggregateId, customerEvent.FirstName, customerEvent.LastName, customerEvent.Email, customerEvent.PhoneNumber, customerEvent.BankAccount,customerEvent.DateOfBirth, customerEvent.OccurredOn);
                     break;
+
                 case "customer_delete": e = new CustomerDeletedEvent(customerEvent.AggregateId);
+                    e.OccurredOn = customerEvent.OccurredOn;
                     break;
             }
           return e;

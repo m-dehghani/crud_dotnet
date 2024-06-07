@@ -49,10 +49,14 @@ namespace Mc2.CrudTest.Presentation
 
             var app = builder.Build();
 
+            // run the required migration
             using (var scope = app.Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 db.Database.Migrate();
+               
+                var readDb = scope.ServiceProvider.GetRequiredService<ReadModelDbContext>();
+                readDb.Database.Migrate();
             }
             app.MapDefaultEndpoints();
 
