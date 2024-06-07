@@ -1,9 +1,12 @@
+using System.Text.Json.Serialization;
+
 namespace Mc2.CrudTest.Presentation.Shared.ValueObjects
 {
     public record DateOfBirth
     {
         public DateOnly Value { get; set; }
 
+        [JsonConstructor]
         public DateOfBirth(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
@@ -12,10 +15,7 @@ namespace Mc2.CrudTest.Presentation.Shared.ValueObjects
             Value = DateOnly.Parse(value,
                 System.Globalization.CultureInfo.InvariantCulture);
         }
-        public DateOfBirth()
-        {
-            
-        }
+       
 
 
     }

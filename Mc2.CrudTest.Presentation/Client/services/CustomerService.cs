@@ -19,12 +19,13 @@ namespace Mc2.CrudTest.Presentation.Client.services
             _httpClient = httpClient;
             _navigationManager = navigationManager;
             _logger = logger;
+          
         }
         private List<string> ErrorMessages { get; set; } = new List<string>();
         
-        public string GetErrors()
+        public List<string> GetErrors()
         {
-            return string.Join(',', ErrorMessages);
+            return ErrorMessages;
         }
         public async Task Update(CustomerUpdateModel model)
         {

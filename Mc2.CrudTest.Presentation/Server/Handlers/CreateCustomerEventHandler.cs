@@ -18,7 +18,7 @@ public class CreateCustomerCommandHandler : IRequestHandler<CreateCustomerComman
     public async Task Handle(CreateCustomerCommand command, CancellationToken cancellationToken)
     {
 
-        await _service.CreateCustomerAsync(new Customer(command.CustomerId, command.FirstName, command.LastName, command.PhoneNumber,
+        await _service.CreateCustomerAsync(new Customer(command.FirstName, command.LastName, command.PhoneNumber,
             command.Email, command.BankAccount, command.DateOfBirth));
 
     }

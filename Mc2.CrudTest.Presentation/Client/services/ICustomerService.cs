@@ -15,6 +15,6 @@ namespace Mc2.CrudTest.Presentation.Client.services
 
         public Task Delete(Guid id);
 
-        public string GetErrors();
+        public List<string> GetErrors();
     }
 }

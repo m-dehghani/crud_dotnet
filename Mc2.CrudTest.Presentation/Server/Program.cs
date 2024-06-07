@@ -1,13 +1,7 @@
-using System.Configuration;
 using Asp.Versioning;
-using FluentAssertions.Common;
 using Mc2.CrudTest.Presentation.DomainServices;
 using Mc2.CrudTest.Presentation.Infrastructure;
-using Mc2.CrudTest.Presentation.Server.Controllers;
-using MediatR;
-using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
 using StackExchange.Redis;
 
 namespace Mc2.CrudTest.Presentation
@@ -18,9 +12,6 @@ namespace Mc2.CrudTest.Presentation
         {
             var builder = WebApplication.CreateBuilder(args);
             builder.AddServiceDefaults();
-
-            
-            // Add services to the container.
 
             builder.Services.AddControllersWithViews();
             builder.Services.AddRazorPages();
@@ -37,8 +28,9 @@ namespace Mc2.CrudTest.Presentation
                 IConnectionMultiplexer multiplexer = ConnectionMultiplexer.Connect($"{builder.Configuration["RedisUrl"]}");
                 return multiplexer.GetDatabase();
             });
-            
-            builder.Services.AddTransient<ICustomerService, CustomerService>();
+
+            // builder.Services.AddTransient<ICustomerService, CustomerService>();
+            builder.Services.AddTransient<ICustomerService, SlowerCustomerService>();
             builder.Services.AddTransient<IEventRepository, EventStoreRepository>();
             builder.Services.AddApiVersioning(options =>
             {
@@ -49,10 +41,14 @@ namespace Mc2.CrudTest.Presentation
 
             var app = builder.Build();
 
+            // run the required migration
             using (var scope = app.Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 db.Database.Migrate();
+               
+                var readDb = scope.ServiceProvider.GetRequiredService<ReadModelDbContext>();
+                readDb.Database.Migrate();
             }
             app.MapDefaultEndpoints();
 

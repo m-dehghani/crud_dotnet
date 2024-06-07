@@ -35,20 +35,20 @@ public class EventStoreRepository: IEventRepository
         }
     }
     
-    public async Task<List< EventBase>> GetEventsAsync(Guid aggregateId)
+    public async Task<List<CustomerReadModel>> GetEventsAsync(Guid aggregateId)
     {
         // Retrieve events for the specified aggregate ID
-        return await _context.Events
+        return await _readContext.CustomerEvents
             .Where(e => e.AggregateId == aggregateId)
             .OrderBy(e => e.OccurredOn)
             .ToListAsync();
     }
-    public async Task<List<EventBase>> GetAllEventsAsync()
+    public IQueryable<CustomerReadModel> GetAllEvents()
     {
         // Retrieve events for All the aggregates
-        return await _context.Events
+        return _readContext.CustomerEvents
             .OrderBy(e => e.OccurredOn)
-            .ToListAsync();
+            .AsQueryable();
     }
     
 }
