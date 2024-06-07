@@ -128,7 +128,6 @@ namespace Mc2.CrudTest.Presentation.DomainServices
                     else
                     {
                         var customer = new Customer();
-                        //var customer = System.Text.Json.JsonSerializer.Deserialize<Customer>(@event.Data);
                         var specific_event = GetEventsFromGenericEvent(@event);
                         customer.Apply(specific_event);
                         customers.Add(@event.AggregateId, customer);

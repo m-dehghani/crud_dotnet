@@ -9,8 +9,9 @@ namespace Mc2.CrudTest.Presentation.Shared.ValueObjects
         [JsonConstructor]
         public PhoneNumber(string value)
         {
+            char plusSign = '\u002B';
             value = value.Trim(['\"']);
-            String temp = (char)'\u002B' + value.Substring(6, value.Length - 6);
+            String temp = value.StartsWith("\\u002B") ?  (char)plusSign + value.Substring(6, value.Length - 6) : value;
             if (!IsValidNumber(temp))
                 throw new ArgumentException("Invalid phone number format. phone numbers should start with country code like +1", nameof(value));
 
