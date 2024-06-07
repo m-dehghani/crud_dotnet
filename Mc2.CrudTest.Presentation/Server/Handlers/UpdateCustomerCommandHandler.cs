@@ -18,7 +18,7 @@ public class UpdateCustomerCommandHandler : IRequestHandler<UpdateCustomerComman
 
     public async Task Handle(UpdateCustomerCommand command, CancellationToken cancellationToken)
     {
-        await _service.UpdateCustomerAsync(new Customer(command.CustomerId, command.FirstName, command.LastName, command.PhoneNumber,
-            command.Email, command.BankAccount, command.DateOfBirth));
+        await _service.UpdateCustomerAsync(new Customer(command.FirstName, command.LastName, command.PhoneNumber,
+            command.Email, command.BankAccount, command.DateOfBirth), command.CustomerId);
     }
 }

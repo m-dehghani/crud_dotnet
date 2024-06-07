@@ -1,5 +1,6 @@
 using Mc2.CrudTest.Presentation.Shared.Events;
 using Mc2.CrudTest.Presentation.Shared.ValueObjects;
+using System.Text.Json.Serialization;
 using System.Diagnostics;
 using System.Text.Json;
 
@@ -17,22 +18,38 @@ namespace Mc2.CrudTest.Presentation.Shared.Entities
         public Email Email { get; private set; }
         public int Version { get; private set; } = 0;
         public bool IsDeleted { get; private set; }
+        
+        [JsonIgnore]
         public List<string> History { get; private set; } = new();
 
-        // Constructor for rehydration
-        public Customer(Guid id, string firstName, string lastName, string phoneNumber, string email, string bankAccount, string dateOfBirth)
+        
+        // Constructor for rehydration(Deserialisation)
+        public Customer(Guid id, string firstName, string lastName, PhoneNumber phoneNumber, Email email, BankAccount bankAccount, DateOfBirth dateOfBirth)
         {
             Id = id;
-            FirstName = firstName ?? throw new ArgumentNullException(nameof(firstName));
-            LastName = lastName ?? throw new ArgumentNullException(nameof(lastName));
-            PhoneNumber = new PhoneNumber(phoneNumber) ?? throw new ArgumentNullException(nameof(phoneNumber));
-            Email = new Email(email) ?? throw new ArgumentNullException(nameof(email));
-            BankAccount = new BankAccount(bankAccount) ?? throw new ArgumentException(bankAccount);
-            DateOfBirth = new DateOfBirth(dateOfBirth);
+            FirstName = firstName;
+            LastName = lastName;
+            PhoneNumber = phoneNumber;
+            Email = email;
+            BankAccount = bankAccount;
+            DateOfBirth = dateOfBirth;
             History = new();
             IsDeleted = false;
         }
 
+        [JsonConstructor]
+        public Customer(Guid id, string firstName, string lastName, PhoneNumber phoneNumber, Email email, BankAccount bankAccount, DateOfBirth dateOfBirth, string[] history,  int version = 0, bool isDeleted = false)
+        {
+            Id = id;
+            FirstName = firstName;
+            LastName = lastName;
+            PhoneNumber = phoneNumber;
+            Email = email;
+            BankAccount = bankAccount;
+            DateOfBirth = dateOfBirth;
+            History = new();
+            IsDeleted = IsDeleted;
+        }
 
         public Customer(string firstName, string lastName, string phoneNumber, string email, string bankAccount, string dateOfBirth)
         {
@@ -56,19 +73,13 @@ namespace Mc2.CrudTest.Presentation.Shared.Entities
         {
             try
             {
-                
-                //var options = new JsonSerializerOptions() { IncludeFields = true,IgnoreReadOnlyFields = true, IgnoreReadOnlyProperties = true };
-                var customer = JsonSerializer.Deserialize<Test>(@event.Data);// json = null;
-
-                //var test = JsonConvert.DeserializeObject<Test>(@event.Data);
-                //var customer = JsonConvert.DeserializeObject<Customer>(@event.Data);
                 Id = @event.AggregateId;
-                FirstName = customer.FirstName;
-                LastName = customer.LastName;
-                Email = customer.Email;
-                PhoneNumber = customer.PhoneNumber;
-                BankAccount = customer.BankAccount;
-                DateOfBirth = customer.DateOfBirth;
+                FirstName = @event.FirstName;
+                LastName = @event.LastName;
+                Email = new Email(@event.Email);
+                PhoneNumber = new PhoneNumber(@event.PhoneNumber);
+                BankAccount = new BankAccount(@event.BankAccount);
+                DateOfBirth = new DateOfBirth(@event.DateOfBirth.ToString());
                 History.Add($"Created at {@event.OccurredOn}");
                 Version = 0;
             }
@@ -81,15 +92,13 @@ namespace Mc2.CrudTest.Presentation.Shared.Entities
 
         protected void Apply(CustomerUpdatedEvent @event)
         {
-            //var customer =  JsonConvert.DeserializeObject<Customer>(@event.Data);
-            var customer = JsonSerializer.Deserialize<Test>(@event.Data); 
-            FirstName = customer.FirstName;
-            LastName = customer.LastName;
-            Email = customer.Email;
-            PhoneNumber = customer.PhoneNumber;
-            BankAccount = customer.BankAccount;
-            DateOfBirth = customer.DateOfBirth;
             Id = @event.AggregateId;
+            FirstName = @event.FirstName;
+            LastName = @event.LastName;
+            Email = new Email(@event.Email);
+            PhoneNumber = new PhoneNumber(@event.PhoneNumber);
+            BankAccount = new BankAccount(@event.BankAccount);
+            DateOfBirth = new DateOfBirth(@event.DateOfBirth.ToString());
             History.Add($"Updated at {@event.OccurredOn}");
             Version += 1;
         }
@@ -108,7 +117,6 @@ namespace Mc2.CrudTest.Presentation.Shared.Entities
             ((dynamic)this).Apply((dynamic)@event);
             Version += 1;
         }
-
     }
 
     public class Test
@@ -124,10 +132,5 @@ namespace Mc2.CrudTest.Presentation.Shared.Entities
         public int Version { get; set; }
         public bool IsDeleted { get; set; }
         public List<object> History { get; set; }
-        public Test()
-        {
-            
-        }
-
     }
 }

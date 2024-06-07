@@ -1,9 +1,12 @@
+using System.Text.Json.Serialization;
+
 namespace Mc2.CrudTest.Presentation.Shared.ValueObjects
 {
     public class PhoneNumber
     {
-        public string Value { get; }
+        public string Value { get; set; }
 
+        [JsonConstructor]
         public PhoneNumber(string value)
         {
             if (!IsValidNumber(value))

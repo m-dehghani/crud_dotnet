@@ -1,9 +1,12 @@
+using System.Text.Json.Serialization;
+
 namespace Mc2.CrudTest.Presentation.Shared.ValueObjects
 {
     public class Email:IEquatable<Email>
     {
-        public string Value { get; }
+        public string Value { get; set; }
 
+        [JsonConstructor]
         public Email(string value)
         {
             if (string.IsNullOrWhiteSpace(value) || !value.Contains("@"))

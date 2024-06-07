@@ -1,9 +1,10 @@
-using System.Diagnostics;
 using Mc2.CrudTest.Presentation.Infrastructure;
 using Mc2.CrudTest.Presentation.Shared.Entities;
 using Mc2.CrudTest.Presentation.Shared.Events;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 using StackExchange.Redis;
+using Mc2.CrudTest.Presentation.Shared.ReadModels;
+using System.Reflection.Metadata.Ecma335;
 
 
 namespace Mc2.CrudTest.Presentation.DomainServices
@@ -17,7 +18,7 @@ namespace Mc2.CrudTest.Presentation.DomainServices
             _redisDB = redis;
             _eventStore = eventStore;
         }
-
+       
         // Command: Create a new customer
         public async Task CreateCustomerAsync(Customer customer)
         {
@@ -28,8 +29,10 @@ namespace Mc2.CrudTest.Presentation.DomainServices
                 customer.PhoneNumber.Value, customer.Email.Value, customer.BankAccount.Value,
                 customer.DateOfBirth.Value)
             {
-                Data = JsonConvert.SerializeObject(customer)
+                
+                Data = System.Text.Json.JsonSerializer.Serialize(customer)
             };
+           
             customerCreatedEvent.OccurredOn = DateTimeOffset.UtcNow;
           
             await _eventStore.SaveEventAsync(customerCreatedEvent, () => SetCustomerInRedis(customer));
@@ -57,11 +60,11 @@ namespace Mc2.CrudTest.Presentation.DomainServices
             return !db.SetContains("taken_emails", email);
         }
         // Command: Update an existing customer
-        public async Task UpdateCustomerAsync(Customer customer)
+        public async Task UpdateCustomerAsync(Customer customer, Guid customerId)
         {
             var customerUpdatedEvent = new CustomerUpdatedEvent(customer.Id, customer.FirstName, customer.LastName, customer.Email.Value, customer.PhoneNumber.Value, customer.BankAccount.Value, customer.DateOfBirth.Value)
             {
-                Data = JsonConvert.SerializeObject(customer),
+                Data = System.Text.Json.JsonSerializer.Serialize(customer),
                 AggregateId = customer.Id
             };
             customerUpdatedEvent.OccurredOn = DateTimeOffset.UtcNow;
@@ -100,7 +103,8 @@ namespace Mc2.CrudTest.Presentation.DomainServices
             var customer = new Customer();
             foreach (var @event in events)
             {
-               customer.Apply(@event);
+                var specific_event = GetEventsFromGenericEvent(@event);
+                customer.Apply(specific_event);
             }
 
             return customer.IsDeleted ? new Customer() : customer;
@@ -111,19 +115,43 @@ namespace Mc2.CrudTest.Presentation.DomainServices
             var events = await _eventStore.GetAllEventsAsync();
             
             var customers = new Dictionary<Guid,Customer>();
-            foreach (var @event in events)
+            try
             {
-                if(customers.ContainsKey(@event.AggregateId))
-                    customers[@event.AggregateId].Apply(@event);
-                else
+                foreach (var @event in events)
                 {
-                    var customer = new Customer();
-                    customer.Apply(@event);
-                    customers.Add(@event.AggregateId, customer);
+                    if (customers.ContainsKey(@event.AggregateId))
+                        customers[@event.AggregateId].Apply(@event);
+                    else
+                    {
+                        var customer = new Customer();
+                        //var customer = System.Text.Json.JsonSerializer.Deserialize<Customer>(@event.Data);
+                        var specific_event = GetEventsFromGenericEvent(@event);
+                        customer.Apply(specific_event);
+                        customers.Add(@event.AggregateId, customer);
+                    }
                 }
             }
-
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
             return customers.Values.Where(customer => !customer.IsDeleted);
+        }
+
+        private EventBase GetEventsFromGenericEvent(CustomerReadModel customerEvent)
+        {
+            var e = new EventBase();
+            switch (customerEvent.EventType)
+            {
+                case "customer_create": e = new CustomerCreatedEvent(customerEvent.AggregateId, customerEvent.FirstName, customerEvent.LastName, customerEvent.PhoneNumber, customerEvent.Email, customerEvent.BankAccount, DateOnly.Parse(customerEvent.DateOfBirth)
+                    );
+                    break;
+                case "customer_update": e = new CustomerUpdatedEvent(customerEvent.AggregateId, customerEvent.FirstName, customerEvent.LastName, customerEvent.Email, customerEvent.PhoneNumber, customerEvent.BankAccount, DateOnly.Parse(customerEvent.DateOfBirth));
+                    break;
+                case "customer_delete": e = new CustomerDeletedEvent(customerEvent.AggregateId);
+                    break;
+            }
+          return e;
         }
     }
 }
