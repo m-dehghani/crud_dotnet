@@ -1,10 +1,9 @@
-﻿using Mc2.CrudTest.Presentation.DomainServices;
-using Mc2.CrudTest.Presentation.Infrastructure;
+﻿using Mc2.CrudTest.Presentation.Infrastructure;
 using Mc2.CrudTest.Presentation.Shared.Entities;
 using Mc2.CrudTest.Presentation.Shared.Events;
 using Mc2.CrudTest.Presentation.Shared.ReadModels;
 
-namespace Mc2.CrudTest.Presentation.Server.DomainServices
+namespace Mc2.CrudTest.Presentation.DomainServices
 {
     public class SlowerCustomerService : ICustomerService
     {

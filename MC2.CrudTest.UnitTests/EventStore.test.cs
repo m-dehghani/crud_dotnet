@@ -63,7 +63,7 @@ public class EventStore_test
         await repository.SaveEventAsync(@event, () => { });
       
         // Act
-        var events = await repository.GetAllEventsAsync();
+        var events = context.Events;
 
         // Assert
        
