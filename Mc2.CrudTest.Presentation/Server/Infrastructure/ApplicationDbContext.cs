@@ -1,5 +1,4 @@
 using Mc2.CrudTest.Presentation.Shared.Events;
-using Mc2.CrudTest.Presentation.Shared.ReadModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace Mc2.CrudTest.Presentation.Infrastructure;

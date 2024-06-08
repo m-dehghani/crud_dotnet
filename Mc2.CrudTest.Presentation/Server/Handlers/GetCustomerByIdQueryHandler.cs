@@ -1,8 +1,5 @@
 using Mc2.CrudTest.Presentation.DomainServices;
-using Mc2.CrudTest.Presentation.Infrastructure;
-using Mc2.CrudTest.Presentation.Shared.Entities;
 using Mc2.CrudTest.Presentation.Shared.Queries;
-using Mc2.CrudTest.Presentation.Shared.ReadModels;
 using MediatR;
 
 namespace Mc2.CrudTest.Presentation.Handlers;

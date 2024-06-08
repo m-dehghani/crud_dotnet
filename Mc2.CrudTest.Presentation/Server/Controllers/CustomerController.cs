@@ -1,10 +1,6 @@
 using Asp.Versioning;
-using Mc2.CrudTest.Presentation.DomainServices;
 using Mc2.CrudTest.Presentation.Shared.Commands;
-using Mc2.CrudTest.Presentation.Shared.Entities;
 using Mc2.CrudTest.Presentation.Shared.Queries;
-using Mc2.CrudTest.Presentation.Shared.ReadModels;
-using Mc2.CrudTest.Presentation.Shared.ValueObjects;
 using Mc2.CrudTest.Presentation.ViewModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

@@ -1,4 +1,4 @@
-using Mc2.CrudTest.Presentation.Shared.ReadModels;
+using Mc2.CrudTest.Presentation.Shared.Events;
 using Microsoft.EntityFrameworkCore;
 
 namespace Mc2.CrudTest.Presentation.Infrastructure;
@@ -6,7 +6,7 @@ namespace Mc2.CrudTest.Presentation.Infrastructure;
 // creating another Dbcontext for reading in CQRS
 public class ReadModelDbContext : DbContext
 {
-    public DbSet<CustomerReadModel> CustomerEvents { get; set; }
+    public DbSet<EventBase> CustomerEvents { get; set; }
 
     public ReadModelDbContext(DbContextOptions<ReadModelDbContext> options)
         : base(options)
@@ -16,8 +16,18 @@ public class ReadModelDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<CustomerReadModel>().ToTable("events_view").HasNoKey();
-       
+        modelBuilder.Entity<EventBase>().ToView("events_view").HasNoKey().Ignore(e=>e.Data).Ignore(e=>e.EventId)
+            .HasDiscriminator<string>("event_type")
+            .HasValue<CustomerCreatedEvent>("customer_create")
+            .HasValue<CustomerUpdatedEvent>("customer_update")
+            .HasValue<CustomerDeletedEvent>("customer_delete");
+        modelBuilder.Entity<EventBase>().Property(e => e.Email).HasColumnName("Email");
+        modelBuilder.Entity<EventBase>().Property(e => e.FirstName).HasColumnName("FirstName");
+        modelBuilder.Entity<EventBase>().Property(e => e.LastName).HasColumnName("LastName");
+        modelBuilder.Entity<EventBase>().Property(e => e.DateOfBirth).HasColumnName("DateOfBirth");
+        modelBuilder.Entity<EventBase>().Property(e => e.BankAccount).HasColumnName("BankAccount");
+        modelBuilder.Entity<EventBase>().Property(e => e.PhoneNumber).HasColumnName("PhoneNumber");
+
         // Additional configuration as needed
     }
 }
