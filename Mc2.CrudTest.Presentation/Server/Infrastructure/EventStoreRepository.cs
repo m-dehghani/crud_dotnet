@@ -1,7 +1,5 @@
 using Mc2.CrudTest.Presentation.Shared.Events;
-using Mc2.CrudTest.Presentation.Shared.ReadModels;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 
 namespace Mc2.CrudTest.Presentation.Infrastructure;
 
@@ -35,7 +33,7 @@ public class EventStoreRepository: IEventRepository
         }
     }
     
-    public async Task<List<CustomerReadModel>> GetEventsAsync(Guid aggregateId)
+    public async Task<List<EventBase>> GetEventsAsync(Guid aggregateId)
     {
         // Retrieve events for the specified aggregate ID
         return await _readContext.CustomerEvents
@@ -43,7 +41,7 @@ public class EventStoreRepository: IEventRepository
             .OrderBy(e => e.OccurredOn)
             .ToListAsync();
     }
-    public IQueryable<CustomerReadModel> GetAllEvents()
+    public IQueryable<EventBase> GetAllEvents()
     {
         // Retrieve events for All the aggregates
         return _readContext.CustomerEvents

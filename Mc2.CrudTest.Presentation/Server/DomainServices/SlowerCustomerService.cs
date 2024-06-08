@@ -1,7 +1,7 @@
 ﻿using Mc2.CrudTest.Presentation.Infrastructure;
 using Mc2.CrudTest.Presentation.Shared.Entities;
 using Mc2.CrudTest.Presentation.Shared.Events;
-using Mc2.CrudTest.Presentation.Shared.ReadModels;
+using Mc2.CrudTest.Presentation.Shared.ViewModels;
 
 namespace Mc2.CrudTest.Presentation.DomainServices
 {
@@ -74,16 +74,23 @@ namespace Mc2.CrudTest.Presentation.DomainServices
             var customer = new Customer();
             foreach (var @event in events)
             {
-                var specific_event = GetEventsFromGenericEvent(@event);
-                customer.Apply(specific_event);
+                // var specific_event = GetEventsFromGenericEvent(@event);
+                customer.Apply(@event);
             }
 
             return customer.IsDeleted ? new Customer() : customer;
         }
 
+        public async Task<CustomerHistoryViewModel> GetHistory(Guid customerId)
+        {
+            var events = await _eventStore.GetEventsAsync(customerId);
+            var history = new CustomerHistoryViewModel(events);
+            return history;
+        }
+
         public async Task<IEnumerable<Customer>> GetAllCustomers()
         {
-            var events = _eventStore.GetAllEvents();
+            var events = _eventStore.GetAllEvents().ToList();
 
             var customers = new Dictionary<Guid, Customer>();
             try
@@ -95,8 +102,8 @@ namespace Mc2.CrudTest.Presentation.DomainServices
                     else
                     {
                         var customer = new Customer();
-                        var specific_event = GetEventsFromGenericEvent(@event);
-                        customer.Apply(specific_event);
+                       //  var specific_event = GetEventsFromGenericEvent(@event);
+                        customer.Apply(@event);
                         customers.Add(@event.AggregateId, customer);
                     }
                 }
@@ -108,30 +115,31 @@ namespace Mc2.CrudTest.Presentation.DomainServices
             return customers.Values.Where(customer => !customer.IsDeleted);
         }
 
-        private EventBase GetEventsFromGenericEvent(CustomerReadModel customerEvent)
-        {
-            var e = new EventBase();
-            switch (customerEvent.EventType)
-            {
-                case "customer_create":
-                    e = new CustomerCreatedEvent(customerEvent.AggregateId, customerEvent.FirstName, customerEvent.LastName, customerEvent.PhoneNumber, customerEvent.Email, customerEvent.BankAccount, customerEvent.DateOfBirth, customerEvent.OccurredOn);
-                    break;
+        //private EventBase GetEventsFromGenericEvent(CustomerReadModel customerEvent)
+        //{
+        //    var e = new EventBase();
+        //    switch (customerEvent.EventType)
+        //    {
+        //        case "customer_create":
+        //            e = new CustomerCreatedEvent(customerEvent.AggregateId, customerEvent.FirstName, customerEvent.LastName, customerEvent.PhoneNumber, customerEvent.Email, customerEvent.BankAccount, customerEvent.DateOfBirth, customerEvent.OccurredOn);
+        //            break;
 
-                case "customer_update":
-                    e = new CustomerUpdatedEvent(customerEvent.AggregateId, customerEvent.FirstName, customerEvent.LastName, customerEvent.Email, customerEvent.PhoneNumber, customerEvent.BankAccount, customerEvent.DateOfBirth, customerEvent.OccurredOn);
-                    break;
+        //        case "customer_update":
+        //            e = new CustomerUpdatedEvent(customerEvent.AggregateId, customerEvent.FirstName, customerEvent.LastName, customerEvent.Email, customerEvent.PhoneNumber, customerEvent.BankAccount, customerEvent.DateOfBirth, customerEvent.OccurredOn);
+        //            break;
 
-                case "customer_delete":
-                    e = new CustomerDeletedEvent(customerEvent.AggregateId);
-                    e.OccurredOn = customerEvent.OccurredOn;
-                    break;
-            }
-            return e;
-        }
+        //        case "customer_delete":
+        //            e = new CustomerDeletedEvent(customerEvent.AggregateId);
+        //            e.OccurredOn = customerEvent.OccurredOn;
+        //            break;
+        //    }
+        //    return e;
+        //}
 
 
         public async Task UpdateCustomerAsync(Customer customer, Guid customerId)
         {
+            customer.Id = customerId;
             var isUnique = await CheckUniqueness(customer);
 
             if (!isUnique.Item1)

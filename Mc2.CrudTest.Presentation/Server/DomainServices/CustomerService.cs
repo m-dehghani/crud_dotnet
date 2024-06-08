@@ -1,10 +1,7 @@
 using Mc2.CrudTest.Presentation.Infrastructure;
 using Mc2.CrudTest.Presentation.Shared.Entities;
 using Mc2.CrudTest.Presentation.Shared.Events;
-using System.Text.Json.Serialization;
 using StackExchange.Redis;
-using Mc2.CrudTest.Presentation.Shared.ReadModels;
-using System.Reflection.Metadata.Ecma335;
 
 
 namespace Mc2.CrudTest.Presentation.DomainServices
@@ -106,8 +103,7 @@ namespace Mc2.CrudTest.Presentation.DomainServices
             var customer = new Customer();
             foreach (var @event in events)
             {
-                var specific_event = GetEventsFromGenericEvent(@event);
-                customer.Apply(specific_event);
+                customer.Apply(@event);
             }
 
             return customer.IsDeleted ? new Customer() : customer;
@@ -127,8 +123,7 @@ namespace Mc2.CrudTest.Presentation.DomainServices
                     else
                     {
                         var customer = new Customer();
-                        var specific_event = GetEventsFromGenericEvent(@event);
-                        customer.Apply(specific_event);
+                        customer.Apply(@event);
                         customers.Add(@event.AggregateId, customer);
                     }
                 }
@@ -140,23 +135,6 @@ namespace Mc2.CrudTest.Presentation.DomainServices
             return customers.Values.Where(customer => !customer.IsDeleted);
         }
 
-        private EventBase GetEventsFromGenericEvent(CustomerReadModel customerEvent)
-        {
-            var e = new EventBase();
-            switch (customerEvent.EventType)
-            {
-                case "customer_create":
-                    e = new CustomerCreatedEvent(customerEvent.AggregateId, customerEvent.FirstName, customerEvent.LastName, customerEvent.PhoneNumber, customerEvent.Email, customerEvent.BankAccount, customerEvent.DateOfBirth, customerEvent.OccurredOn);
-                    break;
-
-                case "customer_update": e = new CustomerUpdatedEvent(customerEvent.AggregateId, customerEvent.FirstName, customerEvent.LastName, customerEvent.Email, customerEvent.PhoneNumber, customerEvent.BankAccount,customerEvent.DateOfBirth, customerEvent.OccurredOn);
-                    break;
-
-                case "customer_delete": e = new CustomerDeletedEvent(customerEvent.AggregateId);
-                    e.OccurredOn = customerEvent.OccurredOn;
-                    break;
-            }
-          return e;
-        }
+      
     }
 }

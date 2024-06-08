@@ -118,19 +118,4 @@ namespace Mc2.CrudTest.Presentation.Shared.Entities
             Version += 1;
         }
     }
-
-    public class Test
-    {
-
-        public string Id { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public BankAccount BankAccount { get; set; }
-        public DateOfBirth DateOfBirth { get; set; }
-        public PhoneNumber PhoneNumber { get; set; }
-        public Email Email { get; set; }
-        public int Version { get; set; }
-        public bool IsDeleted { get; set; }
-        public List<object> History { get; set; }
-    }
 }
