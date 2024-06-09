@@ -8,7 +8,7 @@
 @inject ICustomerService CustomerService
 @page "/customers"
 
-<h3>Customer List</h3>
+<h3>Customer info List</h3>
 @if (Customers == null)
 {
     <p>Loading customer data...</p>
@@ -40,12 +40,16 @@ else
             <td>@customer.DateOfBirth</td>
             
             <td>
+                        <button class="btn btn-link text-success" @onclick="() => GetCustomerHistory(customer)">
+                            <i class="bi bi-pencil"></i> History
+                        </button>
                 <button class="btn btn-link" @onclick="() => UpdateCustomer(customer)">
                     <i class="bi bi-pencil"></i> Edit
                 </button>
                 <button class="btn btn-link text-danger" @onclick="() => DeleteCustomer(customer)">
                     <i class="bi bi-trash"></i> Delete
                 </button>
+                       
             </td>
         </tr>
     }
@@ -63,7 +67,7 @@ else
         StateHasChanged();
     }
 
-    private async Task UpdateCustomer(ViewModels.CustomerViewModel customer)
+    private void UpdateCustomer(ViewModels.CustomerViewModel customer)
     {
         NavigationManager.NavigateTo($"update-customer/{customer.Id}");
     }
@@ -76,5 +80,10 @@ else
             await CustomerService.Delete(customer.Id);
             StateHasChanged();
         }
+    }
+
+    private void GetCustomerHistory(ViewModels.CustomerViewModel customer)
+    {
+        NavigationManager.NavigateTo($"history-customer/{customer.Id}");
     }
 }

@@ -1,6 +1,7 @@
 using Asp.Versioning;
 using Mc2.CrudTest.Presentation.Shared.Commands;
 using Mc2.CrudTest.Presentation.Shared.Queries;
+using Mc2.CrudTest.Presentation.Shared.ViewModels;
 using Mc2.CrudTest.Presentation.ViewModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -26,6 +27,15 @@ public class CustomerController : Controller
     {
         GetCustomerByIdQuery getCustomerByIdQuery = new (Guid.Parse(id)); 
         var result = await RequestHandler.HandleQuery(getCustomerByIdQuery, _mediator, Log);
+        return result;
+    }
+
+    [ApiVersion(1.0)]
+    [HttpGet("History/{id:Guid}")]
+    public async Task<IActionResult> GetHistory(string id)
+    {
+        GetCustomerHistoryByIdQuery getCustomerHistoryByIdQuery = new(Guid.Parse(id));
+        var result = await RequestHandler.HandleQuery(getCustomerHistoryByIdQuery, _mediator, Log);
         return result;
     }
 

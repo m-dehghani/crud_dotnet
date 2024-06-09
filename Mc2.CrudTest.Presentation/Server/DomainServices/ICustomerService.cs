@@ -1,6 +1,7 @@
 
 
 using Mc2.CrudTest.Presentation.Shared.Entities;
+using Mc2.CrudTest.Presentation.Shared.ViewModels;
 
 namespace Mc2.CrudTest.Presentation.DomainServices;
 
@@ -11,4 +12,5 @@ public interface ICustomerService
     public Task DeleteCustomerAsync(Guid customerId);
     public Task<Customer> GetCustomer(Guid customerId);
     public Task<IEnumerable<Customer>> GetAllCustomers();
+    public Task<CustomerHistoryViewModel> GetCustomerHistory(Guid customerId);
 }
