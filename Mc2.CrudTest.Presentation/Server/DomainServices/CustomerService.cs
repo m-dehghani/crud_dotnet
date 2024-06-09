@@ -1,6 +1,8 @@
 using Mc2.CrudTest.Presentation.Infrastructure;
 using Mc2.CrudTest.Presentation.Shared.Entities;
 using Mc2.CrudTest.Presentation.Shared.Events;
+using Mc2.CrudTest.Presentation.Shared.ViewModels;
+using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 
 
@@ -111,7 +113,7 @@ namespace Mc2.CrudTest.Presentation.DomainServices
     
         public async Task<IEnumerable<Customer>> GetAllCustomers()
         {
-            var events = _eventStore.GetAllEvents();
+            var events = await _eventStore.GetAllEvents().ToListAsync();
             
             var customers = new Dictionary<Guid,Customer>();
             try
@@ -135,6 +137,9 @@ namespace Mc2.CrudTest.Presentation.DomainServices
             return customers.Values.Where(customer => !customer.IsDeleted);
         }
 
-      
+        public Task<CustomerHistoryViewModel> GetCustomerHistory(Guid customerId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

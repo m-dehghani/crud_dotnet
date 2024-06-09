@@ -1,11 +1,5 @@
 ﻿using Mc2.CrudTest.Presentation.Shared.Entities;
 using Mc2.CrudTest.Presentation.Shared.Events;
-using Mc2.CrudTest.Presentation.Shared.ValueObjects;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Mc2.CrudTest.Presentation.Shared.ViewModels
 {
@@ -15,37 +9,47 @@ namespace Mc2.CrudTest.Presentation.Shared.ViewModels
         {
             events.ForEach(e => Apply(e));
         }
-        
+        public CustomerHistoryViewModel()
+        {
+            
+        }
         public void Apply(EventBase @event)
         {
             Customer customer = new();
             customer.Apply(@event);
-            FirstName.Add(customer.FirstName);
-            LastName.Add(customer.LastName);
-            BankAccount.Add(customer.BankAccount);
-            DateOfBirth.Add(customer.DateOfBirth);
-            PhoneNumber.Add(customer.PhoneNumber);
-            Email.Add(customer.Email);
+            EventTypes.Add(@event.GetType().Name);
+            FirstNames.Add(customer.FirstName);
+             LastNames.Add(customer.LastName);
+             BankAccounts.Add(customer.BankAccount.Value);
+            DateOfBirths.Add(customer.DateOfBirth.Value);
+            PhoneNumbers.Add(customer.PhoneNumber.Value);
+            Emails.Add(customer.Email.Value);
+            OccurredOn.Add(@event.OccurredOn);
             IsDeleted = customer.IsDeleted;
             Version += 1;
         }
         
         public Guid Id { get; set; }
+
+        public List<string> EventTypes { get; set; } = [];
+        public List<DateTimeOffset> OccurredOn { get; set; } = [];
+
+        public List<string> FirstNames { get;  set; } = [];
         
-        public List<string> FirstName { get; private set; } = new List<string>();
+        public List<string> LastNames { get;  set; } = [];
         
-        public List<string> LastName { get; private set; } = new List<string>();
+        public List<string> BankAccounts { get;  set; } = [];
         
-        public List<BankAccount> BankAccount { get; private set; } = new List<BankAccount>();
+        public List<DateOnly> DateOfBirths { get;  set; } = [];
         
-        public List<DateOfBirth> DateOfBirth { get; private set; } = new List<DateOfBirth>();
+        public List<string> PhoneNumbers { get;  set; } = [];
         
-        public List<PhoneNumber> PhoneNumber { get; private set; } = new List<PhoneNumber>();
+        public List<string> Emails { get;  set; } = [];
+
         
-        public List<Email> Email { get; private set; } = new List<Email>();
         
-        public int Version { get; private set; } = 0;
-        
-        public bool IsDeleted { get; private set; }
+        public int Version { get;  set; } = 0;
+
+        public bool IsDeleted { get; set; } = false;
     }
 }

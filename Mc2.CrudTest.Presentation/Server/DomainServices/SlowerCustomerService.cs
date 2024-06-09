@@ -2,6 +2,7 @@
 using Mc2.CrudTest.Presentation.Shared.Entities;
 using Mc2.CrudTest.Presentation.Shared.Events;
 using Mc2.CrudTest.Presentation.Shared.ViewModels;
+using Microsoft.EntityFrameworkCore;
 
 namespace Mc2.CrudTest.Presentation.DomainServices
 {
@@ -81,7 +82,7 @@ namespace Mc2.CrudTest.Presentation.DomainServices
             return customer.IsDeleted ? new Customer() : customer;
         }
 
-        public async Task<CustomerHistoryViewModel> GetHistory(Guid customerId)
+        public async Task<CustomerHistoryViewModel> GetCustomerHistory(Guid customerId)
         {
             var events = await _eventStore.GetEventsAsync(customerId);
             var history = new CustomerHistoryViewModel(events);
@@ -90,7 +91,7 @@ namespace Mc2.CrudTest.Presentation.DomainServices
 
         public async Task<IEnumerable<Customer>> GetAllCustomers()
         {
-            var events = _eventStore.GetAllEvents().ToList();
+            var events = await _eventStore.GetAllEvents().ToListAsync();
 
             var customers = new Dictionary<Guid, Customer>();
             try

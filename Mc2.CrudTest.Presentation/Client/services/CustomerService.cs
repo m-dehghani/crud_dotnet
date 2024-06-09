@@ -6,6 +6,7 @@ using System.Net.Http.Json;
 using Mc2.CrudTest.Presentation.ViewModels;
 using Mc2.CrudTest.Presentation.Client.Models;
 using Mc2.CrudTest.Presentation.Shared.Entities;
+using Mc2.CrudTest.Presentation.Shared.ViewModels;
 
 namespace Mc2.CrudTest.Presentation.Client.services
 {
@@ -38,7 +39,7 @@ namespace Mc2.CrudTest.Presentation.Client.services
                 else
                     ErrorMessages.Add( await result.Content.ReadAsStringAsync());
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 ErrorMessages.Add("An error has been occured. Please try again later.");
             }
@@ -56,7 +57,7 @@ namespace Mc2.CrudTest.Presentation.Client.services
                     ErrorMessages.Add(await result.Content.ReadAsStringAsync());
             }
 
-            catch (Exception ex)
+            catch (Exception)
             {
                 ErrorMessages.Add("An error has been occured. Please try again later.");
             }
@@ -84,5 +85,11 @@ namespace Mc2.CrudTest.Presentation.Client.services
             await _httpClient.DeleteAsync($"{ApiAddress}/{id}");
         }
 
+        public async Task<CustomerHistoryViewModel> GetCustomerHistory(Guid id)
+        {
+            var result =await _httpClient.GetAsync($"{ApiAddress}/History/{id}");
+            var model =await result.Content.ReadFromJsonAsync<CustomerHistoryViewModel>();
+            return model;
+        }
     }
 }

@@ -1,0 +1,52 @@
+﻿@page "/history-customer/{Id}"
+@using Mc2.CrudTest.Presentation.Client.services
+@using Mc2.CrudTest.Presentation.Shared.ViewModels
+@using System.Diagnostics
+@inject NavigationManager NavigationManager
+@inject ILogger<CustomerHistory> Logger
+@inject ICustomerService CustomerService
+<h3>Customer History(last five events)</h3>
+<table class="table">
+  <tr>
+    <th colspan="30%"></th>
+    <th colspan="20%"></th>
+    <th colspan="20%"></th>
+  </tr>
+       
+     <tr>
+        
+        <p> <strong>Event Types: </strong> @string.Join('-', Model.EventTypes.TakeLast(5)) </p>
+  </tr>
+<tr>
+        <p> <strong>First Names: </strong>@string.Join('-', Model.FirstNames.TakeLast(5)) </p>
+</tr>
+    <tr>
+        <p><strong>Last Names: </strong> @string.Join('-', Model.LastNames.TakeLast(5)) </p>
+    </tr>
+    <tr>
+        <p><strong>Bank Accounts: </strong> @string.Join('-', Model.BankAccounts.TakeLast(5)) </p>
+    </tr>
+    <tr>
+        <p><strong>Emails: </strong> @string.Join('-', Model.Emails.TakeLast(5)) </p>
+    </tr>
+    <tr>
+        <p><strong>Date Of Births: </strong> @string.Join('-', Model.DateOfBirths.TakeLast(5)) </p>
+    </tr>
+    <tr>
+        <p><strong>Occurred On: </strong> @string.Join('-', Model.OccurredOn.TakeLast(5)) </p>
+    </tr>
+   
+
+
+</table>
+@code {
+    [Parameter]
+    public string Id { get; set; }
+    public CustomerHistoryViewModel Model;
+    protected override async void OnInitialized()
+    {
+        Model = new CustomerHistoryViewModel();
+        Model = await CustomerService.GetCustomerHistory(new Guid(Id));
+        StateHasChanged();
+    }
+}
