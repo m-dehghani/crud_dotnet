@@ -22,7 +22,7 @@ public class CustomerController : Controller
 
 
     [ApiVersion(1.0)]
-    [HttpGet("{id:Guid}")]
+    [HttpGet("V1/{id:Guid}")]
     public async Task<IActionResult> Get(string id)
     {
         GetCustomerByIdQuery getCustomerByIdQuery = new (Guid.Parse(id)); 
@@ -31,26 +31,24 @@ public class CustomerController : Controller
     }
 
     [ApiVersion(1.0)]
-    [HttpGet("History/{id:Guid}")]
-    public async Task<IActionResult> GetHistory(string id)
+    [HttpGet("V1/{id:Guid}/History")]
+    public async Task<IActionResult> GetHistory(GetCustomerHistoryByIdQuery getCustomerHistoryByIdQuery)
     {
-        GetCustomerHistoryByIdQuery getCustomerHistoryByIdQuery = new(Guid.Parse(id));
+        //GetCustomerHistoryByIdQuery getCustomerHistoryByIdQuery = new(Guid.Parse(id));
         var result = await RequestHandler.HandleQuery(getCustomerHistoryByIdQuery, _mediator, Log);
         return result;
     }
 
     [ApiVersion(1.0)]
-    [HttpGet]
+    [HttpGet("V1")]
     public async Task<IActionResult> GetAll()
     {
-        GetAllCustomersQuery getAllCustomersQuery = new GetAllCustomersQuery(); 
-        var result = await RequestHandler.HandleQuery(getAllCustomersQuery, _mediator, Log);
-        return result;
+        return await RequestHandler.HandleQuery(new GetAllCustomersQuery(), _mediator, Log);
     }
 
     [ApiVersion(1.0)]
-    [HttpPost]
-    public async Task<IActionResult> CreateCustomer(ViewModels.CustomerViewModel newCustomer)
+    [HttpPost("V1")]
+    public async Task<IActionResult> CreateCustomer(CustomerViewModel newCustomer)
     {
         CreateCustomerCommand command = new CreateCustomerCommand(newCustomer.FirstName, newCustomer.LastName,
             newCustomer.PhoneNumber, newCustomer.Email, newCustomer.BankAccount, newCustomer.DateOfBirth);
@@ -58,7 +56,7 @@ public class CustomerController : Controller
     }
 
     [ApiVersion(1.0)]
-    [HttpPut("{id}")]
+    [HttpPut("V1/{id}")]
     public async Task<IActionResult> UdateCustomer(string id, CustomerUpdateViewModel updatedCustomer)
     {
         var customerUpdateCmd = new UpdateCustomerCommand(Guid.Parse(id), updatedCustomer.FirstName,
@@ -69,10 +67,9 @@ public class CustomerController : Controller
     }
 
     [ApiVersion(1.0)]
-    [HttpDelete("{id}")]
+    [HttpDelete("V1/{id}")]
     public async Task DeleteCustomer(string id)
     {
-        DeleteCustomerCommand customerDeleteCmd = new (Guid.Parse(id));
-        await RequestHandler.HandleCommand(customerDeleteCmd, _mediator, Log);
+        await RequestHandler.HandleCommand(new DeleteCustomerCommand(Guid.Parse(id)), _mediator, Log);
     }
 }

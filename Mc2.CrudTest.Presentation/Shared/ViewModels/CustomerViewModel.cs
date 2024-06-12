@@ -13,6 +13,10 @@ public class CustomerViewModel
         this.PhoneNumber = phoneNumber;
         this.Email = email;
     }
+    public CustomerViewModel()
+    {
+        
+    }
     public Guid Id { get; set; }
     public string[] History { get; set; }
     public string FirstName { get; set; }

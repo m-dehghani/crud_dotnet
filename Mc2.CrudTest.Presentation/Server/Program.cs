@@ -15,10 +15,29 @@ namespace Mc2.CrudTest.Presentation
 
             builder.Services.AddControllersWithViews();
             builder.Services.AddRazorPages();
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(builder.Configuration["ConnectionStrings:EventStoreConnection"]));
-            builder.Services.AddDbContext<ReadModelDbContext>(options =>
-                options.UseNpgsql(builder.Configuration["ConnectionStrings:EventStoreConnection"]));
+            builder.Services.AddDbContext<ApplicationDbContext>(options => {
+                options.UseNpgsql(builder.Configuration["ConnectionStrings:EventStoreConnection"], 
+                    npgsqlOptionsAction: sqlOptions =>
+                    {
+                        sqlOptions.EnableRetryOnFailure(
+                        maxRetryCount: 10,
+                        maxRetryDelay: TimeSpan.FromSeconds(30),
+                        errorCodesToAdd: null);
+                    });
+            });
+            
+            builder.Services.AddDbContext<ReadModelDbContext>(options => { 
+                options.UseNpgsql(builder.Configuration["ConnectionStrings:EventStoreConnection"],
+                npgsqlOptionsAction: sqlOptions =>
+                {
+                    sqlOptions.EnableRetryOnFailure(
+                    maxRetryCount: 10,
+                    maxRetryDelay: TimeSpan.FromSeconds(30),
+                    errorCodesToAdd: null);
+                });
+        });
+
+
             builder.Services.AddSwaggerGen();
             builder.Services.AddMediatR(cfg => {
                 cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
@@ -45,11 +64,11 @@ namespace Mc2.CrudTest.Presentation
             using (var scope = app.Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                db.Database.Migrate();
+                    db.Database.Migrate();
                
                 var readDb = scope.ServiceProvider.GetRequiredService<ReadModelDbContext>();
-                readDb.Database.Migrate();
-            }
+                    readDb.Database.Migrate();
+                }
             app.MapDefaultEndpoints();
 
             // Configure the HTTP request pipeline.

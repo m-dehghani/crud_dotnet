@@ -16,21 +16,27 @@ public class EventStoreRepository: IEventRepository
 
     public async Task SaveEventAsync(EventBase @event, Action functionToRun) 
     {
-        var trx = await _context.Database.BeginTransactionAsync();
-        try
-        {
-            _context.Events.Add(@event);
-            await _context.SaveChangesAsync();
+        var executionStrategy = _context.Database.CreateExecutionStrategy();
 
-            functionToRun();
+        await executionStrategy.Execute(
+           async () =>
+            {
+                var trx = await _context.Database.BeginTransactionAsync();
+                try
+                {
+                    _context.Events.Add(@event);
+                    await _context.SaveChangesAsync();
 
-            await trx.CommitAsync();
-        }
-        catch (Exception ex)
-        {
-            await trx.RollbackAsync();
-            throw ex;
-        }
+                    functionToRun();
+
+                    await trx.CommitAsync();
+                }
+                catch (Exception ex)
+                {
+                    await trx.RollbackAsync();
+                    throw;
+                }
+            });
     }
     
     public async Task<List<EventBase>> GetEventsAsync(Guid aggregateId)

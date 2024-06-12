@@ -61,8 +61,6 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        Console.WriteLine("init customers list page");
-
         Customers = await CustomerService.GetAll();
         StateHasChanged();
     }
