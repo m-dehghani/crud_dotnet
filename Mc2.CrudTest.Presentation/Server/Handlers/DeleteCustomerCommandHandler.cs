@@ -15,7 +15,7 @@ public class DeleteCustomerCommandHandler: IRequestHandler<DeleteCustomerCommand
     
     public async Task Handle(DeleteCustomerCommand command, CancellationToken cancellationToken)
     {
-        var @event = new CustomerDeletedEvent(command.CustomerId);
+        var @event = new CustomerDeletedEvent(command.Id);
         await _eventStore.SaveEventAsync(@event, () => {});
        
     }

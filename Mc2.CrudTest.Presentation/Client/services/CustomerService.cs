@@ -39,7 +39,7 @@ namespace Mc2.CrudTest.Presentation.Client.services
                 if (result.IsSuccessStatusCode)
                     _navigationManager.NavigateTo("customers");
                 else
-                    ErrorMessages.Add( await result.Content.ReadAsStringAsync());
+                    HandleNotSuccessfulError();
             }
             catch (BrokenCircuitException)
             {
@@ -60,7 +60,8 @@ namespace Mc2.CrudTest.Presentation.Client.services
                 if (result.IsSuccessStatusCode)
                     _navigationManager.NavigateTo("customers");
                 else
-                    ErrorMessages.Add(await result.Content.ReadAsStringAsync());
+                    HandleNotSuccessfulError();
+
             }
             catch (BrokenCircuitException)
             {
@@ -74,12 +75,18 @@ namespace Mc2.CrudTest.Presentation.Client.services
     
         public async Task<List<CustomerViewModel>> GetAll()
         {
-            List<ViewModels.CustomerViewModel> model  = [];
+            List<ViewModels.CustomerViewModel>? model  = [];
             try
             {
                 var result = await _httpClient.GetAsync(ApiAddress);
-
-                model = await result.Content.ReadFromJsonAsync<List<ViewModels.CustomerViewModel>>();
+                if (result.IsSuccessStatusCode)
+                {
+                    model = await result.Content.ReadFromJsonAsync<List<ViewModels.CustomerViewModel>>();
+                }
+                else
+                {
+                    HandleNotSuccessfulError();
+                }
             }
             catch (BrokenCircuitException)
             {
@@ -94,7 +101,14 @@ namespace Mc2.CrudTest.Presentation.Client.services
             try
             {
                 var result = await _httpClient.GetAsync($"{ApiAddress}/{id}");
-                model = await result.Content.ReadFromJsonAsync<CustomerViewModel>();
+                if (result.IsSuccessStatusCode)
+                {
+                    model = await result.Content.ReadFromJsonAsync<CustomerViewModel>();
+                }
+                else
+                {
+                    HandleNotSuccessfulError();
+                }
             }
             catch (BrokenCircuitException)
             {
@@ -107,7 +121,11 @@ namespace Mc2.CrudTest.Presentation.Client.services
         {
             try
             {
-                await _httpClient.DeleteAsync($"{ApiAddress}/{id}");
+                var result = await _httpClient.DeleteAsync($"{ApiAddress}/{id}");
+                if (!result.IsSuccessStatusCode)
+                {
+                    HandleNotSuccessfulError();
+                }
             }
             catch (BrokenCircuitException)
             {
@@ -121,7 +139,14 @@ namespace Mc2.CrudTest.Presentation.Client.services
             try
             {
                 var result = await _httpClient.GetAsync($"{ApiAddress}/{id}/History");
-                model = await result.Content.ReadFromJsonAsync<CustomerHistoryViewModel>();
+                if (result.IsSuccessStatusCode)
+                { 
+                    model = await result.Content.ReadFromJsonAsync<CustomerHistoryViewModel>();
+                }
+                else
+                {
+                    HandleNotSuccessfulError();
+                }
             }
             catch (BrokenCircuitException)
             {
@@ -133,6 +158,11 @@ namespace Mc2.CrudTest.Presentation.Client.services
         private static void HandleBrokenCircuitException()
         {
            ErrorMessages.Add("Customer Service is inoperative, please try later on");
+        }
+
+        private static void HandleNotSuccessfulError()
+        {
+            ErrorMessages.Add("Couldn't connect to the server. Try again");
         }
     }
 }

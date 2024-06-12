@@ -15,7 +15,7 @@ namespace Mc2.CrudTest.Presentation.Server.Handlers
         }
         public async Task<CustomerHistoryViewModel> Handle(GetCustomerHistoryByIdQuery request, CancellationToken cancellationToken)
         {
-            return await _readService.GetCustomerHistory(request.CustomerId);
+            return await _readService.GetCustomerHistory(request.Id);
         }
     }
 }

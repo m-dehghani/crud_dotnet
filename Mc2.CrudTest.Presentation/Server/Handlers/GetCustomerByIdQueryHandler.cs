@@ -14,7 +14,7 @@ public class GetCustomerByIdQueryHandler : IRequestHandler<GetCustomerByIdQuery,
     }
     public async Task<ViewModels.CustomerViewModel> Handle(GetCustomerByIdQuery request, CancellationToken cancellationToken)
     {
-        var customer = await _readService.GetCustomer(request.CustomerId);
+        var customer = await _readService.GetCustomer(request.Id);
         return new ViewModels.CustomerViewModel(customer.Id,customer.History.ToArray(), customer.FirstName, customer.LastName, customer.PhoneNumber.Value, customer.Email.Value, customer.BankAccount.Value, customer.DateOfBirth?.Value.ToString());
     }
 }

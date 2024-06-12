@@ -4,9 +4,9 @@ namespace Mc2.CrudTest.Presentation.Shared.Commands;
 
 public class DeleteCustomerCommand : IRequest, INotification
 {
-    public DeleteCustomerCommand(Guid customerId)
+    public DeleteCustomerCommand(Guid Id)
     {
-        CustomerId = customerId;
+        this.Id = Id;
     }
-    public Guid CustomerId { get; set; }
+    public Guid Id { get; set; }
 }

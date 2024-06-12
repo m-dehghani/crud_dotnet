@@ -39,10 +39,12 @@
     <tr>
         <p><strong>Occurred On: </strong> @string.Join('-', Model.OccurredOn.TakeLast(5)) </p>
     </tr>
+
    
 
 
 </table>
+<div class="text-danger">@CustomerService.GetErrors().LastOrDefault()</div>
 @code {
     [Parameter]
     public string Id { get; set; }

@@ -3,7 +3,7 @@ using Mc2.CrudTest.Presentation.Shared.Events;
 
 namespace Mc2.CrudTest.Presentation.Shared.ViewModels
 {
-    public class CustomerHistoryViewModel
+    public class CustomerHistoryViewModel: BaseViewModel
     {
         public CustomerHistoryViewModel(List<EventBase> events)
         {

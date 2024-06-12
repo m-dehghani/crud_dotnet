@@ -20,7 +20,6 @@ public class CustomerController : Controller
         _mediator = mediator;
     }
 
-
     [ApiVersion(1.0)]
     [HttpGet("V1/{id:Guid}")]
     public async Task<IActionResult> Get(string id)
@@ -32,9 +31,9 @@ public class CustomerController : Controller
 
     [ApiVersion(1.0)]
     [HttpGet("V1/{id:Guid}/History")]
-    public async Task<IActionResult> GetHistory(GetCustomerHistoryByIdQuery getCustomerHistoryByIdQuery)
+    public async Task<IActionResult> GetHistory(string id)
     {
-        //GetCustomerHistoryByIdQuery getCustomerHistoryByIdQuery = new(Guid.Parse(id));
+        GetCustomerHistoryByIdQuery getCustomerHistoryByIdQuery = new(Guid.Parse(id));
         var result = await RequestHandler.HandleQuery(getCustomerHistoryByIdQuery, _mediator, Log);
         return result;
     }
@@ -48,21 +47,16 @@ public class CustomerController : Controller
 
     [ApiVersion(1.0)]
     [HttpPost("V1")]
-    public async Task<IActionResult> CreateCustomer(CustomerViewModel newCustomer)
+    public async Task<IActionResult> CreateCustomer(CreateCustomerCommand command)
     {
-        CreateCustomerCommand command = new CreateCustomerCommand(newCustomer.FirstName, newCustomer.LastName,
-            newCustomer.PhoneNumber, newCustomer.Email, newCustomer.BankAccount, newCustomer.DateOfBirth);
          return await RequestHandler.HandleCommand(command, _mediator, Log);
     }
 
     [ApiVersion(1.0)]
     [HttpPut("V1/{id}")]
-    public async Task<IActionResult> UdateCustomer(string id, CustomerUpdateViewModel updatedCustomer)
+    public async Task<IActionResult> UpdateCustomer(string id, UpdateCustomerCommand customerUpdateCmd)
     {
-        var customerUpdateCmd = new UpdateCustomerCommand(Guid.Parse(id), updatedCustomer.FirstName,
-            updatedCustomer.LastName,
-            updatedCustomer.PhoneNumber, updatedCustomer.Email, updatedCustomer.BankAccount,
-            updatedCustomer.DateOfBirth);
+        if (new Guid(id) != customerUpdateCmd.Id) { return new BadRequestResult(); }
         return await RequestHandler.HandleCommand(customerUpdateCmd, _mediator, Log);
     }
 
