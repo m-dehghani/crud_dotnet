@@ -10,7 +10,7 @@ namespace Mc2.CrudTest.Presentation.Shared.ValueObjects
         [JsonConstructor]
         public Email(string value)
         {
-            if (string.IsNullOrWhiteSpace(value) || !value.Contains("@") || !Helper.RegexPatterns.EmailIsValid.IsMatch(value))
+            if (string.IsNullOrWhiteSpace(value) || !value.Contains("@") /*|| !Helper.RegexPatterns.EmailIsValid.IsMatch(value)*/)
                 throw new ArgumentException("Invalid email format.", nameof(value));
            
             Value = value.Trim().ToLowerInvariant();;

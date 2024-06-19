@@ -20,7 +20,7 @@ public class CustomerController : Controller
         _mediator = mediator;
     }
 
-    [ApiVersion(1.0)]
+   
     [HttpGet("V1/{id:Guid}")]
     public async Task<IActionResult> Get(string id)
     {
@@ -29,7 +29,6 @@ public class CustomerController : Controller
         return result;
     }
 
-    [ApiVersion(1.0)]
     [HttpGet("V1/{id:Guid}/History")]
     public async Task<IActionResult> GetHistory(string id)
     {
@@ -38,21 +37,18 @@ public class CustomerController : Controller
         return result;
     }
 
-    [ApiVersion(1.0)]
     [HttpGet("V1")]
     public async Task<IActionResult> GetAll()
     {
         return await RequestHandler.HandleQuery(new GetAllCustomersQuery(), _mediator, Log);
     }
 
-    [ApiVersion(1.0)]
     [HttpPost("V1")]
     public async Task<IActionResult> CreateCustomer(CreateCustomerCommand command)
     {
          return await RequestHandler.HandleCommand(command, _mediator, Log);
     }
 
-    [ApiVersion(1.0)]
     [HttpPut("V1/{id}")]
     public async Task<IActionResult> UpdateCustomer(string id, UpdateCustomerCommand customerUpdateCmd)
     {
@@ -60,7 +56,6 @@ public class CustomerController : Controller
         return await RequestHandler.HandleCommand(customerUpdateCmd, _mediator, Log);
     }
 
-    [ApiVersion(1.0)]
     [HttpDelete("V1/{id}")]
     public async Task DeleteCustomer(string id)
     {

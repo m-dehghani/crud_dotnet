@@ -1,6 +1,7 @@
 using Asp.Versioning;
 using Mc2.CrudTest.Presentation.DomainServices;
 using Mc2.CrudTest.Presentation.Infrastructure;
+using Mc2.CrudTest.Presentation.Shared.Helper;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 
@@ -11,9 +12,12 @@ namespace Mc2.CrudTest.Presentation
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            builder.AddServiceDefaults();
+           // builder.AddServiceDefaults();
 
-            builder.Services.AddControllersWithViews();
+            builder.Services.AddControllersWithViews().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
+            }); ;
             builder.Services.AddRazorPages();
             builder.Services.AddDbContext<ApplicationDbContext>(options => {
                 options.UseNpgsql(builder.Configuration["ConnectionStrings:EventStoreConnection"], 
@@ -69,7 +73,7 @@ namespace Mc2.CrudTest.Presentation
                 var readDb = scope.ServiceProvider.GetRequiredService<ReadModelDbContext>();
                     readDb.Database.Migrate();
                 }
-            app.MapDefaultEndpoints();
+           // app.MapDefaultEndpoints();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

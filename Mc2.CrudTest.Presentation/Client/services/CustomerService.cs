@@ -9,6 +9,8 @@ using Mc2.CrudTest.Presentation.Shared.Entities;
 using Mc2.CrudTest.Presentation.Shared.ViewModels;
 using Polly.CircuitBreaker;
 using System.Collections.Generic;
+using Mc2.CrudTest.Presentation.Shared.Helper;
+using System.Text.Json;
 
 namespace Mc2.CrudTest.Presentation.Client.services
 {
@@ -18,8 +20,14 @@ namespace Mc2.CrudTest.Presentation.Client.services
         private NavigationManager _navigationManager;
         private ILogger<CustomerService> _logger;
         private string ApiAddress = "customer/V1";
+        private readonly JsonSerializerOptions _options;
         public CustomerService(HttpClient httpClient, NavigationManager navigationManager, ILogger<CustomerService> logger) {
             _httpClient = httpClient;
+            _options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            _options.Converters.Add(new DateOnlyJsonConverter());
             _navigationManager = navigationManager;
             _logger = logger;
           
@@ -35,7 +43,7 @@ namespace Mc2.CrudTest.Presentation.Client.services
             try
             {
                 _logger.LogInformation("sending start: sending the form to customer controller");
-                var result = await _httpClient.PutAsJsonAsync($"{ApiAddress}/{model.Id}", model);
+                var result = await _httpClient.PutAsJsonAsync($"{ApiAddress}/{model.Id}", model, _options);
                 if (result.IsSuccessStatusCode)
                     _navigationManager.NavigateTo("customers");
                 else
@@ -55,8 +63,8 @@ namespace Mc2.CrudTest.Presentation.Client.services
             try
             {
                 _logger.LogInformation("sending start: sending the form to customer controller");
-
-                var result = await _httpClient.PostAsJsonAsync(ApiAddress, model);
+                
+                var result = await _httpClient.PostAsJsonAsync(ApiAddress, model, _options);
                 if (result.IsSuccessStatusCode)
                     _navigationManager.NavigateTo("customers");
                 else
@@ -67,7 +75,7 @@ namespace Mc2.CrudTest.Presentation.Client.services
             {
                 HandleBrokenCircuitException();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 ErrorMessages.Add("An error has been occured. Please try again later.");
             }
@@ -81,7 +89,7 @@ namespace Mc2.CrudTest.Presentation.Client.services
                 var result = await _httpClient.GetAsync(ApiAddress);
                 if (result.IsSuccessStatusCode)
                 {
-                    model = await result.Content.ReadFromJsonAsync<List<ViewModels.CustomerViewModel>>();
+                    model = await result.Content.ReadFromJsonAsync<List<ViewModels.CustomerViewModel>>(_options);
                 }
                 else
                 {
@@ -103,7 +111,7 @@ namespace Mc2.CrudTest.Presentation.Client.services
                 var result = await _httpClient.GetAsync($"{ApiAddress}/{id}");
                 if (result.IsSuccessStatusCode)
                 {
-                    model = await result.Content.ReadFromJsonAsync<CustomerViewModel>();
+                    model = await result.Content.ReadFromJsonAsync<CustomerViewModel>(_options);
                 }
                 else
                 {
@@ -141,7 +149,7 @@ namespace Mc2.CrudTest.Presentation.Client.services
                 var result = await _httpClient.GetAsync($"{ApiAddress}/{id}/History");
                 if (result.IsSuccessStatusCode)
                 { 
-                    model = await result.Content.ReadFromJsonAsync<CustomerHistoryViewModel>();
+                    model = await result.Content.ReadFromJsonAsync<CustomerHistoryViewModel>(_options);
                 }
                 else
                 {
@@ -162,7 +170,7 @@ namespace Mc2.CrudTest.Presentation.Client.services
 
         private static void HandleNotSuccessfulError()
         {
-            ErrorMessages.Add("Couldn't connect to the server. Try again");
+            ErrorMessages.Add("An error has been occured. Please try again later.");
         }
     }
 }

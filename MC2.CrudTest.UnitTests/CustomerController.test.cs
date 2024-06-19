@@ -56,7 +56,7 @@ namespace MC2.CrudTest.UnitTests
 
             _customerService = new CustomerService(new EventStoreRepository(context, null), mockDatabase.Object);
 
-            newCustomer = new CustomerViewModel(Guid.NewGuid(), [], "Mohammadd", "Dehghaniii", "+989010596159", "dehghany.m@gmail.com",
+            newCustomer = new CustomerViewModel(Guid.NewGuid(), new List<string>().ToArray(), "Mohammadd", "Dehghaniii", "+989010596159", "dehghany.m@gmail.com",
                "1231564654", "2015-02-04");
 
             createHandler = new CreateCustomerCommandHandler(_customerService);
@@ -116,7 +116,7 @@ namespace MC2.CrudTest.UnitTests
 
             mockDatabase.Setup((x) => x.StringGet($"{newCustomer.FirstName}-{newCustomer.LastName}-{DateOnly.Parse(newCustomer.DateOfBirth)}", It.IsAny<CommandFlags>())).Returns(() => "true");
 
-            var anotherCustomer = new CustomerViewModel(Guid.NewGuid(), [], "M", "Dehghaniii", "+989010596159", "a@a.com",
+            var anotherCustomer = new CustomerViewModel(Guid.NewGuid(), new List<string>().ToArray(), "M", "Dehghaniii", "+989010596159", "a@a.com",
                "1231564654", "2015-02-04");
 
             await createHandler.Handle(new CreateCustomerCommand(anotherCustomer.FirstName, anotherCustomer.LastName, anotherCustomer.PhoneNumber, anotherCustomer.Email, anotherCustomer.BankAccount, anotherCustomer.DateOfBirth), CancellationToken.None);
@@ -134,7 +134,7 @@ namespace MC2.CrudTest.UnitTests
         [Fact]
         public async Task Bad_Email_shouldFail()
         {
-            var customer = new CustomerViewModel(Guid.NewGuid(), [], "Mohammadd", "Dehghaniii", "+989010596159", "dfhfdghfgh",
+            var customer = new CustomerViewModel(Guid.NewGuid(), new List<string>().ToArray(), "Mohammadd", "Dehghaniii", "+989010596159", "dfhfdghfgh",
                "1231564654", "2015-02-04");
 
             await Assert.ThrowsAsync<ArgumentException>(async () => await createHandler.Handle(new CreateCustomerCommand(customer.FirstName, customer.LastName, customer.PhoneNumber, customer.Email, customer.BankAccount, customer.DateOfBirth), CancellationToken.None));
@@ -300,6 +300,20 @@ namespace MC2.CrudTest.UnitTests
             //    && newCustomer.Email.Equals(firstSavedCustomer.Email));
             //Assert.Equal(2, customersList.Count());
         }
+        [Fact]
+        public async Task Check_phoneNumber_should_pass()
+        {
+            string phone = "+989121234567";
+            new Mc2.CrudTest.Presentation.Shared.ValueObjects.PhoneNumber(phone);
+        }
+
+        [Fact]
+        public async Task Check_phoneNumber_should_throws_exception()
+        {
+            string phone = "+982188776655";
+            Assert.Throws<ArgumentException>(()  => new Mc2.CrudTest.Presentation.Shared.ValueObjects.PhoneNumber(phone));
+        }
+
 
     }
 }

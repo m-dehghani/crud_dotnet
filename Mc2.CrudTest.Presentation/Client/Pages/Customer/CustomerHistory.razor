@@ -5,46 +5,94 @@
 @inject NavigationManager NavigationManager
 @inject ILogger<CustomerHistory> Logger
 @inject ICustomerService CustomerService
-<h3>Customer History(last five events)</h3>
-<table class="table">
-  <tr>
-        <th colspan="30"></th>
-        <th colspan="20"></th>
-        <th colspan="20"></th>
-        <th colspan="20"></th>
-        <th colspan="20"></th>
-        <th colspan="20"></th>
-        <th colspan="20"></th>
-  </tr>
-       
-     <tr>
-        
-        <p> <strong>Event Types: </strong> @string.Join('-', Model.EventTypes.TakeLast(5)) </p>
-  </tr>
-<tr>
-        <p> <strong>First Names: </strong>@string.Join('-', Model.FirstNames.TakeLast(5)) </p>
-</tr>
-    <tr>
-        <p><strong>Last Names: </strong> @string.Join('-', Model.LastNames.TakeLast(5)) </p>
-    </tr>
-    <tr>
-        <p><strong>Bank Accounts: </strong> @string.Join('-', Model.BankAccounts.TakeLast(5)) </p>
-    </tr>
-    <tr>
-        <p><strong>Emails: </strong> @string.Join('-', Model.Emails.TakeLast(5)) </p>
-    </tr>
-    <tr>
-        <p><strong>Date Of Births: </strong> @string.Join('-', Model.DateOfBirths.TakeLast(5)) </p>
-    </tr>
-    <tr>
-        <p><strong>Occurred On: </strong> @string.Join('-', Model.OccurredOn.TakeLast(5)) </p>
-    </tr>
+<h3>Customer History</h3>
+@if (Model.Items?.Count == 0)
+{
+    <div class="bg-success">please wait ....</div>
+}
+else
+{
+    <h4># of changes @(Model.Version - 1)</h4>
+    <div class="row">
+        @if (Model.Items?.Count != 0 && Model.Items != null)
+        {
+            @foreach (var historyItem in Model.Items)
+            {
+                <div class="col col-3">
+                    <div class="card">
+                        <div class="card-header">
+                            @historyItem.EventType
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col col-4">
+                                    <label class="label h6"><strong>First Name:</strong></label>
+                                </div>
+                                <div class="col">
+                                    @historyItem.FirstName
+                                </div>
+                            </div>
 
-   
+                            <div class="row">
+                                <div class="col col-4">
+                                    <label class="label h6"><strong>Last Name:</strong></label>
+                                </div>
+                                <div class="col">
+                                    @historyItem.LastName
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col col-4">
+                                    <label class="label h6"><strong>Email:</strong></label>
+                                </div>
+                                <div class="col">
+                                    @historyItem.Email
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col col-4">
+                                    <label class="label h6"><strong>Phone Number:</strong></label>
+                                </div>
+                                <div class="col">
+                                    @historyItem.PhoneNumber
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col col-4">
+                                    <label class="label h6"><strong>Date Of Birth:</strong></label>
+                                </div>
+                                <div class="col">
+                                    @historyItem.DateOfBirth
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col col-4">
+                                    <label class="label h6"><strong>Bank Account:</strong></label>
+                                </div>
+                                <div class="col">
+                                    @historyItem.BankAccount
+                                </div>
+                            </div>
 
 
-</table>
-<div class="text-danger">@CustomerService.GetErrors().LastOrDefault()</div>
+
+                        </div>
+                        <div class="card-footer">
+                           <p>Occured On:&nbsp; @historyItem.OccurredOn</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+    <br/>
+    <button class="btn-success" @onclick="() => BackToList()">Back</button>
+    <div class="text-danger">@CustomerService.GetErrors().LastOrDefault()</div>
+}
 @code {
     [Parameter]
     public string Id { get; set; }
@@ -55,4 +103,10 @@
         Model = await CustomerService.GetCustomerHistory(new Guid(Id));
         StateHasChanged();
     }
+
+    public void BackToList()
+    {
+        NavigationManager.NavigateTo("Customers");
+    }
+   
 }
