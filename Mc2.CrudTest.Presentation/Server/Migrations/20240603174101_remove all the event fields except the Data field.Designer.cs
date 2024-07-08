@@ -50,8 +50,8 @@ namespace Mc2.CrudTest.Presentation.Server.Migrations
                     b.ToTable("Events");
 
                     b.HasDiscriminator<string>("event_type").HasValue("EventBase");
-                    
-                    //b.UseTphMappingStrategy();
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Mc2.CrudTest.Presentation.Shared.Events.CustomerCreatedEvent", b =>

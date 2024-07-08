@@ -12,10 +12,10 @@ namespace Mc2.CrudTest.Presentation.Shared.Queries
     public class GetCustomerHistoryByIdQuery : IRequest<CustomerHistoryViewModel>, INotification
 
     {
-        public GetCustomerHistoryByIdQuery(Guid Id)
+        public GetCustomerHistoryByIdQuery(Guid customerId)
         {
-            this.Id = Id;
+            CustomerId = customerId;
         }
-        public Guid Id { get; set; }
+        public Guid CustomerId { get; set; }
     }
 }

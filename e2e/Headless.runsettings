@@ -1,8 +1,0 @@
-<RunSettings>
-  <Playwright>
-    <BrowserName>firefox</BrowserName>
-    <LaunchOptions>
-      <Headless>false</Headless>
-    </LaunchOptions>
-  </Playwright>
-</RunSettings>

@@ -1,26 +1,17 @@
 ﻿using Mc2.CrudTest.Presentation.Infrastructure;
 using Mc2.CrudTest.Presentation.Shared.Entities;
 using Mc2.CrudTest.Presentation.Shared.Events;
-using Mc2.CrudTest.Presentation.Shared.Helper;
 using Mc2.CrudTest.Presentation.Shared.ViewModels;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
 
 namespace Mc2.CrudTest.Presentation.DomainServices
 {
     public class SlowerCustomerService : ICustomerService
     {
         private readonly IEventRepository _eventStore;
-        JsonSerializerOptions _options;
         public SlowerCustomerService(IEventRepository eventStore)
         {
             _eventStore = eventStore;
-            
-            _options = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            };
-            _options.Converters.Add(new DateOnlyJsonConverter());
         }
 
         private async Task<(Boolean, Boolean)> CheckUniqueness(Customer customer)
@@ -30,7 +21,7 @@ namespace Mc2.CrudTest.Presentation.DomainServices
             var dataUnique = false;
 
             var customers = await GetAllCustomers();
-            var tempCustomer = customers.FirstOrDefault(c => c.Email == customer.Email && !c.IsDeleted);
+            var tempCustomer = customers.FirstOrDefault(c => c.Email == customer.Email);
             if (tempCustomer == null  || tempCustomer.Id == customer.Id)
             {
                 emailUnique = true;
@@ -57,12 +48,11 @@ namespace Mc2.CrudTest.Presentation.DomainServices
             {
                 customer.Id = Guid.NewGuid();
             }
-            
-             var customerCreatedEvent = new CustomerCreatedEvent(customer.Id, customer.FirstName, customer.LastName,
+            var customerCreatedEvent = new CustomerCreatedEvent(customer.Id, customer.FirstName, customer.LastName,
                 customer.PhoneNumber.Value, customer.Email.Value, customer.BankAccount.Value,
                 customer.DateOfBirth.Value)
             {
-                Data = System.Text.Json.JsonSerializer.Serialize(customer,_options),
+                Data = System.Text.Json.JsonSerializer.Serialize(customer),
             };
 
             customerCreatedEvent.OccurredOn = DateTimeOffset.UtcNow;
@@ -101,13 +91,11 @@ namespace Mc2.CrudTest.Presentation.DomainServices
 
         public async Task<IEnumerable<Customer>> GetAllCustomers()
         {
+            var events = await _eventStore.GetAllEvents().ToListAsync();
+
             var customers = new Dictionary<Guid, Customer>();
             try
             {
-                var events = await _eventStore.GetAllEvents().ToListAsync();
-
-           
-           
                 foreach (var @event in events)
                 {
                     if (customers.ContainsKey(@event.AggregateId))
@@ -115,6 +103,7 @@ namespace Mc2.CrudTest.Presentation.DomainServices
                     else
                     {
                         var customer = new Customer();
+                       //  var specific_event = GetEventsFromGenericEvent(@event);
                         customer.Apply(@event);
                         customers.Add(@event.AggregateId, customer);
                     }
@@ -126,6 +115,28 @@ namespace Mc2.CrudTest.Presentation.DomainServices
             }
             return customers.Values.Where(customer => !customer.IsDeleted);
         }
+
+        //private EventBase GetEventsFromGenericEvent(CustomerReadModel customerEvent)
+        //{
+        //    var e = new EventBase();
+        //    switch (customerEvent.EventType)
+        //    {
+        //        case "customer_create":
+        //            e = new CustomerCreatedEvent(customerEvent.AggregateId, customerEvent.FirstName, customerEvent.LastName, customerEvent.PhoneNumber, customerEvent.Email, customerEvent.BankAccount, customerEvent.DateOfBirth, customerEvent.OccurredOn);
+        //            break;
+
+        //        case "customer_update":
+        //            e = new CustomerUpdatedEvent(customerEvent.AggregateId, customerEvent.FirstName, customerEvent.LastName, customerEvent.Email, customerEvent.PhoneNumber, customerEvent.BankAccount, customerEvent.DateOfBirth, customerEvent.OccurredOn);
+        //            break;
+
+        //        case "customer_delete":
+        //            e = new CustomerDeletedEvent(customerEvent.AggregateId);
+        //            e.OccurredOn = customerEvent.OccurredOn;
+        //            break;
+        //    }
+        //    return e;
+        //}
+
 
         public async Task UpdateCustomerAsync(Customer customer, Guid customerId)
         {
@@ -139,7 +150,7 @@ namespace Mc2.CrudTest.Presentation.DomainServices
                 throw new ArgumentException("This user has registered before");
             var customerUpdatedEvent = new CustomerUpdatedEvent(customer.Id, customer.FirstName, customer.LastName, customer.Email.Value, customer.PhoneNumber.Value, customer.BankAccount.Value, customer.DateOfBirth.Value)
             {
-                Data = System.Text.Json.JsonSerializer.Serialize(customer, _options),
+                Data = System.Text.Json.JsonSerializer.Serialize(customer),
                 AggregateId = customer.Id
             };
             customerUpdatedEvent.OccurredOn = DateTimeOffset.UtcNow;
