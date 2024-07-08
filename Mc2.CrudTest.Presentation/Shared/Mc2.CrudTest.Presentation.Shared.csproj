@@ -1,8 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-	  <LangVersion>12</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
@@ -12,13 +11,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="ReadModels\" />
+    <PackageReference Include="libphonenumber-csharp" Version="8.13.36" />
+    <PackageReference Include="MediatR" Version="12.2.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="System.Text.Json" Version="8.0.3" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MediatR" Version="12.3.0" />
-	  <PackageReference Include="libphonenumber-csharp" Version="8.13.40" />
-	  <PackageReference Include="System.Text.Json" Version="8.0.3" />
-	  <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
+    <Folder Include="ReadModels\" />
   </ItemGroup>
 </Project>

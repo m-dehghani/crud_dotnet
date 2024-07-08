@@ -1,6 +1,6 @@
 ﻿namespace Mc2.CrudTest.Presentation.Shared.ViewModels
 {
-    internal class CustomerCreateViewModel : BaseViewModel
+    internal class CustomerCreateViewModel
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }

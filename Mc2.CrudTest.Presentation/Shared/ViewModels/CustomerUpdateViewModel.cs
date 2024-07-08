@@ -1,8 +1,6 @@
-using Mc2.CrudTest.Presentation.Shared.ViewModels;
-
 namespace Mc2.CrudTest.Presentation.ViewModels;
 
-public class CustomerUpdateViewModel : BaseViewModel
+public class CustomerUpdateViewModel
 {
         public CustomerUpdateViewModel(Guid id,string firstName, string lastName, string phoneNumber,  string email, string bankAccount, string dateOfBirth)
         {
