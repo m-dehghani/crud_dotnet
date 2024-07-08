@@ -14,7 +14,7 @@ namespace Mc2.CrudTest.Presentation.Shared.ValueObjects
            // value = value.Trim(['\"']);
             String temp = value.StartsWith("\\u002B") ?  (char)plusSign + value.Substring(6, value.Length - 6) : value;
             if (!IsValidNumber(temp))
-                throw new ArgumentException("Invalid phone number format. phone numbers should start with country code like +1", nameof(value));
+                throw new ArgumentException("102", nameof(value));
 
             Value = temp;
         }
