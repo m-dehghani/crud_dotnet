@@ -30,7 +30,7 @@ namespace Mc2.CrudTest.Presentation.DomainServices
             var dataUnique = false;
 
             var customers = await GetAllCustomers();
-            var tempCustomer = customers.FirstOrDefault(c => c.Email == customer.Email);
+            var tempCustomer = customers.FirstOrDefault(c => c.Email == customer.Email && !c.IsDeleted);
             if (tempCustomer == null  || tempCustomer.Id == customer.Id)
             {
                 emailUnique = true;
@@ -101,11 +101,13 @@ namespace Mc2.CrudTest.Presentation.DomainServices
 
         public async Task<IEnumerable<Customer>> GetAllCustomers()
         {
-            var events = await _eventStore.GetAllEvents().ToListAsync();
-
             var customers = new Dictionary<Guid, Customer>();
             try
             {
+                var events = await _eventStore.GetAllEvents().ToListAsync();
+
+           
+           
                 foreach (var @event in events)
                 {
                     if (customers.ContainsKey(@event.AggregateId))
@@ -113,7 +115,6 @@ namespace Mc2.CrudTest.Presentation.DomainServices
                     else
                     {
                         var customer = new Customer();
-                       //  var specific_event = GetEventsFromGenericEvent(@event);
                         customer.Apply(@event);
                         customers.Add(@event.AggregateId, customer);
                     }

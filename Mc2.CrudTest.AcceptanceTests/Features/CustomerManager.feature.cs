@@ -101,13 +101,15 @@ this.ScenarioInitialize(scenarioInfo);
                             "LastName",
                             "DateOfBirth",
                             "PhoneNumber",
-                            "Email"});
+                            "Email",
+                            "BankAccountNumber"});
                 table1.AddRow(new string[] {
                             "Mohammad",
                             "Dehghani",
                             "01/02/1989",
                             "+989010596159",
-                            "\"dehghany.m@gmail.com\""});
+                            "\"dehghany.m@gmail.com\"",
+                            "123456"});
 #line 8
  testRunner.When("I create a Customer with following details", ((string)(null)), table1, "When ");
 #line hidden

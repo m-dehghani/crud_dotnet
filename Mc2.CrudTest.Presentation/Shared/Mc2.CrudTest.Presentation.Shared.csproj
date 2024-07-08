@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
 	  <LangVersion>12</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -17,8 +17,8 @@
 
   <ItemGroup>
     <PackageReference Include="MediatR" Version="12.3.0" />
-	  <PackageReference Include="libphonenumber-csharp" Version="8.13.36" />
-	  <PackageReference Include="System.Text.Json" Version="6.0.9" />
+	  <PackageReference Include="libphonenumber-csharp" Version="8.13.40" />
+	  <PackageReference Include="System.Text.Json" Version="8.0.3" />
 	  <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
   </ItemGroup>
 </Project>
