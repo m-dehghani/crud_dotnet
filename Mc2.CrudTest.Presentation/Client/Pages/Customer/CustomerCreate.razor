@@ -13,42 +13,72 @@
 
 <h3>Create New Customer</h3>
 
-<EditForm EditContext="editContext"   OnValidSubmit="CreateCustomer" FormName="CustomerCreate">
+<EditForm EditContext="editContext" class="form" OnValidSubmit="CreateCustomer" FormName="CustomerCreate">
     <DataAnnotationsValidator />
-    
-    <div class="form-group">
-        <label for="firstName">First Name</label>
-        <InputText id="firstName" @bind-Value="Model!.FirstName" class="form-control" />
-        <ValidationMessage For="() => Model!.FirstName" />
-    </div>
-    <div class="form-group">
-        <label for="lastName">Last Name</label>
-        <InputText id="lastName" @bind-Value="Model!.LastName" class="form-control" />
-        <ValidationMessage For="() => Model!.LastName" />
-    </div>
-    <div class="form-group">
-        <label for="email">Email</label>
-        <InputText id="email" @bind-Value="Model!.Email" class="form-control" />
-        <ValidationMessage For="() => Model!.Email" />
-    </div>
-    <div class="form-group">
-        <label for="phoneNumber">Phone Number</label>
-        <InputText id="phoneNumber" @bind-Value="Model!.PhoneNumber" class="form-control" />
-        <ValidationMessage For="() => Model!.PhoneNumber" />
-    </div>
-    <div class="form-group">
-        <label for="dateOfBirth">DateOfBirth</label>
-        <InputDate id="dateOfBirth" @bind-Value="Model!.DateOfBirth" class="form-control" />
-        <ValidationMessage For="() => Model!.DateOfBirth" />
+    <div class="row row-cols-6 mb-4">
+        <div class="col col-3">
+            <div class="form-group">
+                <label for="firstName">First Name</label>
+                <InputText placeholder="First name" id="firstName" @bind-Value="Model!.FirstName" class="form-control mb-2" />
+                <ValidationMessage For="() => Model!.FirstName" />
+            </div>
+        </div>
+        <div class="col col-3">
+            <div class="form-group">
+                <label for="lastName">Last Name</label>
+                <InputText placeholder="Last name" id="lastName" @bind-Value="Model!.LastName" class="form-control mb-2" />
+                <ValidationMessage For="() => Model!.LastName" />
+            </div>
+        </div>
     </div>
 
-    <div class="form-group">
-        <label for="bankAccount">BankAccount</label>
-        <InputText id="bankAccount" @bind-Value="Model!.BankAccount" class="form-control" />
-        <ValidationMessage For="() => Model!.BankAccount" />
+
+    <div class="row mb-4">
+        <div class="col col-3">
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <InputText placeholder="Email" id="email" @bind-Value="Model!.Email" class="form-control" />
+                <ValidationMessage For="() => Model!.Email" />
+            </div>
+        </div>
+        <div class="col col-3">
+
+            <div class="form-group">
+                <label class="label form-label" for="phoneNumber">Phone Number</label>
+                <div class="input-group mb-2 mr-sm-2">
+                   
+                    <div class="input-group-prepend">
+                        <div class="input-group-text">+</div>
+                    </div>
+                    <InputText placeholder="Phone Number" id="phoneNumber" @bind-Value="Model!.PhoneNumber" class="form-control" />
+                    <ValidationMessage For="() => Model!.PhoneNumber" />
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row mb-4">
+        <div class="col col-3">
+
+            <div class="form-group">
+                <label for="dateOfBirth">Date Of Birth</label>
+                <InputDate placeholder="Date Of Birth" id="dateOfBirth" @bind-Value="Model!.DateOfBirth" class="form-control" />
+                <ValidationMessage For="() => Model!.DateOfBirth" />
+            </div>
+        </div>
+        <div class="col col-3">
+
+            <div class="form-group">
+                <label for="bankAccount">Bank Account</label>
+                <InputText placeholder="Bank Account" id="bankAccount" @bind-Value="Model!.BankAccount" class="form-control" />
+                <ValidationMessage For="() => Model!.BankAccount" />
+            </div>
+        </div>
     </div>
     <br />
-    <button type="submit" class="btn btn-primary">Create</button> <div class="text-danger">@CustomerService.GetErrors().LastOrDefault()</div>
+    <button type="submit" class="btn btn-primary col-6">Create</button> <div class="text-danger">@CustomerService.GetErrors().LastOrDefault()</div>
 </EditForm>
 
 @code {
@@ -59,7 +89,7 @@
     {
         Logger.LogInformation("sending start: sending the form to customer controller");
         await CustomerService.Create(Model);
-      
+
     }
 
     private void Submit()
@@ -67,16 +97,16 @@
         Logger.LogInformation("Submit called: Processing the form");
     }
 
-    [SupplyParameterFromForm]
+    // [SupplyParameterFromForm]
     private CustomerCreateModel? Model { get; set; }
 
     private ValidationMessageStore? messageStore;
 
-   
+
 
     protected override void OnInitialized()
     {
-   
+
         Model ??= new();
         editContext = new(Model);
         editContext.OnValidationRequested += HandleValidationRequested;

@@ -20,9 +20,8 @@ public class CustomerController : Controller
         _mediator = mediator;
     }
 
-
-    [ApiVersion(1.0)]
-    [HttpGet("{id:Guid}")]
+   
+    [HttpGet("V1/{id:Guid}")]
     public async Task<IActionResult> Get(string id)
     {
         GetCustomerByIdQuery getCustomerByIdQuery = new (Guid.Parse(id)); 
@@ -30,8 +29,7 @@ public class CustomerController : Controller
         return result;
     }
 
-    [ApiVersion(1.0)]
-    [HttpGet("History/{id:Guid}")]
+    [HttpGet("V1/{id:Guid}/History")]
     public async Task<IActionResult> GetHistory(string id)
     {
         GetCustomerHistoryByIdQuery getCustomerHistoryByIdQuery = new(Guid.Parse(id));
@@ -39,40 +37,28 @@ public class CustomerController : Controller
         return result;
     }
 
-    [ApiVersion(1.0)]
-    [HttpGet]
+    [HttpGet("V1")]
     public async Task<IActionResult> GetAll()
     {
-        GetAllCustomersQuery getAllCustomersQuery = new GetAllCustomersQuery(); 
-        var result = await RequestHandler.HandleQuery(getAllCustomersQuery, _mediator, Log);
-        return result;
+        return await RequestHandler.HandleQuery(new GetAllCustomersQuery(), _mediator, Log);
     }
 
-    [ApiVersion(1.0)]
-    [HttpPost]
-    public async Task<IActionResult> CreateCustomer(ViewModels.CustomerViewModel newCustomer)
+    [HttpPost("V1")]
+    public async Task<IActionResult> CreateCustomer(CreateCustomerCommand command)
     {
-        CreateCustomerCommand command = new CreateCustomerCommand(newCustomer.FirstName, newCustomer.LastName,
-            newCustomer.PhoneNumber, newCustomer.Email, newCustomer.BankAccount, newCustomer.DateOfBirth);
          return await RequestHandler.HandleCommand(command, _mediator, Log);
     }
 
-    [ApiVersion(1.0)]
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UdateCustomer(string id, CustomerUpdateViewModel updatedCustomer)
+    [HttpPut("V1/{id}")]
+    public async Task<IActionResult> UpdateCustomer(string id, UpdateCustomerCommand customerUpdateCmd)
     {
-        var customerUpdateCmd = new UpdateCustomerCommand(Guid.Parse(id), updatedCustomer.FirstName,
-            updatedCustomer.LastName,
-            updatedCustomer.PhoneNumber, updatedCustomer.Email, updatedCustomer.BankAccount,
-            updatedCustomer.DateOfBirth);
+        if (new Guid(id) != customerUpdateCmd.Id) { return new BadRequestResult(); }
         return await RequestHandler.HandleCommand(customerUpdateCmd, _mediator, Log);
     }
 
-    [ApiVersion(1.0)]
-    [HttpDelete("{id}")]
+    [HttpDelete("V1/{id}")]
     public async Task DeleteCustomer(string id)
     {
-        DeleteCustomerCommand customerDeleteCmd = new (Guid.Parse(id));
-        await RequestHandler.HandleCommand(customerDeleteCmd, _mediator, Log);
+        await RequestHandler.HandleCommand(new DeleteCustomerCommand(Guid.Parse(id)), _mediator, Log);
     }
 }

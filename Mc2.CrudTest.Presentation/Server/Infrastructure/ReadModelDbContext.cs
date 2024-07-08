@@ -16,11 +16,11 @@ public class ReadModelDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<EventBase>().ToView("events_view").HasNoKey().Ignore(e=>e.Data).Ignore(e=>e.EventId)
+        modelBuilder.Entity<EventBase>().ToView("events_view").HasNoKey().Ignore(e => e.Data).Ignore(e => e.EventId)
             .HasDiscriminator<string>("event_type")
             .HasValue<CustomerCreatedEvent>("customer_create")
-            .HasValue<CustomerUpdatedEvent>("customer_update")
-            .HasValue<CustomerDeletedEvent>("customer_delete");
+            .HasValue<CustomerUpdatedEvent>("customer_update");
+            
         modelBuilder.Entity<EventBase>().Property(e => e.Email).HasColumnName("Email");
         modelBuilder.Entity<EventBase>().Property(e => e.FirstName).HasColumnName("FirstName");
         modelBuilder.Entity<EventBase>().Property(e => e.LastName).HasColumnName("LastName");
@@ -28,6 +28,8 @@ public class ReadModelDbContext : DbContext
         modelBuilder.Entity<EventBase>().Property(e => e.BankAccount).HasColumnName("BankAccount");
         modelBuilder.Entity<EventBase>().Property(e => e.PhoneNumber).HasColumnName("PhoneNumber");
 
+        modelBuilder.Entity<EventBase>().ToView("events_view").HasNoKey().Ignore(e => e.Data).Ignore(e => e.EventId)
+            .HasDiscriminator<string>("event_type").HasValue<CustomerDeletedEvent>("customer_delete");
         // Additional configuration as needed
     }
 }

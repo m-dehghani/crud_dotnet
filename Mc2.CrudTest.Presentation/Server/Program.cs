@@ -1,6 +1,7 @@
 using Asp.Versioning;
 using Mc2.CrudTest.Presentation.DomainServices;
 using Mc2.CrudTest.Presentation.Infrastructure;
+using Mc2.CrudTest.Presentation.Shared.Helper;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 
@@ -11,14 +12,36 @@ namespace Mc2.CrudTest.Presentation
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            builder.AddServiceDefaults();
+           // builder.AddServiceDefaults();
 
-            builder.Services.AddControllersWithViews();
+            builder.Services.AddControllersWithViews().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
+            }); ;
             builder.Services.AddRazorPages();
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(builder.Configuration["ConnectionStrings:EventStoreConnection"]));
-            builder.Services.AddDbContext<ReadModelDbContext>(options =>
-                options.UseNpgsql(builder.Configuration["ConnectionStrings:EventStoreConnection"]));
+            builder.Services.AddDbContext<ApplicationDbContext>(options => {
+                options.UseNpgsql(builder.Configuration["ConnectionStrings:EventStoreConnection"], 
+                    npgsqlOptionsAction: sqlOptions =>
+                    {
+                        sqlOptions.EnableRetryOnFailure(
+                        maxRetryCount: 10,
+                        maxRetryDelay: TimeSpan.FromSeconds(30),
+                        errorCodesToAdd: null);
+                    });
+            });
+            
+            builder.Services.AddDbContext<ReadModelDbContext>(options => { 
+                options.UseNpgsql(builder.Configuration["ConnectionStrings:EventStoreConnection"],
+                npgsqlOptionsAction: sqlOptions =>
+                {
+                    sqlOptions.EnableRetryOnFailure(
+                    maxRetryCount: 10,
+                    maxRetryDelay: TimeSpan.FromSeconds(30),
+                    errorCodesToAdd: null);
+                });
+        });
+
+
             builder.Services.AddSwaggerGen();
             builder.Services.AddMediatR(cfg => {
                 cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
@@ -45,12 +68,12 @@ namespace Mc2.CrudTest.Presentation
             using (var scope = app.Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                db.Database.Migrate();
+                    db.Database.Migrate();
                
                 var readDb = scope.ServiceProvider.GetRequiredService<ReadModelDbContext>();
-                readDb.Database.Migrate();
-            }
-            app.MapDefaultEndpoints();
+                    readDb.Database.Migrate();
+                }
+           // app.MapDefaultEndpoints();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
