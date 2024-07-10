@@ -90,6 +90,7 @@ else
     <button class="btn-success" @onclick="() => BackToList()">Back</button>
     <div class="text-danger">@CustomerService.GetErrors().LastOrDefault()</div>
 }
+<div class="text-danger">@CustomerService.GetErrors().LastOrDefault()</div>
 @code {
     [Parameter]
     public string Id { get; set; }
