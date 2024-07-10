@@ -43,7 +43,8 @@ public static class RequestHandler
 #if DEBUG
         return new BadRequestObjectResult(new
         {
-            error = e.Message,
+            errorCode = e.Message,
+            
            // stackTrace = e.StackTrace
         });
 #else

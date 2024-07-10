@@ -10,7 +10,7 @@ namespace Mc2.CrudTest.Presentation.Shared.ValueObjects
         public BankAccount(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
-                throw new ArgumentException("BankAccount cannot be empty.", nameof(value));
+                throw new ArgumentException("103", nameof(value));
 
             Value = value;
         }

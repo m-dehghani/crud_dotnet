@@ -133,10 +133,10 @@ namespace Mc2.CrudTest.Presentation.DomainServices
             var isUnique = await CheckUniqueness(customer);
 
             if (!isUnique.Item1)
-                throw new ArgumentException("This email address was taken by another user. Please select another one ");
+                throw new ArgumentException("201");
 
             if (!isUnique.Item2)
-                throw new ArgumentException("This user has registered before");
+                throw new ArgumentException("202");
             var customerUpdatedEvent = new CustomerUpdatedEvent(customer.Id, customer.FirstName, customer.LastName, customer.Email.Value, customer.PhoneNumber.Value, customer.BankAccount.Value, customer.DateOfBirth.Value)
             {
                 Data = System.Text.Json.JsonSerializer.Serialize(customer, _options),

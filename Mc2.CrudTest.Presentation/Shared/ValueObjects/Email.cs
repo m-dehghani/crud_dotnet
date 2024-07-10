@@ -11,7 +11,8 @@ namespace Mc2.CrudTest.Presentation.Shared.ValueObjects
         public Email(string value)
         {
             if (string.IsNullOrWhiteSpace(value) || !value.Contains("@") /*|| !Helper.RegexPatterns.EmailIsValid.IsMatch(value)*/)
-                throw new ArgumentException("Invalid email format.", nameof(value));
+                //return new ErrorCodes();
+                throw new ArgumentException("101", nameof(value));
            
             Value = value.Trim().ToLowerInvariant();;
         }
