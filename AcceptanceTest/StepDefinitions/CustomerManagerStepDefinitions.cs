@@ -1,29 +1,20 @@
-using System;
 using AcceptanceTest.Drivers;
-using Mc2.CrudTest.Presentation.DomainServices;
-using Mc2.CrudTest.Presentation.Handlers;
-using Mc2.CrudTest.Presentation.Infrastructure;
-using Mc2.CrudTest.Presentation.Server.Controllers;
+using Mc2.CrudTest.Presentation.Shared;
 using Mc2.CrudTest.Presentation.Shared.Commands;
+using Mc2.CrudTest.Presentation.Shared.Entities;
 using Mc2.CrudTest.Presentation.ViewModels;
-using MediatR;
-using Microsoft.AspNetCore.Components.Web;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Moq;
-using Reqnroll;
-using StackExchange.Redis;
-using Testcontainers.PostgreSql;
 
 namespace AcceptanceTest.StepDefinitions
 {
     [Binding]
-    public class CustomerManagerStepDefinitions
+    public class CustomerManagerStepDefinitions(CustomerDriver customerDriver)
     {
-        private readonly CustomerDriver customerDriver;
-        public CustomerManagerStepDefinitions(CustomerDriver customerDriver) {
-            this.customerDriver = customerDriver;
+        List<ErrorCodes> errors = new List<ErrorCodes>();
+
+        [Given("platform support following error codes")]
+        public void GivenPlatformSupportFollowingErrorCodes(DataTable dataTable)
+        {
+            errors = dataTable.CreateSet<ErrorCodes>().ToList();
         }
 
         [Given("platform has {string} record of customers")]
@@ -32,52 +23,50 @@ namespace AcceptanceTest.StepDefinitions
             await customerDriver.ResetDb();
         }
 
-
         [When("When user send command to create new customer with following information")]
-        public async Task WhenICreateACustomerWithFollowingDetails(DataTable dataTable)
+        public async Task Whenusersendcommandtocreatenewcustomerwithfollowinginformation(DataTable dataTable)
         {
-            Dictionary<string, string> dictionary = CreateDDictionary(dataTable);
-            var command = new CreateCustomerCommand(dictionary["FirstName"], dictionary["LastName"], dictionary["DateOfBirth"], dictionary["PhoneNumber"], dictionary["Email"], dictionary["BankAccountNumber"]);
-            await customerDriver.CreateCustomer(command);
+
+            List<ErrorCodes> errors = dataTable.CreateSet<ErrorCodes>().ToList();
+            CustomerViewModel customerToCreate = dataTable.CreateInstance<CustomerViewModel>();
 
 
+           Exception ex = await Assert.ThrowsAsync(customerDriver.CreateCustomer(new CreateCustomerCommand(customerToCreate.FirstName, customerToCreate.LastName, customerToCreate.DateOfBirth, customerToCreate.PhoneNumber, customerToCreate.Email, customerToCreate.BankAccount)));
 
-            //assert
+            ex.Message.Should().Be(errors.ToArray()[0].ErrorCode.ToString());
         }
 
-        [Then("user can send query and receive \"1\" record of customer with following data")]
+        [Then("user can send query and receive (.*) record of customer with following data")]
         public async Task ThenTheCustomerShouldBeCreatedSuccessfully(DataTable dataTable)
         {
-            Dictionary<string, string> dictionary = CreateDDictionary(dataTable);
-
-            var customerList = await customerDriver.GetAllCustomers();
+            CustomerViewModel customerToCreate = dataTable.CreateInstance<CustomerViewModel>();
+            
+            List<CustomerViewModel> customerList = await customerDriver.GetAllCustomers();
+          
             customerList.Should().NotBeNull();
-            var customer = customerList.FirstOrDefault();
-            customer.FirstName.Should().Be(dictionary["FirstName"]);
-            customer.LastName.Should().Be(dictionary["LastName"]);
-            customer.Email.Should().Be(dictionary["Email"]);
-            customer.DateOfBirth.Should().Be(dictionary["DateOfBirth"]);
-
+          
+            CustomerViewModel? customer = customerList.FirstOrDefault();
+            
+            Assert.Multiple(
+                () => customer?.FirstName.Should().Be(customerToCreate.FirstName),
+                () => customer?.LastName.Should().Be(customerToCreate.LastName),
+                () => customer?.Email.Should().Be(customerToCreate.Email),
+                () => customer?.DateOfBirth.Should().Be(customerToCreate.DateOfBirth),
+                () => customer?.PhoneNumber.Should().Be(customerToCreate.PhoneNumber)
+            );
         }
 
-        [When("user send command to update customer with email of \"john.doe@email.com\" and with below information")]
-        public async Task WhenICreateACustomerWithFollowingDetails(DataTable dataTable)
-        { 
-        }
-
-
-
-
-            private static Dictionary<string, string> CreateDDictionary(DataTable dataTable)
+        [When("user send command to update customer with email of (.*) and with below information")]
+        public async Task UserSendCommandToUpdateCustomerWithEmailOfWithBelowInformation(DataTable dataTable)
         {
-            var dictionary = new Dictionary<string, string>();
-            foreach (var row in dataTable.Rows)
-            {
-                dictionary.Add(row[0], row[1]);
-            }
-
-            return dictionary;
+            CustomerUpdateViewModel customer = dataTable.CreateInstance<CustomerUpdateViewModel>();
+            
+            List<CustomerViewModel> customers = await customerDriver.GetAllCustomers();
+            
+            await customerDriver.UpdateCustomer(new UpdateCustomerCommand(customers.FirstOrDefault()!.Id, customer.FirstName, customer.LastName, customer.PhoneNumber, customer.Email, customer.BankAccount,customer.DateOfBirth));
         }
 
+
+      
     }
 }

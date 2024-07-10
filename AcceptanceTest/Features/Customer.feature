@@ -5,7 +5,7 @@ As a an operator I wish to be able to Create, Update, Delete customers and list 
 @mytag
 Scenario: User can Create, Edit, Delete, and Read customer records
 
-	 Given platform support following error codes
+	Given platform support following error codes
       | Code | Description                    |
       | 101  | Invalid Email                  |
       | 102  | Invalid Phonenumber            |

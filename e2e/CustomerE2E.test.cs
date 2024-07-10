@@ -1,5 +1,5 @@
 using Microsoft.Playwright;
-
+// Added for e2e testing
 namespace e2e
 {
     [Parallelizable(ParallelScope.Self)]
