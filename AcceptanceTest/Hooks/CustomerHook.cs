@@ -1,3 +1,4 @@
+using Mc2.CrudTest.Presentation;
 using Reqnroll;
 using Testcontainers.PostgreSql;
 
@@ -14,21 +15,24 @@ namespace AcceptanceTest.Hooks
         [BeforeScenario("@tag1")]
         public async Task BeforeScenarioWithTag()
         {
-            await _postgres.StartAsync();
+           
         }
 
         [BeforeScenario(Order = 1)]
-        public void FirstBeforeScenario()
+        public async Task FirstBeforeScenario()
         {
-            // Example of ordering the execution of hooks
-            // See https://go.reqnroll.net/doc-hooks#hook-execution-order
+            await _postgres.StartAsync();
 
-            //TODO: implement logic that has to run before executing each scenario
+            _host = Mc2.CrudTest.Presentation.Program.CreateHostBuilder(null).UseContentRoot(Path.Combine(Environment.CurrentDirectory, "../../../../SpecFlowCalculator")).Build();
+
+            _host.Start();
+
         }
 
         [AfterScenario]
         public async Task AfterScenario()
         {
+            await _host.stopAsync();
             await _postgres.StopAsync();
         }
     }

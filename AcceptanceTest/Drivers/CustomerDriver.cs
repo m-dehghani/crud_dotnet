@@ -14,6 +14,7 @@ namespace AcceptanceTest.Drivers
         private readonly GetAllCustomerQueryHandler _getAllQueryHandler;
         private readonly UpdateCustomerCommandHandler _updateCustomerCommandHandler;
         private readonly GetCustomerByIdQueryHandler _getCustomerByIdQueryHandler;
+        private readonly DeleteCustomerCommandHandler _deleteCustomerCommandHandler;
 
         protected CustomerDriver()
         {
@@ -50,26 +51,33 @@ namespace AcceptanceTest.Drivers
             _getCustomerByIdQueryHandler = new GetCustomerByIdQueryHandler(customerService);
 
             _getAllQueryHandler = new GetAllCustomerQueryHandler(customerService);
+
+            _deleteCustomerCommandHandler = new DeleteCustomerCommandHandler(customerService);
         }
 
         private readonly PostgreSqlContainer _postgres = new PostgreSqlBuilder()
             .WithImage("postgres:15-alpine")
             .Build();
         
-        public async  Task CreateCustomer(CreateCustomerCommand command)
+        public async  Task Create(CreateCustomerCommand command)
         {
             await _createHandler.Handle(command, CancellationToken.None);
         }
 
-        public async Task<List<CustomerViewModel>> GetAllCustomers()
+        public async Task<List<CustomerViewModel>> GetAll()
         {
            return (await _getAllQueryHandler.Handle(new Mc2.CrudTest.Presentation.Shared.Queries.GetAllCustomersQuery(), CancellationToken.None)).ToList();
         }
 
-        public async Task UpdateCustomer(UpdateCustomerCommand command)
+        public async Task Update(UpdateCustomerCommand command)
         {
             
             await _updateCustomerCommandHandler.Handle(command, CancellationToken.None);
+        }
+
+        public async Task Delete(DeleteCustomerCommand command)
+        {
+            await _deleteCustomerCommandHandler.Handle(command, CancellationToken.None);
         }
 
         public async Task ResetDb()
