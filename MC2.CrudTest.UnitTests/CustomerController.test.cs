@@ -1,5 +1,4 @@
 using Mc2.CrudTest.Presentation.DomainServices;
-using Mc2.CrudTest.Presentation.Server.Controllers;
 using Mc2.CrudTest.Presentation.Shared.Entities;
 using Moq;
 using Mc2.CrudTest.Presentation;
@@ -13,22 +12,19 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using StackExchange.Redis;
 using Mc2.CrudTest.Presentation.Handlers;
 using Mc2.CrudTest.Presentation.Shared.Events;
-using Mc2.CrudTest.Presentation.Shared.Queries;
 
 namespace MC2.CrudTest.UnitTests
 {
     public class CustomerControllerTests : IClassFixture<WebApplicationFactory<Program>>
     {
-        private ICustomerService _customerService;
-        private Mock<IMediator> _mediator;
-        private ApplicationDbContext context;
-        private RedisCacheHandler cacheHandler;
-        private Mock<IDatabase> mockDatabase;
-        private CustomerViewModel newCustomer;
-        private CreateCustomerCommandHandler createHandler;
-        private UpdateCustomerCommandHandler updateHandler;
-        private GetCustomerByIdQueryHandler getByIdHandler;
-        private GetAllCustomerQueryHandler getAllQueryHandler;
+        private readonly ApplicationDbContext _context;
+        private readonly RedisCacheHandler _cacheHandler;
+        private readonly Mock<IDatabase> _mockDatabase;
+        private readonly CustomerViewModel _newCustomer;
+        private readonly CreateCustomerCommandHandler _createHandler;
+        private readonly UpdateCustomerCommandHandler _updateHandler;
+        private GetCustomerByIdQueryHandler _getByIdHandler;
+        private GetAllCustomerQueryHandler _getAllQueryHandler;
 
         public CustomerControllerTests(WebApplicationFactory<Program> factory)
         {
@@ -37,50 +33,50 @@ namespace MC2.CrudTest.UnitTests
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
                 .Options;
 
-            context = new ApplicationDbContext(options);
+            _context = new ApplicationDbContext(options);
 
 
             _mediator = new Mock<IMediator>();
 
-            var mockMultiplexer = new Mock<IConnectionMultiplexer>();
+            Mock<IConnectionMultiplexer> mockMultiplexer = new Mock<IConnectionMultiplexer>();
 
             mockMultiplexer.Setup(_ => _.IsConnected).Returns(false);
 
-            mockDatabase = new Mock<IDatabase>();
+            _mockDatabase = new Mock<IDatabase>();
 
             mockMultiplexer
                 .Setup(_ => _.GetDatabase(It.IsAny<int>(), It.IsAny<object>()))
-                .Returns(mockDatabase.Object);
+                .Returns(_mockDatabase.Object);
 
-            cacheHandler = new RedisCacheHandler(mockMultiplexer.Object);
+            _cacheHandler = new RedisCacheHandler(mockMultiplexer.Object);
 
-            _customerService = new CustomerService(new EventStoreRepository(context, null), mockDatabase.Object);
+            ICustomerService customerService = new CustomerService(new EventStoreRepository(_context, null), _mockDatabase.Object);
 
-            newCustomer = new CustomerViewModel(Guid.NewGuid(), new List<string>().ToArray(), "Mohammadd", "Dehghaniii", "+989010596159", "dehghany.m@gmail.com",
+            _newCustomer = new CustomerViewModel(Guid.NewGuid(), new List<string>().ToArray(), "Mohammadd", "Dehghaniii", "+989010596159", "dehghany.m@gmail.com",
                "1231564654", "2015-02-04");
 
-            createHandler = new CreateCustomerCommandHandler(_customerService);
+            _createHandler = new CreateCustomerCommandHandler(customerService);
 
-            updateHandler = new UpdateCustomerCommandHandler(_customerService);
+            _updateHandler = new UpdateCustomerCommandHandler(customerService);
 
-            getByIdHandler = new GetCustomerByIdQueryHandler(_customerService);
+            _getByIdHandler = new GetCustomerByIdQueryHandler(customerService);
 
-            getAllQueryHandler = new GetAllCustomerQueryHandler(_customerService);
+            _getAllQueryHandler = new GetAllCustomerQueryHandler(customerService);
 
         }
 
         [Fact]
         public async Task CreateCustomer_DuplicateEmail_throws_exception()
         {
-            await createHandler.Handle(new CreateCustomerCommand(newCustomer.FirstName, newCustomer.LastName, newCustomer.PhoneNumber, newCustomer.Email, newCustomer.BankAccount, newCustomer.DateOfBirth), CancellationToken.None);
+            await _createHandler.Handle(new CreateCustomerCommand(_newCustomer.FirstName, _newCustomer.LastName, _newCustomer.PhoneNumber, _newCustomer.Email, _newCustomer.BankAccount, _newCustomer.DateOfBirth), CancellationToken.None);
 
-            cacheHandler.SetCustomerData(new Customer(newCustomer.FirstName, newCustomer.LastName, newCustomer.PhoneNumber, newCustomer.Email, newCustomer.BankAccount, newCustomer.DateOfBirth));
+            _cacheHandler.SetCustomerData(new Customer(_newCustomer.FirstName, _newCustomer.LastName, _newCustomer.PhoneNumber, _newCustomer.Email, _newCustomer.BankAccount, _newCustomer.DateOfBirth));
 
-            mockDatabase.Setup((x) => x.StringGet(newCustomer.Email, It.IsAny<CommandFlags>())).Returns(() => "true");
+            _mockDatabase.Setup((x) => x.StringGet(_newCustomer.Email, It.IsAny<CommandFlags>())).Returns(() => "true");
 
-            mockDatabase.Setup((x) => x.StringGet($"{newCustomer.FirstName}-{newCustomer.LastName}-{DateOnly.Parse(newCustomer.DateOfBirth)}", It.IsAny<CommandFlags>())).Returns(() => "true");
+            _mockDatabase.Setup((x) => x.StringGet($"{_newCustomer.FirstName}-{_newCustomer.LastName}-{DateOnly.Parse(_newCustomer.DateOfBirth)}", It.IsAny<CommandFlags>())).Returns(() => "true");
 
-            await Assert.ThrowsAsync<ArgumentException>(async () => await createHandler.Handle(new CreateCustomerCommand(newCustomer.FirstName, newCustomer.LastName, newCustomer.PhoneNumber, newCustomer.Email, newCustomer.BankAccount, newCustomer.DateOfBirth), CancellationToken.None));
+            await Assert.ThrowsAsync<ArgumentException>(async () => await _createHandler.Handle(new CreateCustomerCommand(_newCustomer.FirstName, _newCustomer.LastName, _newCustomer.PhoneNumber, _newCustomer.Email, _newCustomer.BankAccount, _newCustomer.DateOfBirth), CancellationToken.None));
 
         }
 
@@ -88,18 +84,18 @@ namespace MC2.CrudTest.UnitTests
         public async Task NewCustomer_CustomerDataIsNotUnique_EmailIsUnique_ShouldFail()
         {
 
-            await createHandler.Handle(new CreateCustomerCommand(newCustomer.FirstName, newCustomer.LastName, newCustomer.PhoneNumber, newCustomer.Email, newCustomer.BankAccount, newCustomer.DateOfBirth), CancellationToken.None);
+            await _createHandler.Handle(new CreateCustomerCommand(_newCustomer.FirstName, _newCustomer.LastName, _newCustomer.PhoneNumber, _newCustomer.Email, _newCustomer.BankAccount, _newCustomer.DateOfBirth), CancellationToken.None);
 
-            cacheHandler.SetCustomerData(new Customer(newCustomer.FirstName, newCustomer.LastName, newCustomer.PhoneNumber, newCustomer.Email, newCustomer.BankAccount, newCustomer.DateOfBirth));
+            _cacheHandler.SetCustomerData(new Customer(_newCustomer.FirstName, _newCustomer.LastName, _newCustomer.PhoneNumber, _newCustomer.Email, _newCustomer.BankAccount, _newCustomer.DateOfBirth));
 
-            mockDatabase.Setup((x) => x.StringGet(newCustomer.Email, It.IsAny<CommandFlags>())).Returns(() => "true");
+            _mockDatabase.Setup((x) => x.StringGet(_newCustomer.Email, It.IsAny<CommandFlags>())).Returns(() => "true");
 
-            mockDatabase.Setup((x) => x.StringGet($"{newCustomer.FirstName}-{newCustomer.LastName}-{DateOnly.Parse(newCustomer.DateOfBirth)}", It.IsAny<CommandFlags>())).Returns(() => "true");
+            _mockDatabase.Setup((x) => x.StringGet($"{_newCustomer.FirstName}-{_newCustomer.LastName}-{DateOnly.Parse(_newCustomer.DateOfBirth)}", It.IsAny<CommandFlags>())).Returns(() => "true");
 
             var anotherCustomer = new CustomerViewModel(Guid.NewGuid(), [], "Mohammadd", "Dehghaniii", "+989010596159", "a@a.com",
                "1231564654", "2015-02-04");
 
-            await Assert.ThrowsAsync<ArgumentException>(async () => await createHandler.Handle(new CreateCustomerCommand(anotherCustomer.FirstName, anotherCustomer.LastName, anotherCustomer.PhoneNumber, anotherCustomer.Email, anotherCustomer.BankAccount, anotherCustomer.DateOfBirth), CancellationToken.None));
+            await Assert.ThrowsAsync<ArgumentException>(async () => await _createHandler.Handle(new CreateCustomerCommand(anotherCustomer.FirstName, anotherCustomer.LastName, anotherCustomer.PhoneNumber, anotherCustomer.Email, anotherCustomer.BankAccount, anotherCustomer.DateOfBirth), CancellationToken.None));
 
         }
 
@@ -108,27 +104,27 @@ namespace MC2.CrudTest.UnitTests
         {
             ResetDbContext();
 
-            await createHandler.Handle(new CreateCustomerCommand(newCustomer.FirstName, newCustomer.LastName, newCustomer.PhoneNumber, newCustomer.Email, newCustomer.BankAccount, newCustomer.DateOfBirth), CancellationToken.None);
+            await _createHandler.Handle(new CreateCustomerCommand(_newCustomer.FirstName, _newCustomer.LastName, _newCustomer.PhoneNumber, _newCustomer.Email, _newCustomer.BankAccount, _newCustomer.DateOfBirth), CancellationToken.None);
 
-            cacheHandler.SetCustomerData(new Customer(newCustomer.FirstName, newCustomer.LastName, newCustomer.PhoneNumber, newCustomer.Email, newCustomer.BankAccount, newCustomer.DateOfBirth));
+            _cacheHandler.SetCustomerData(new Customer(_newCustomer.FirstName, _newCustomer.LastName, _newCustomer.PhoneNumber, _newCustomer.Email, _newCustomer.BankAccount, _newCustomer.DateOfBirth));
 
-            mockDatabase.Setup((x) => x.StringGet(newCustomer.Email, It.IsAny<CommandFlags>())).Returns(() => "true");
+            _mockDatabase.Setup((x) => x.StringGet(_newCustomer.Email, It.IsAny<CommandFlags>())).Returns(() => "true");
 
-            mockDatabase.Setup((x) => x.StringGet($"{newCustomer.FirstName}-{newCustomer.LastName}-{DateOnly.Parse(newCustomer.DateOfBirth)}", It.IsAny<CommandFlags>())).Returns(() => "true");
+            _mockDatabase.Setup((x) => x.StringGet($"{_newCustomer.FirstName}-{_newCustomer.LastName}-{DateOnly.Parse(_newCustomer.DateOfBirth)}", It.IsAny<CommandFlags>())).Returns(() => "true");
 
             var anotherCustomer = new CustomerViewModel(Guid.NewGuid(), new List<string>().ToArray(), "M", "Dehghaniii", "+989010596159", "a@a.com",
                "1231564654", "2015-02-04");
 
-            await createHandler.Handle(new CreateCustomerCommand(anotherCustomer.FirstName, anotherCustomer.LastName, anotherCustomer.PhoneNumber, anotherCustomer.Email, anotherCustomer.BankAccount, anotherCustomer.DateOfBirth), CancellationToken.None);
+            await _createHandler.Handle(new CreateCustomerCommand(anotherCustomer.FirstName, anotherCustomer.LastName, anotherCustomer.PhoneNumber, anotherCustomer.Email, anotherCustomer.BankAccount, anotherCustomer.DateOfBirth), CancellationToken.None);
 
-            Assert.Equal(2, await context.Events.CountAsync());
+            Assert.Equal(2, await _context.Events.CountAsync());
 
         }
 
         [Fact]
         public async Task Bad_Phone_Number_shouldFail()
         {
-            await Assert.ThrowsAsync<ArgumentException>(async () => await createHandler.Handle(new CreateCustomerCommand(newCustomer.FirstName, newCustomer.LastName, "+986546876465", newCustomer.Email, newCustomer.BankAccount, newCustomer.DateOfBirth), CancellationToken.None));
+            await Assert.ThrowsAsync<ArgumentException>(async () => await _createHandler.Handle(new CreateCustomerCommand(_newCustomer.FirstName, _newCustomer.LastName, "+986546876465", _newCustomer.Email, _newCustomer.BankAccount, _newCustomer.DateOfBirth), CancellationToken.None));
         }
 
         [Fact]
@@ -137,7 +133,7 @@ namespace MC2.CrudTest.UnitTests
             var customer = new CustomerViewModel(Guid.NewGuid(), new List<string>().ToArray(), "Mohammadd", "Dehghaniii", "+989010596159", "dfhfdghfgh",
                "1231564654", "2015-02-04");
 
-            await Assert.ThrowsAsync<ArgumentException>(async () => await createHandler.Handle(new CreateCustomerCommand(customer.FirstName, customer.LastName, customer.PhoneNumber, customer.Email, customer.BankAccount, customer.DateOfBirth), CancellationToken.None));
+            await Assert.ThrowsAsync<ArgumentException>(async () => await _createHandler.Handle(new CreateCustomerCommand(customer.FirstName, customer.LastName, customer.PhoneNumber, customer.Email, customer.BankAccount, customer.DateOfBirth), CancellationToken.None));
         }
 
         [Fact]
@@ -145,24 +141,24 @@ namespace MC2.CrudTest.UnitTests
         {
             ResetDbContext();
 
-            await createHandler.Handle(new CreateCustomerCommand(newCustomer.FirstName, newCustomer.LastName, newCustomer.PhoneNumber, newCustomer.Email, newCustomer.BankAccount, newCustomer.DateOfBirth), CancellationToken.None);
+            await _createHandler.Handle(new CreateCustomerCommand(_newCustomer.FirstName, _newCustomer.LastName, _newCustomer.PhoneNumber, _newCustomer.Email, _newCustomer.BankAccount, _newCustomer.DateOfBirth), CancellationToken.None);
 
-            cacheHandler.SetCustomerData(new Customer(newCustomer.FirstName, newCustomer.LastName, newCustomer.PhoneNumber, newCustomer.Email, newCustomer.BankAccount, newCustomer.DateOfBirth));
+            _cacheHandler.SetCustomerData(new Customer(_newCustomer.FirstName, _newCustomer.LastName, _newCustomer.PhoneNumber, _newCustomer.Email, _newCustomer.BankAccount, _newCustomer.DateOfBirth));
 
-            mockDatabase.Setup((x) => x.StringGet(newCustomer.Email, It.IsAny<CommandFlags>())).Returns(() => "true");
+            _mockDatabase.Setup((x) => x.StringGet(_newCustomer.Email, It.IsAny<CommandFlags>())).Returns(() => "true");
 
-            mockDatabase.Setup((x) => x.StringGet($"{newCustomer.FirstName}-{newCustomer.LastName}-{DateOnly.Parse(newCustomer.DateOfBirth)}", It.IsAny<CommandFlags>())).Returns(() => "true");
+            _mockDatabase.Setup((x) => x.StringGet($"{_newCustomer.FirstName}-{_newCustomer.LastName}-{DateOnly.Parse(_newCustomer.DateOfBirth)}", It.IsAny<CommandFlags>())).Returns(() => "true");
 
-            var cutomerId = context.Events.FirstOrDefault()?.AggregateId;
+            var cutomerId = _context.Events.FirstOrDefault()?.AggregateId;
 
             if (cutomerId.HasValue)
             {
 
-                await updateHandler.Handle(new UpdateCustomerCommand(cutomerId.Value, "a", "a", "+989010596159", "a@a.com", "123456", "2015-02-08"), CancellationToken.None);
+                await _updateHandler.Handle(new UpdateCustomerCommand(cutomerId.Value, "a", "a", "+989010596159", "a@a.com", "123456", "2015-02-08"), CancellationToken.None);
 
-                var lastEvent = context.Events.LastOrDefault();
+                var lastEvent = _context.Events.LastOrDefault();
 
-                Assert.Equal(2, context.Events.Count());
+                Assert.Equal(2, _context.Events.Count());
 
                 Assert.IsType<CustomerUpdatedEvent>(lastEvent);
             }
@@ -170,9 +166,9 @@ namespace MC2.CrudTest.UnitTests
 
         private void ResetDbContext()
         {
-            foreach (var entity in context.Events)
-                context.Events.Remove(entity);
-            context.SaveChanges();
+            foreach (var entity in _context.Events)
+                _context.Events.Remove(entity);
+            _context.SaveChanges();
         }
 
         [Fact]
@@ -180,15 +176,15 @@ namespace MC2.CrudTest.UnitTests
         {
             ResetDbContext();
 
-            await createHandler.Handle(new CreateCustomerCommand(newCustomer.FirstName, newCustomer.LastName, newCustomer.PhoneNumber, newCustomer.Email, newCustomer.BankAccount, newCustomer.DateOfBirth), CancellationToken.None);
+            await _createHandler.Handle(new CreateCustomerCommand(_newCustomer.FirstName, _newCustomer.LastName, _newCustomer.PhoneNumber, _newCustomer.Email, _newCustomer.BankAccount, _newCustomer.DateOfBirth), CancellationToken.None);
 
-            cacheHandler.SetCustomerData(new Customer(newCustomer.FirstName, newCustomer.LastName, newCustomer.PhoneNumber, newCustomer.Email, newCustomer.BankAccount, newCustomer.DateOfBirth));
+            _cacheHandler.SetCustomerData(new Customer(_newCustomer.FirstName, _newCustomer.LastName, _newCustomer.PhoneNumber, _newCustomer.Email, _newCustomer.BankAccount, _newCustomer.DateOfBirth));
 
-            mockDatabase.Setup((x) => x.StringGet(newCustomer.Email, It.IsAny<CommandFlags>())).Returns(() => "true");
+            _mockDatabase.Setup((x) => x.StringGet(_newCustomer.Email, It.IsAny<CommandFlags>())).Returns(() => "true");
 
-            mockDatabase.Setup((x) => x.StringGet($"{newCustomer.FirstName}-{newCustomer.LastName}-{DateOnly.Parse(newCustomer.DateOfBirth)}", It.IsAny<CommandFlags>())).Returns(() => "true");
+            _mockDatabase.Setup((x) => x.StringGet($"{_newCustomer.FirstName}-{_newCustomer.LastName}-{DateOnly.Parse(_newCustomer.DateOfBirth)}", It.IsAny<CommandFlags>())).Returns(() => "true");
 
-            var cutomerId = context.Events.FirstOrDefault()?.AggregateId;
+            var cutomerId = _context.Events.FirstOrDefault()?.AggregateId;
 
             if (cutomerId.HasValue)
             {
@@ -206,11 +202,11 @@ namespace MC2.CrudTest.UnitTests
                 //    && newCustomer.Email.Equals(result.Email));
 
 
-                await updateHandler.Handle(new UpdateCustomerCommand(cutomerId.Value, "a", "a", "+989010596159", "a@a.com", "123456", "2015-02-08"), CancellationToken.None);
+                await _updateHandler.Handle(new UpdateCustomerCommand(cutomerId.Value, "a", "a", "+989010596159", "a@a.com", "123456", "2015-02-08"), CancellationToken.None);
 
-                var lastEvent = context.Events.LastOrDefault();
+                var lastEvent = _context.Events.LastOrDefault();
 
-                Assert.Equal(2, context.Events.Count());
+                Assert.Equal(2, _context.Events.Count());
 
                 Assert.IsType<CustomerUpdatedEvent>(lastEvent);
             }
@@ -221,25 +217,25 @@ namespace MC2.CrudTest.UnitTests
         {
             ResetDbContext();
 
-            await createHandler.Handle(new CreateCustomerCommand(newCustomer.FirstName, newCustomer.LastName, newCustomer.PhoneNumber, newCustomer.Email, newCustomer.BankAccount, newCustomer.DateOfBirth), CancellationToken.None);
+            await _createHandler.Handle(new CreateCustomerCommand(_newCustomer.FirstName, _newCustomer.LastName, _newCustomer.PhoneNumber, _newCustomer.Email, _newCustomer.BankAccount, _newCustomer.DateOfBirth), CancellationToken.None);
 
-            cacheHandler.SetCustomerData(new Customer(newCustomer.FirstName, newCustomer.LastName, newCustomer.PhoneNumber, newCustomer.Email, newCustomer.BankAccount, newCustomer.DateOfBirth));
+            _cacheHandler.SetCustomerData(new Customer(_newCustomer.FirstName, _newCustomer.LastName, _newCustomer.PhoneNumber, _newCustomer.Email, _newCustomer.BankAccount, _newCustomer.DateOfBirth));
 
-            mockDatabase.Setup((x) => x.StringGet(newCustomer.Email, It.IsAny<CommandFlags>())).Returns(() => "true");
+            _mockDatabase.Setup((x) => x.StringGet(_newCustomer.Email, It.IsAny<CommandFlags>())).Returns(() => "true");
 
-            mockDatabase.Setup((x) => x.StringGet($"{newCustomer.FirstName}-{newCustomer.LastName}-{DateOnly.Parse(newCustomer.DateOfBirth)}", It.IsAny<CommandFlags>())).Returns(() => "true");
+            _mockDatabase.Setup((x) => x.StringGet($"{_newCustomer.FirstName}-{_newCustomer.LastName}-{DateOnly.Parse(_newCustomer.DateOfBirth)}", It.IsAny<CommandFlags>())).Returns(() => "true");
 
             var secondCustomer = new CustomerViewModel(Guid.NewGuid(), [], "M", "Dehghaniii", "+989010596159", "a@a.com",
                "1231564654", "2015-02-04");
 
-            await createHandler.Handle(new CreateCustomerCommand(secondCustomer.FirstName, secondCustomer.LastName, secondCustomer.PhoneNumber, secondCustomer.Email, secondCustomer.BankAccount, secondCustomer.DateOfBirth), CancellationToken.None);
+            await _createHandler.Handle(new CreateCustomerCommand(secondCustomer.FirstName, secondCustomer.LastName, secondCustomer.PhoneNumber, secondCustomer.Email, secondCustomer.BankAccount, secondCustomer.DateOfBirth), CancellationToken.None);
 
-            Assert.Equal(2, await context.Events.CountAsync());
+            Assert.Equal(2, await _context.Events.CountAsync());
 
-            var secondCutomerId = context.Events.LastOrDefault()?.AggregateId;
+            var secondCutomerId = _context.Events.LastOrDefault()?.AggregateId;
             if (secondCutomerId.HasValue)
             {
-                await Assert.ThrowsAsync<ArgumentException>(async () => await updateHandler.Handle(new UpdateCustomerCommand(secondCutomerId.Value, secondCustomer.FirstName, secondCustomer.LastName, secondCustomer.PhoneNumber, newCustomer.Email, secondCustomer.BankAccount, secondCustomer.DateOfBirth), CancellationToken.None));
+                await Assert.ThrowsAsync<ArgumentException>(async () => await _updateHandler.Handle(new UpdateCustomerCommand(secondCutomerId.Value, secondCustomer.FirstName, secondCustomer.LastName, secondCustomer.PhoneNumber, _newCustomer.Email, secondCustomer.BankAccount, secondCustomer.DateOfBirth), CancellationToken.None));
             }
         }
 
@@ -248,27 +244,27 @@ namespace MC2.CrudTest.UnitTests
         {
             ResetDbContext();
 
-            await createHandler.Handle(new CreateCustomerCommand(newCustomer.FirstName, newCustomer.LastName, newCustomer.PhoneNumber, newCustomer.Email, newCustomer.BankAccount, newCustomer.DateOfBirth), CancellationToken.None);
+            await _createHandler.Handle(new CreateCustomerCommand(_newCustomer.FirstName, _newCustomer.LastName, _newCustomer.PhoneNumber, _newCustomer.Email, _newCustomer.BankAccount, _newCustomer.DateOfBirth), CancellationToken.None);
 
-            cacheHandler.SetCustomerData(new Customer(newCustomer.FirstName, newCustomer.LastName, newCustomer.PhoneNumber, newCustomer.Email, newCustomer.BankAccount, newCustomer.DateOfBirth));
+            _cacheHandler.SetCustomerData(new Customer(_newCustomer.FirstName, _newCustomer.LastName, _newCustomer.PhoneNumber, _newCustomer.Email, _newCustomer.BankAccount, _newCustomer.DateOfBirth));
 
-            mockDatabase.Setup((x) => x.StringGet(newCustomer.Email, It.IsAny<CommandFlags>())).Returns(() => "true");
+            _mockDatabase.Setup((x) => x.StringGet(_newCustomer.Email, It.IsAny<CommandFlags>())).Returns(() => "true");
 
-            mockDatabase.Setup((x) => x.StringGet($"{newCustomer.FirstName}-{newCustomer.LastName}-{DateOnly.Parse(newCustomer.DateOfBirth)}", It.IsAny<CommandFlags>())).Returns(() => "true");
+            _mockDatabase.Setup((x) => x.StringGet($"{_newCustomer.FirstName}-{_newCustomer.LastName}-{DateOnly.Parse(_newCustomer.DateOfBirth)}", It.IsAny<CommandFlags>())).Returns(() => "true");
 
             var secondCustomer = new CustomerViewModel(Guid.NewGuid(), [], "M", "Dehghaniii", "+989010596159", "a@a.com",
                "1231564654", "2015-02-04");
 
-            await createHandler.Handle(new CreateCustomerCommand(secondCustomer.FirstName, secondCustomer.LastName, secondCustomer.PhoneNumber, secondCustomer.Email, secondCustomer.BankAccount, secondCustomer.DateOfBirth), CancellationToken.None);
+            await _createHandler.Handle(new CreateCustomerCommand(secondCustomer.FirstName, secondCustomer.LastName, secondCustomer.PhoneNumber, secondCustomer.Email, secondCustomer.BankAccount, secondCustomer.DateOfBirth), CancellationToken.None);
 
-            Assert.Equal(2, await context.Events.CountAsync());
+            Assert.Equal(2, await _context.Events.CountAsync());
 
-            var secondCutomerId = context.Events.LastOrDefault()?.AggregateId;
+            var secondCutomerId = _context.Events.LastOrDefault()?.AggregateId;
             if (secondCutomerId.HasValue)
             {
                 var uniqueEmail = "b@b.com";
-                await updateHandler.Handle(new UpdateCustomerCommand(secondCutomerId.Value, secondCustomer.FirstName, secondCustomer.LastName, secondCustomer.PhoneNumber, uniqueEmail, secondCustomer.BankAccount, secondCustomer.DateOfBirth), CancellationToken.None);
-                Assert.Equal(3, context.Events.Count());
+                await _updateHandler.Handle(new UpdateCustomerCommand(secondCutomerId.Value, secondCustomer.FirstName, secondCustomer.LastName, secondCustomer.PhoneNumber, uniqueEmail, secondCustomer.BankAccount, secondCustomer.DateOfBirth), CancellationToken.None);
+                Assert.Equal(3, _context.Events.Count());
             }
         }
         
@@ -278,19 +274,19 @@ namespace MC2.CrudTest.UnitTests
         {
             ResetDbContext();
 
-            await createHandler.Handle(new CreateCustomerCommand(newCustomer.FirstName, newCustomer.LastName, newCustomer.PhoneNumber, newCustomer.Email, newCustomer.BankAccount, newCustomer.DateOfBirth), CancellationToken.None);
+            await _createHandler.Handle(new CreateCustomerCommand(_newCustomer.FirstName, _newCustomer.LastName, _newCustomer.PhoneNumber, _newCustomer.Email, _newCustomer.BankAccount, _newCustomer.DateOfBirth), CancellationToken.None);
 
-            cacheHandler.SetCustomerData(new Customer(newCustomer.FirstName, newCustomer.LastName, newCustomer.PhoneNumber, newCustomer.Email, newCustomer.BankAccount, newCustomer.DateOfBirth));
+            _cacheHandler.SetCustomerData(new Customer(_newCustomer.FirstName, _newCustomer.LastName, _newCustomer.PhoneNumber, _newCustomer.Email, _newCustomer.BankAccount, _newCustomer.DateOfBirth));
 
-            mockDatabase.Setup((x) => x.StringGet(newCustomer.Email, It.IsAny<CommandFlags>())).Returns(() => "true");
+            _mockDatabase.Setup((x) => x.StringGet(_newCustomer.Email, It.IsAny<CommandFlags>())).Returns(() => "true");
 
-            mockDatabase.Setup((x) => x.StringGet($"{newCustomer.FirstName}-{newCustomer.LastName}-{DateOnly.Parse(newCustomer.DateOfBirth)}", It.IsAny<CommandFlags>())).Returns(() => "true");
+            _mockDatabase.Setup((x) => x.StringGet($"{_newCustomer.FirstName}-{_newCustomer.LastName}-{DateOnly.Parse(_newCustomer.DateOfBirth)}", It.IsAny<CommandFlags>())).Returns(() => "true");
 
             var secondCustomer = new CustomerViewModel(new Guid(), [], "M", "Dehghaniii", "+989010596159", "a@a.com",
                "1231564654", "2015-02-04");
 
-            await createHandler.Handle(new CreateCustomerCommand(secondCustomer.FirstName, secondCustomer.LastName, secondCustomer.PhoneNumber, secondCustomer.Email, secondCustomer.BankAccount, secondCustomer.DateOfBirth), CancellationToken.None);
-            Assert.Equal(2, context.Events.Count());
+            await _createHandler.Handle(new CreateCustomerCommand(secondCustomer.FirstName, secondCustomer.LastName, secondCustomer.PhoneNumber, secondCustomer.Email, secondCustomer.BankAccount, secondCustomer.DateOfBirth), CancellationToken.None);
+            Assert.Equal(2, _context.Events.Count());
             //var customersList =  await getAllQueryHandler.Handle(new GetAllCustomersQuery(), CancellationToken.None);
             //var firstSavedCustomer =  customersList.FirstOrDefault();
             //Assert.NotNull(firstSavedCustomer);
