@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Options;
 using Microsoft.Playwright;
 using Reqnroll;
-using ReqnrollTestProject.Settings;
 
 namespace AcceptanceTest.Services
 {
@@ -15,7 +14,8 @@ namespace AcceptanceTest.Services
 
     public class PageDependencyService : IPageDependencyService, IDisposable
     {
-        public PageDependencyService(Task<IPage> page, IOptions<AppSettings> appSettings, ScenarioContext scenarioContext)
+        public PageDependencyService(Task<IPage> page, 
+            IOptions<AppSettings> appSettings, ScenarioContext scenarioContext)
         {
             Page = page;
             Page.Result.SetDefaultTimeout(240000);

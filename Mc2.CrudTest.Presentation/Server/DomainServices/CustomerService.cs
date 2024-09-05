@@ -10,8 +10,8 @@ namespace Mc2.CrudTest.Presentation.DomainServices
 {
     public class CustomerService: ICustomerService
     {
-        private readonly IEventRepository _eventStore; 
-        static  IDatabase _redisDB; 
+        private readonly IEventRepository _eventStore;
+        private static  IDatabase _redisDB; 
         public CustomerService(IEventRepository eventStore, IDatabase redis)
         {
             _redisDB = redis;
@@ -28,7 +28,7 @@ namespace Mc2.CrudTest.Presentation.DomainServices
                 customer.Id = Guid.NewGuid();
             }
 
-            var customerCreatedEvent = new CustomerCreatedEvent(customer.Id, customer.FirstName, customer.LastName,
+            CustomerCreatedEvent? customerCreatedEvent = new CustomerCreatedEvent(customer.Id, customer.FirstName, customer.LastName,
                 customer.PhoneNumber.Value, customer.Email.Value, customer.BankAccount.Value,
                 customer.DateOfBirth.Value)
             {
@@ -42,7 +42,7 @@ namespace Mc2.CrudTest.Presentation.DomainServices
 
         public static void SetCustomerInRedis(Customer customer)
         {
-            var customerData = $"{customer.FirstName}-{customer.LastName}-{customer.DateOfBirth.Value}";
+            string? customerData = $"{customer.FirstName}-{customer.LastName}-{customer.DateOfBirth.Value}";
 
             if (!string.IsNullOrEmpty(_redisDB.StringGet(customer.Email.Value)))
                 throw new ArgumentException("This email address was taken by another user. Please select another one ");
@@ -55,8 +55,8 @@ namespace Mc2.CrudTest.Presentation.DomainServices
 
             _redisDB.StringSet(customerData, $"{customer.Id}");
         }
-        
-        static bool IsEmailUnique(IDatabase db, string email)
+
+        private static bool IsEmailUnique(IDatabase db, string email)
         {
             return !db.SetContains("taken_emails", email);
         }
@@ -64,7 +64,7 @@ namespace Mc2.CrudTest.Presentation.DomainServices
         // Command: Update an existing customer
         public async Task UpdateCustomerAsync(Customer customer, Guid customerId)
         {
-            var customerUpdatedEvent = new CustomerUpdatedEvent(customer.Id, customer.FirstName, customer.LastName, customer.Email.Value, customer.PhoneNumber.Value, customer.BankAccount.Value, customer.DateOfBirth.Value)
+            CustomerUpdatedEvent? customerUpdatedEvent = new CustomerUpdatedEvent(customer.Id, customer.FirstName, customer.LastName, customer.Email.Value, customer.PhoneNumber.Value, customer.BankAccount.Value, customer.DateOfBirth.Value)
             {
                 Data = System.Text.Json.JsonSerializer.Serialize(customer),
                 AggregateId = customer.Id
@@ -76,8 +76,8 @@ namespace Mc2.CrudTest.Presentation.DomainServices
 
         private static void UpdateCustomerInRedis(Customer customer)
         {
-            var customerData = $"{customer.FirstName}-{customer.LastName}-{customer.DateOfBirth.Value}";
-            var redisEmail = _redisDB.StringGet(customer.Email.Value);
+            string? customerData = $"{customer.FirstName}-{customer.LastName}-{customer.DateOfBirth.Value}";
+            RedisValue redisEmail = _redisDB.StringGet(customer.Email.Value);
             if (!string.IsNullOrEmpty(redisEmail) && redisEmail != new RedisValue(customer.Id.ToString()))
                 throw new ArgumentException("This email address was taken by another user. Please select another one ");
 
@@ -91,7 +91,7 @@ namespace Mc2.CrudTest.Presentation.DomainServices
         // Command: Delete a customer
         public async Task DeleteCustomerAsync(Guid customerId)
         {
-            var customerDeletedEvent = new CustomerDeletedEvent(customerId);
+            CustomerDeletedEvent? customerDeletedEvent = new CustomerDeletedEvent(customerId);
             customerDeletedEvent.OccurredOn = DateTimeOffset.UtcNow;
             await _eventStore.SaveEventAsync(customerDeletedEvent, () => {});
         }
@@ -100,10 +100,10 @@ namespace Mc2.CrudTest.Presentation.DomainServices
         public async Task<Customer> GetCustomer(Guid customerId)
         {
            
-            var events = await _eventStore.GetEventsAsync(customerId);
+            List<EventBase>? events = await _eventStore.GetEventsAsync(customerId);
         
-            var customer = new Customer();
-            foreach (var @event in events)
+            Customer? customer = new Customer();
+            foreach (EventBase? @event in events)
             {
                 customer.Apply(@event);
             }
@@ -113,18 +113,18 @@ namespace Mc2.CrudTest.Presentation.DomainServices
     
         public async Task<IEnumerable<Customer>> GetAllCustomers()
         {
-            var events = await _eventStore.GetAllEvents().ToListAsync();
+            List<EventBase>? events = await _eventStore.GetAllEvents().ToListAsync();
             
-            var customers = new Dictionary<Guid,Customer>();
+            Dictionary<Guid, Customer>? customers = new Dictionary<Guid,Customer>();
             try
             {
-                foreach (var @event in events)
+                foreach (EventBase? @event in events)
                 {
                     if (customers.ContainsKey(@event.AggregateId))
                         customers[@event.AggregateId].Apply(@event);
                     else
                     {
-                        var customer = new Customer();
+                        Customer? customer = new Customer();
                         customer.Apply(@event);
                         customers.Add(@event.AggregateId, customer);
                     }

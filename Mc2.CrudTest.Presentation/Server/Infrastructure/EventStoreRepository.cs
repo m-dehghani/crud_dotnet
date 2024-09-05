@@ -1,5 +1,6 @@
 using Mc2.CrudTest.Presentation.Shared.Events;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Mc2.CrudTest.Presentation.Infrastructure;
 
@@ -16,12 +17,12 @@ public class EventStoreRepository: IEventRepository
 
     public async Task SaveEventAsync(EventBase @event, Action functionToRun) 
     {
-        var executionStrategy = _context.Database.CreateExecutionStrategy();
+        IExecutionStrategy? executionStrategy = _context.Database.CreateExecutionStrategy();
 
         await executionStrategy.Execute(
            async () =>
             {
-                var trx = await _context.Database.BeginTransactionAsync();
+                IDbContextTransaction? trx = await _context.Database.BeginTransactionAsync();
                 try
                 {
                     _context.Events.Add(@event);

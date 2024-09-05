@@ -46,7 +46,8 @@ namespace e2e
             await Page.GetByRole(AriaRole.Button, new PageGetByRoleOptions() {NameString = "History"}).ClickAsync();
             await Expect(Page.GetByText("CustomerCreatedEvent")).ToBeVisibleAsync();
             await Expect(Page.GetByText("CustomerUpdatedEvent")).ToBeVisibleAsync();
-            await Expect(Page.GetByRole(AriaRole.Heading, new PageGetByRoleOptions() {NameString = "Customer History"}))
+            await Expect(Page.GetByRole(AriaRole.Heading, new PageGetByRoleOptions()
+                    {NameString = "Customer History"}))
                 .ToBeVisibleAsync();
             await Expect(Page.GetByText("a@a.com").First).ToBeVisibleAsync();
             await Expect(Page.GetByText("a@a.com").Nth(1)).ToBeVisibleAsync();
@@ -69,7 +70,8 @@ namespace e2e
             await Page.GetByRole(AriaRole.Button, new PageGetByRoleOptions() {NameString = "History"}).ClickAsync();
             await Expect(Page.GetByText("CustomerCreatedEvent")).ToBeVisibleAsync();
             await Expect(Page.GetByText("CustomerUpdatedEvent")).ToBeVisibleAsync();
-            await Expect(Page.GetByRole(AriaRole.Heading, new PageGetByRoleOptions() {NameString = "Customer History"}))
+            await Expect(Page.GetByRole(AriaRole.Heading, new PageGetByRoleOptions() 
+                    {NameString = "Customer History"}))
                 .ToBeVisibleAsync();
             await Expect(Page.GetByText("a@a.com").First).ToBeVisibleAsync();
             await Expect(Page.GetByText("a@a.com").Nth(1)).ToBeVisibleAsync();
@@ -84,7 +86,8 @@ namespace e2e
             await Page.GetByRole(AriaRole.Button, new PageGetByRoleOptions() {NameString = "Delete"}).ClickAsync();
             await Page.GotoAsync(CustomerPageUrl);
             await Expect(Page.GetByText("Doe").Nth(1)).Not.ToBeVisibleAsync();
-            await Expect(Page.GetByText("John", new PageGetByTextOptions() {Exact = true})).Not.ToBeVisibleAsync();
+            await Expect(Page.GetByText("John", new PageGetByTextOptions() {Exact = true})).Not
+                .ToBeVisibleAsync();
 
         }
     }

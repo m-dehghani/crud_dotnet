@@ -1,6 +1,7 @@
 ﻿using AcceptanceTest.Pages;
 using AcceptanceTest.Services;
 using AcceptanceTest.Settings;
+using AcceptanceTest.StepDefinitions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Autofac;
@@ -30,7 +31,7 @@ namespace AcceptanceTest
 
         private static void RegisterConfiguration(this ContainerBuilder builder)
         {
-            var configuration = new ConfigurationBuilder()
+            IConfigurationRoot configuration = new ConfigurationBuilder()
                 .AddJsonFile("Settings/appsettings.json", false, true)
                 .Build();
 
@@ -43,8 +44,8 @@ namespace AcceptanceTest
         {
             builder.Register(c =>
             {
-                var configuration = c.Resolve<IConfiguration>();
-                var appSettings = new AppSettings();
+                IConfiguration configuration = c.Resolve<IConfiguration>();
+                AppSettings appSettings = new AppSettings();
                 configuration.Bind(appSettings);
                 return Options.Create(appSettings);
             }).As<IOptions<AppSettings>>();
@@ -54,8 +55,8 @@ namespace AcceptanceTest
         {
             builder.Register(async _ =>
             {
-                var playwright = await Playwright.CreateAsync().ConfigureAwait(false);
-                var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
+                IPlaywright? playwright = await Playwright.CreateAsync().ConfigureAwait(false);
+                IBrowser browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
                 {
                     Headless = false,
                     SlowMo = 200

@@ -10,10 +10,10 @@ using ILogger = Serilog.ILogger;
 namespace Mc2.CrudTest.Presentation.Server.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("[controller]/V1")]
 public class CustomerController : Controller
 {
-    private IMediator _mediator;
+    private readonly IMediator _mediator;
     private static readonly ILogger Log = Serilog.Log.ForContext<CustomerController>();
     public CustomerController(IMediator mediator)
     {
@@ -21,42 +21,42 @@ public class CustomerController : Controller
     }
 
    
-    [HttpGet("V1/{id:Guid}")]
+    [HttpGet("{id:Guid}")]
     public async Task<IActionResult> Get(string id)
     {
         GetCustomerByIdQuery getCustomerByIdQuery = new (Guid.Parse(id)); 
-        var result = await RequestHandler.HandleQuery(getCustomerByIdQuery, _mediator, Log);
+        IActionResult? result = await RequestHandler.HandleQuery(getCustomerByIdQuery, _mediator, Log);
         return result;
     }
 
-    [HttpGet("V1/{id:Guid}/History")]
+    [HttpGet("{id:Guid}/History")]
     public async Task<IActionResult> GetHistory(string id)
     {
         GetCustomerHistoryByIdQuery getCustomerHistoryByIdQuery = new(Guid.Parse(id));
-        var result = await RequestHandler.HandleQuery(getCustomerHistoryByIdQuery, _mediator, Log);
+        IActionResult? result = await RequestHandler.HandleQuery(getCustomerHistoryByIdQuery, _mediator, Log);
         return result;
     }
 
-    [HttpGet("V1")]
+    [HttpGet("")]
     public async Task<IActionResult> GetAll()
     {
         return await RequestHandler.HandleQuery(new GetAllCustomersQuery(), _mediator, Log);
     }
 
-    [HttpPost("V1")]
+    [HttpPost("")]
     public async Task<IActionResult> CreateCustomer(CreateCustomerCommand command)
     {
          return await RequestHandler.HandleCommand(command, _mediator, Log);
     }
 
-    [HttpPut("V1/{id}")]
+    [HttpPut("{id}")]
     public async Task<IActionResult> UpdateCustomer(string id, UpdateCustomerCommand customerUpdateCmd)
     {
         if (new Guid(id) != customerUpdateCmd.Id) { return new BadRequestResult(); }
         return await RequestHandler.HandleCommand(customerUpdateCmd, _mediator, Log);
     }
 
-    [HttpDelete("V1/{id}")]
+    [HttpDelete("{id}")]
     public async Task DeleteCustomer(string id)
     {
         await RequestHandler.HandleCommand(new DeleteCustomerCommand(Guid.Parse(id)), _mediator, Log);

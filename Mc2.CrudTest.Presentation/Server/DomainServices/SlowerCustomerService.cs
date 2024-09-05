@@ -11,7 +11,7 @@ namespace Mc2.CrudTest.Presentation.DomainServices
     public class SlowerCustomerService : ICustomerService
     {
         private readonly IEventRepository _eventStore;
-        JsonSerializerOptions _options;
+        private JsonSerializerOptions _options;
         public SlowerCustomerService(IEventRepository eventStore)
         {
             _eventStore = eventStore;
@@ -25,12 +25,12 @@ namespace Mc2.CrudTest.Presentation.DomainServices
 
         private async Task<(Boolean, Boolean)> CheckUniqueness(Customer customer)
         {
-            var emailUnique = false;
+            bool emailUnique = false;
 
-            var dataUnique = false;
+            bool dataUnique = false;
 
-            var customers = await GetAllCustomers();
-            var tempCustomer = customers.FirstOrDefault(c => c.Email == customer.Email && !c.IsDeleted);
+            IEnumerable<Customer>? customers = await GetAllCustomers();
+            Customer? tempCustomer = customers.FirstOrDefault(c => c.Email == customer.Email && !c.IsDeleted);
             if (tempCustomer == null  || tempCustomer.Id == customer.Id)
             {
                 emailUnique = true;
@@ -45,7 +45,7 @@ namespace Mc2.CrudTest.Presentation.DomainServices
 
         public async Task CreateCustomerAsync(Customer customer)
         {
-            var isUnique = await CheckUniqueness(customer);
+            (bool, bool) isUnique = await CheckUniqueness(customer);
 
             if (!isUnique.Item1)
                 throw new ArgumentException("This email address was taken by another user. Please select another one ");
@@ -58,7 +58,7 @@ namespace Mc2.CrudTest.Presentation.DomainServices
                 customer.Id = Guid.NewGuid();
             }
             
-             var customerCreatedEvent = new CustomerCreatedEvent(customer.Id, customer.FirstName, customer.LastName,
+             CustomerCreatedEvent? customerCreatedEvent = new CustomerCreatedEvent(customer.Id, customer.FirstName, customer.LastName,
                 customer.PhoneNumber.Value, customer.Email.Value, customer.BankAccount.Value,
                 customer.DateOfBirth.Value)
             {
@@ -71,7 +71,7 @@ namespace Mc2.CrudTest.Presentation.DomainServices
         }
         public async Task DeleteCustomerAsync(Guid customerId)
         {
-            var customerDeletedEvent = new CustomerDeletedEvent(customerId);
+            CustomerDeletedEvent? customerDeletedEvent = new CustomerDeletedEvent(customerId);
             customerDeletedEvent.OccurredOn = DateTimeOffset.UtcNow;
             await _eventStore.SaveEventAsync(customerDeletedEvent, () => { });
         }
@@ -80,10 +80,10 @@ namespace Mc2.CrudTest.Presentation.DomainServices
         public async Task<Customer> GetCustomer(Guid customerId)
         {
 
-            var events = await _eventStore.GetEventsAsync(customerId);
+            List<EventBase>? events = await _eventStore.GetEventsAsync(customerId);
 
-            var customer = new Customer();
-            foreach (var @event in events)
+            Customer? customer = new Customer();
+            foreach (EventBase? @event in events)
             {
                 // var specific_event = GetEventsFromGenericEvent(@event);
                 customer.Apply(@event);
@@ -94,27 +94,27 @@ namespace Mc2.CrudTest.Presentation.DomainServices
 
         public async Task<CustomerHistoryViewModel> GetCustomerHistory(Guid customerId)
         {
-            var events = await _eventStore.GetEventsAsync(customerId);
-            var history = new CustomerHistoryViewModel(events);
+            List<EventBase>? events = await _eventStore.GetEventsAsync(customerId);
+            CustomerHistoryViewModel? history = new CustomerHistoryViewModel(events);
             return history;
         }
 
         public async Task<IEnumerable<Customer>> GetAllCustomers()
         {
-            var customers = new Dictionary<Guid, Customer>();
+            Dictionary<Guid, Customer>? customers = new Dictionary<Guid, Customer>();
             try
             {
-                var events = await _eventStore.GetAllEvents().ToListAsync();
+                List<EventBase>? events = await _eventStore.GetAllEvents().ToListAsync();
 
            
            
-                foreach (var @event in events)
+                foreach (EventBase? @event in events)
                 {
                     if (customers.ContainsKey(@event.AggregateId))
                         customers[@event.AggregateId].Apply(@event);
                     else
                     {
-                        var customer = new Customer();
+                        Customer? customer = new Customer();
                         customer.Apply(@event);
                         customers.Add(@event.AggregateId, customer);
                     }
@@ -130,14 +130,14 @@ namespace Mc2.CrudTest.Presentation.DomainServices
         public async Task UpdateCustomerAsync(Customer customer, Guid customerId)
         {
             customer.Id = customerId;
-            var isUnique = await CheckUniqueness(customer);
+            (bool, bool) isUnique = await CheckUniqueness(customer);
 
             if (!isUnique.Item1)
                 throw new ArgumentException("201");
 
             if (!isUnique.Item2)
                 throw new ArgumentException("202");
-            var customerUpdatedEvent = new CustomerUpdatedEvent(customer.Id, customer.FirstName, customer.LastName, customer.Email.Value, customer.PhoneNumber.Value, customer.BankAccount.Value, customer.DateOfBirth.Value)
+            CustomerUpdatedEvent? customerUpdatedEvent = new CustomerUpdatedEvent(customer.Id, customer.FirstName, customer.LastName, customer.Email.Value, customer.PhoneNumber.Value, customer.BankAccount.Value, customer.DateOfBirth.Value)
             {
                 Data = System.Text.Json.JsonSerializer.Serialize(customer, _options),
                 AggregateId = customer.Id

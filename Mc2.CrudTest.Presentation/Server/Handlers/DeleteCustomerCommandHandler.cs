@@ -1,3 +1,4 @@
+using Mc2.CrudTest.Presentation.DomainServices;
 using Mc2.CrudTest.Presentation.Infrastructure;
 using Mc2.CrudTest.Presentation.Shared.Commands;
 using Mc2.CrudTest.Presentation.Shared.Events;
@@ -6,18 +7,16 @@ namespace Mc2.CrudTest.Presentation.Handlers;
 
 public class DeleteCustomerCommandHandler: IRequestHandler<DeleteCustomerCommand>
 {
-    private readonly IEventRepository _eventStore;
+    private readonly ICustomerService _service;
 
-    public DeleteCustomerCommandHandler(IEventRepository eventStore)
+    public DeleteCustomerCommandHandler(ICustomerService service)
     {
-        _eventStore = eventStore;
+        _service = service;
     }
     
     public async Task Handle(DeleteCustomerCommand command, CancellationToken cancellationToken)
     {
-        var @event = new CustomerDeletedEvent(command.Id);
-        await _eventStore.SaveEventAsync(@event, () => {});
-       
+        await _service.DeleteCustomerAsync(command.Id);
     }
     
 }

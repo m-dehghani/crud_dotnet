@@ -28,12 +28,11 @@ namespace AcceptanceTest.StepDefinitions
         [Then("The following customer is visible")]
         public async Task ThenTheFollowingCustomerIsVisible(DataTable dataTable)
         {
-            var tableRows = dataTable.ToDictionary();
-            foreach (var row in tableRows)
-            {
-                var textMatches = await _pageService.CustomerPage.TextContainsGivenValueAsync(row.Value);
-                textMatches.Should().BeTrue();
-            }
+            Dictionary<string, string>? tableRows = dataTable.ToDictionary();
+           
+              await _pageService.CustomerPage.TextContainsGivenValueAsync(dataTable);
+                
+           
         }
     }
 }

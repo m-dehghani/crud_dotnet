@@ -11,44 +11,47 @@ namespace Mc2.CrudTest.Presentation
     {
         public static void Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
-           // builder.AddServiceDefaults();
-
+            WebApplicationBuilder? builder = WebApplication.CreateBuilder(args);
+           
+            // builder.AddServiceDefaults();
+           
             builder.Services.AddControllersWithViews().AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
-            }); ;
+            });
+            ;
             builder.Services.AddRazorPages();
-            builder.Services.AddDbContext<ApplicationDbContext>(options => {
-                options.UseNpgsql(builder.Configuration["ConnectionStrings:EventStoreConnection"], 
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            {
+                options.UseNpgsql(builder.Configuration["ConnectionStrings:EventStoreConnection"],
                     npgsqlOptionsAction: sqlOptions =>
                     {
                         sqlOptions.EnableRetryOnFailure(
-                        maxRetryCount: 10,
-                        maxRetryDelay: TimeSpan.FromSeconds(30),
-                        errorCodesToAdd: null);
+                            maxRetryCount: 10,
+                            maxRetryDelay: TimeSpan.FromSeconds(30),
+                            errorCodesToAdd: null);
                     });
             });
-            
-            builder.Services.AddDbContext<ReadModelDbContext>(options => { 
+
+            builder.Services.AddDbContext<ReadModelDbContext>(options =>
+            {
                 options.UseNpgsql(builder.Configuration["ConnectionStrings:EventStoreConnection"],
-                npgsqlOptionsAction: sqlOptions =>
-                {
-                    sqlOptions.EnableRetryOnFailure(
-                    maxRetryCount: 10,
-                    maxRetryDelay: TimeSpan.FromSeconds(30),
-                    errorCodesToAdd: null);
-                });
-        });
+                    npgsqlOptionsAction: sqlOptions =>
+                    {
+                        sqlOptions.EnableRetryOnFailure(
+                            maxRetryCount: 10,
+                            maxRetryDelay: TimeSpan.FromSeconds(30),
+                            errorCodesToAdd: null);
+                    });
+            });
 
 
             builder.Services.AddSwaggerGen();
-            builder.Services.AddMediatR(cfg => {
-                cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
-            });
+            builder.Services.AddMediatR(cfg => { cfg.RegisterServicesFromAssembly(typeof(Program).Assembly); });
             builder.Services.AddScoped<IDatabase>(cfg =>
             {
-                IConnectionMultiplexer multiplexer = ConnectionMultiplexer.Connect($"{builder.Configuration["RedisUrl"]}");
+                IConnectionMultiplexer multiplexer =
+                    ConnectionMultiplexer.Connect($"{builder.Configuration["RedisUrl"]}");
                 return multiplexer.GetDatabase();
             });
 
@@ -62,18 +65,18 @@ namespace Mc2.CrudTest.Presentation
                 options.AssumeDefaultVersionWhenUnspecified = true;
             });
 
-            var app = builder.Build();
+            WebApplication? app = builder.Build();
 
             // run the required migration
-            using (var scope = app.Services.CreateScope())
+            using (IServiceScope? scope = app.Services.CreateScope())
             {
-                var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                    db.Database.Migrate();
-               
-                var readDb = scope.ServiceProvider.GetRequiredService<ReadModelDbContext>();
-                    readDb.Database.Migrate();
-                }
-           // app.MapDefaultEndpoints();
+                ApplicationDbContext? db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                db.Database.Migrate();
+
+                ReadModelDbContext? readDb = scope.ServiceProvider.GetRequiredService<ReadModelDbContext>();
+                readDb.Database.Migrate();
+            }
+            // app.MapDefaultEndpoints();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -103,5 +106,10 @@ namespace Mc2.CrudTest.Presentation
 
             app.Run();
         }
+
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults((builder => { }));
+
     }
 }

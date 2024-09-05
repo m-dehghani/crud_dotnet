@@ -14,13 +14,14 @@ namespace AcceptanceTest.StepDefinitions
     [Binding]
     public class CustomerManagerStepDefinitions(CustomerDriver customerDriver)
     {
-        List<ErrorCode> errors = [];
-        List<ErrorCode> result = [];
+        private List<ErrorCode> _errors = [];
+        private readonly List<ErrorCode> _result = [];
+        private readonly int _numberOfRecordToBeInDb = 0;
       
         [Given("platform support following error codes")]
         public void GivenPlatformSupportFollowingErrorCodes(DataTable dataTable)
         {
-            errors = dataTable.CreateSet<ErrorCode>().ToList();
+            _errors = dataTable.CreateSet<ErrorCode>().ToList();
         }
 
         [Given("platform has {string} record of customers")]
@@ -34,7 +35,10 @@ namespace AcceptanceTest.StepDefinitions
         {
             CustomerViewModel customerToCreate = dataTable.CreateInstance<CustomerViewModel>();
 
-            await customerDriver.Create(new CreateCustomerCommand(customerToCreate.FirstName, customerToCreate.LastName, customerToCreate.DateOfBirth, customerToCreate.PhoneNumber, customerToCreate.Email, customerToCreate.BankAccount));
+            await customerDriver.Create(
+                new CreateCustomerCommand(customerToCreate.FirstName, customerToCreate.LastName
+                    , customerToCreate.DateOfBirth, customerToCreate.PhoneNumber
+                    , customerToCreate.Email, customerToCreate.BankAccount));
         }
 
         [Then("user can send query and receive (.*) record of customer with following data")]
@@ -43,7 +47,7 @@ namespace AcceptanceTest.StepDefinitions
             CustomerViewModel customerToCreate = dataTable.CreateInstance<CustomerViewModel>();
             
             List<CustomerViewModel> customerList = await customerDriver.GetAll();
-            if (numberOfRecordToBeInDb == 0)
+            if (_numberOfRecordToBeInDb == 0)
             {
                 customerList.Should().BeEmpty();
             }
@@ -67,16 +71,19 @@ namespace AcceptanceTest.StepDefinitions
         public async Task WhenUserSendCommandToCreateNewCustomerWithFollowingInformation(DataTable dataTable)
         {
             CustomerViewModel customerToCreate = dataTable.CreateInstance<CustomerViewModel>();
+            CreateCustomerCommand createCustomerCommand = new CreateCustomerCommand(customerToCreate.FirstName, customerToCreate.LastName,
+                customerToCreate.DateOfBirth, customerToCreate.PhoneNumber,
+                customerToCreate.Email, customerToCreate.BankAccount);
+            await customerDriver.Create(createCustomerCommand);
 
-            result =  await customerDriver.Create(new CreateCustomerCommand(customerToCreate.FirstName, customerToCreate.LastName, customerToCreate.DateOfBirth, customerToCreate.PhoneNumber, customerToCreate.Email, customerToCreate.BankAccount));
         }
 
         [Then("Then user should receive following error codes")]
         public void ThenUserShouldReceiveFollowingErrorCodes(DataTable dataTable)
         {
-            int[] errorsToCatch = dataTable.CreateSet<int>().ToList().ToArray();
+            int[] errorsToCatch = dataTable.CreateSet<int>().ToArray();
 
-            result.Select(r => r.Code).Should().ContainInOrder(errorsToCatch);
+            _result.Select(r => r.Code).Should().ContainInOrder(errorsToCatch);
         }
 
         [When("user send command to update customer with email of (.*) and with below information")]
@@ -86,7 +93,9 @@ namespace AcceptanceTest.StepDefinitions
             
             List<CustomerViewModel> customers = await customerDriver.GetAll();
             
-            await customerDriver.Update(new UpdateCustomerCommand(customers.FirstOrDefault()!.Id, customer.FirstName, customer.LastName, customer.PhoneNumber, customer.Email, customer.BankAccount,customer.DateOfBirth));
+            await customerDriver.Update(
+                new UpdateCustomerCommand(customers.FirstOrDefault()!.Id, customer.FirstName, customer.LastName, 
+                    customer.PhoneNumber, customer.Email, customer.BankAccount,customer.DateOfBirth));
         }
 
         [When("When user send command to delete customer with email of (.*)")]
@@ -94,7 +103,8 @@ namespace AcceptanceTest.StepDefinitions
         {
             List<CustomerViewModel> customerList = await customerDriver.GetAll();
 
-            Guid customerId = customerList.FirstOrDefault(c => c.Email == dataTable.CreateInstance<string>()).Id;
+            Guid customerId = customerList.FirstOrDefault(c => 
+                dataTable.CreateInstance<string>() != null && c.Email != null && c.Email == dataTable.CreateInstance<string>()).Id;
 
             await customerDriver.Delete(new DeleteCustomerCommand(customerId));
         }

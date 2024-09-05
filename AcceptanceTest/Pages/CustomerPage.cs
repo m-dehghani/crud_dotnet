@@ -8,15 +8,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AcceptanceTest.Settings;
+using Microsoft.Playwright.NUnit;
+using NUnit.Framework;
 
 namespace AcceptanceTest.Pages
 {
     [Parallelizable(ParallelScope.Self)]
     [TestFixture]
-    public class CustomerPage(IPageDependencyService pageDependencyService): PageTest
+    public class CustomerPage(IPageDependencyService pageDependencyService, AppSettings appSettings): PageTest
     {
         private readonly IPageDependencyService _pageDependencyService = pageDependencyService;
-
+        private readonly AppSettings _appSettings = appSettings;
         public async Task GoToPageAsync()
         {
             await _pageDependencyService.Page.Result.GotoAsync(_pageDependencyService.AppSettings.Value.UiUrl);
@@ -46,7 +49,7 @@ namespace AcceptanceTest.Pages
 
         public ILocator StrongTexts => _pageDependencyService.Page.Result.Locator("strong");
 
-        public async Task<bool> TextContainsGivenValueAsync(DataTable dataTable)
+        public async Task TextContainsGivenValueAsync(DataTable dataTable)
         {
             CustomerViewModel customer = new DataTable().CreateInstance<CustomerViewModel>();
             await Expect(Page.Locator("tbody")).ToContainTextAsync(customer.FirstName);
@@ -62,7 +65,7 @@ namespace AcceptanceTest.Pages
             await Page.GetByLabel("First Name").ClickAsync();
             await Page.GetByLabel("First Name").FillAsync(customer.FirstName);
             await Page.GetByRole(AriaRole.Button, new PageGetByRoleOptions() { NameString = "Update" }).ClickAsync();
-            await Page.GotoAsync(CustomerPageUrl);
+            await Page.GotoAsync(_appSettings.UiUrl);
             await Expect(Page.Locator("tbody")).ToContainTextAsync(customer.FirstName);
             await Expect(Page.Locator("tbody")).ToContainTextAsync(customer.Email);
         }
@@ -71,7 +74,7 @@ namespace AcceptanceTest.Pages
         {
             await GoToPageAsync();
             await Page.GetByRole(AriaRole.Button, new PageGetByRoleOptions() { NameString = "Delete" }).ClickAsync();
-            await Page.GotoAsync(CustomerPageUrl);
+            await Page.GotoAsync(_appSettings.UiUrl);
             await Expect(Page.GetByText("Doe").Nth(1)).Not.ToBeVisibleAsync();
             await Expect(Page.GetByText("John", new PageGetByTextOptions() { Exact = true })).Not.ToBeVisibleAsync();
         }
@@ -100,16 +103,16 @@ namespace AcceptanceTest.Pages
             await Expect(Page.GetByRole(AriaRole.Article)).ToContainTextAsync("New Customer");
 
 
-            await Page.GotoAsync(CustomerPageUrl);
+            await Page.GotoAsync(_appSettings.UiUrl);
             await Page.GetByRole(AriaRole.Button, new PageGetByRoleOptions() { NameString = "Edit" }).ClickAsync();
             await Page.GetByLabel("First Name").ClickAsync();
             await Page.GetByLabel("First Name").FillAsync("Johnny");
             await Page.GetByRole(AriaRole.Button, new PageGetByRoleOptions() { NameString = "Update" }).ClickAsync();
-            await Page.GotoAsync(CustomerPageUrl);
+            await Page.GotoAsync(_appSettings.UiUrl);
             await Expect(Page.Locator("tbody")).ToContainTextAsync("Johnny");
             await Expect(Page.Locator("tbody")).ToContainTextAsync("a@a.com");
 
-            await Page.GotoAsync(CustomerPageUrl);
+            await Page.GotoAsync(_appSettings.UiUrl);
             await Page.GetByRole(AriaRole.Button, new PageGetByRoleOptions() { NameString = "History" }).ClickAsync();
             await Expect(Page.GetByText("CustomerCreatedEvent")).ToBeVisibleAsync();
             await Expect(Page.GetByText("CustomerUpdatedEvent")).ToBeVisibleAsync();
@@ -129,10 +132,10 @@ namespace AcceptanceTest.Pages
             await Page.GetByText("About New Customer History").ClickAsync();
             await Expect(Page.GetByRole(AriaRole.Button, new PageGetByRoleOptions() { NameString = "Delete" }))
                 .ToBeVisibleAsync();
-            await Page.GotoAsync(CustomerPageUrl);
+            await Page.GotoAsync(_appSettings.UiUrl);
 
 
-            await Page.GotoAsync(CustomerPageUrl);
+            await Page.GotoAsync(_appSettings.UiUrl);
             await Page.GetByRole(AriaRole.Button, new PageGetByRoleOptions() { NameString = "History" }).ClickAsync();
             await Expect(Page.GetByText("CustomerCreatedEvent")).ToBeVisibleAsync();
             await Expect(Page.GetByText("CustomerUpdatedEvent")).ToBeVisibleAsync();
@@ -149,7 +152,7 @@ namespace AcceptanceTest.Pages
             await Page.GetByRole(AriaRole.Button, new PageGetByRoleOptions() { NameString = "Back" }).ClickAsync();
 
             await Page.GetByRole(AriaRole.Button, new PageGetByRoleOptions() { NameString = "Delete" }).ClickAsync();
-            await Page.GotoAsync(CustomerPageUrl);
+            await Page.GotoAsync(_appSettings.UiUrl);
             await Expect(Page.GetByText("Doe").Nth(1)).Not.ToBeVisibleAsync();
             await Expect(Page.GetByText("John", new PageGetByTextOptions() { Exact = true })).Not.ToBeVisibleAsync();
 
