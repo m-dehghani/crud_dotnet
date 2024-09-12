@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging;
 using static System.Net.WebRequestMethods;
 using System.Reflection;
 using System.Net.Http.Json;
-using Mc2.CrudTest.Presentation.ViewModels;
 using Mc2.CrudTest.Presentation.Client.Models;
 using Mc2.CrudTest.Presentation.Shared.Entities;
 using Mc2.CrudTest.Presentation.Shared.ViewModels;
@@ -16,10 +15,10 @@ namespace Mc2.CrudTest.Presentation.Client.services
 {
     public class CustomerService : ICustomerService
     {
-        private HttpClient _httpClient;
-        private NavigationManager _navigationManager;
-        private ILogger<CustomerService> _logger;
-        private string ApiAddress = "customer/V1";
+        private readonly HttpClient _httpClient;
+        private readonly NavigationManager _navigationManager;
+        private readonly ILogger<CustomerService> _logger;
+        private readonly string ApiAddress = "customer/V1";
         private readonly JsonSerializerOptions _options;
         public CustomerService(HttpClient httpClient, NavigationManager navigationManager, ILogger<CustomerService> logger) {
             _httpClient = httpClient;
@@ -43,7 +42,7 @@ namespace Mc2.CrudTest.Presentation.Client.services
             try
             {
                 _logger.LogInformation("sending start: sending the form to customer controller");
-                var result = await _httpClient.PutAsJsonAsync($"{ApiAddress}/{model.Id}", model, _options);
+                HttpResponseMessage? result = await _httpClient.PutAsJsonAsync($"{ApiAddress}/{model.Id}", model, _options);
                 if (result.IsSuccessStatusCode)
                     _navigationManager.NavigateTo("customers");
                 else
@@ -64,7 +63,7 @@ namespace Mc2.CrudTest.Presentation.Client.services
             {
                 _logger.LogInformation("sending start: sending the form to customer controller");
                 
-                var result = await _httpClient.PostAsJsonAsync(ApiAddress, model, _options);
+                HttpResponseMessage? result = await _httpClient.PostAsJsonAsync(ApiAddress, model, _options);
                 if (result.IsSuccessStatusCode)
                     _navigationManager.NavigateTo("customers");
                 else
@@ -83,13 +82,13 @@ namespace Mc2.CrudTest.Presentation.Client.services
     
         public async Task<List<CustomerViewModel>> GetAll()
         {
-            List<ViewModels.CustomerViewModel>? model  = [];
+            List<CustomerViewModel>? model  = [];
             try
             {
-                var result = await _httpClient.GetAsync(ApiAddress);
+                HttpResponseMessage? result = await _httpClient.GetAsync(ApiAddress);
                 if (result.IsSuccessStatusCode)
                 {
-                    model = await result.Content.ReadFromJsonAsync<List<ViewModels.CustomerViewModel>>(_options);
+                    model = await result.Content.ReadFromJsonAsync<List<CustomerViewModel>>(_options);
                 }
                 else
                 {
@@ -108,7 +107,7 @@ namespace Mc2.CrudTest.Presentation.Client.services
             CustomerViewModel? model = new();
             try
             {
-                var result = await _httpClient.GetAsync($"{ApiAddress}/{id}");
+                HttpResponseMessage? result = await _httpClient.GetAsync($"{ApiAddress}/{id}");
                 if (result.IsSuccessStatusCode)
                 {
                     model = await result.Content.ReadFromJsonAsync<CustomerViewModel>(_options);
@@ -129,7 +128,7 @@ namespace Mc2.CrudTest.Presentation.Client.services
         {
             try
             {
-                var result = await _httpClient.DeleteAsync($"{ApiAddress}/{id}");
+                HttpResponseMessage? result = await _httpClient.DeleteAsync($"{ApiAddress}/{id}");
                 if (!result.IsSuccessStatusCode)
                 {
                     HandleNotSuccessfulError();
@@ -146,7 +145,7 @@ namespace Mc2.CrudTest.Presentation.Client.services
             CustomerHistoryViewModel? model = new();
             try
             {
-                var result = await _httpClient.GetAsync($"{ApiAddress}/{id}/History");
+                HttpResponseMessage? result = await _httpClient.GetAsync($"{ApiAddress}/{id}/History");
                 if (result.IsSuccessStatusCode)
                 { 
                     model = await result.Content.ReadFromJsonAsync<CustomerHistoryViewModel>(_options);

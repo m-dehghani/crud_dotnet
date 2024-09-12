@@ -1,7 +1,6 @@
-using Mc2.CrudTest.Presentation.ViewModels;
-
 using MediatR;
 using System.Diagnostics;
+using Mc2.CrudTest.Presentation.Shared.ViewModels;
 
 namespace Mc2.CrudTest.Presentation.Shared.Queries;
 

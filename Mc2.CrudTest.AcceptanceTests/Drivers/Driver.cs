@@ -1,6 +1,4 @@
-using System;
-
-namespace Mc2.CrudTest.AcceptanceTests.Drivers
+namespace Mc2.CrudTest.AcceptanceTests.old.Drivers
 {
     public class Driver
     {

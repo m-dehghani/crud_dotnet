@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-namespace Mc2.CrudTest.Presentation.Infrastructure;
+namespace Mc2.CrudTest.Presentation.Server.Infrastructure;
 
 public static class MyModuleInitializer
 {

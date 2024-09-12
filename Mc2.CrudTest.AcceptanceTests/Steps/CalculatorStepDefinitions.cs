@@ -1,4 +1,4 @@
-﻿namespace Mc2.CrudTest.AcceptanceTests.Steps;
+﻿namespace Mc2.CrudTest.AcceptanceTests.old.Steps;
 
 [Binding]
 public sealed class CalculatorStepDefinitions

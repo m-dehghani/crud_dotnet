@@ -1,5 +1,5 @@
 using Mc2.CrudTest.Presentation.Shared.Entities;
-using Mc2.CrudTest.Presentation.ViewModels;
+using Mc2.CrudTest.Presentation.Shared.ViewModels;
 using MediatR;
 
 namespace Mc2.CrudTest.Presentation.Shared.Queries;

@@ -22,13 +22,13 @@ namespace Mc2.CrudTest.Presentation.Shared.ValueObjects
         private bool IsValidNumber(string value)
         {
             // using google's libPhoneNumber package for validating phone numbers
-            var phoneNumberUtil = PhoneNumbers.PhoneNumberUtil.GetInstance();
+            PhoneNumberUtil? phoneNumberUtil = PhoneNumbers.PhoneNumberUtil.GetInstance();
             try
             {
-                var numberProto = phoneNumberUtil.Parse(value,"");
-                var countryCode = numberProto.CountryCode;
-                var temp = new PhoneNumbers.PhoneNumber();
-                var result =  phoneNumberUtil.IsValidNumber(numberProto);
+                PhoneNumbers.PhoneNumber? numberProto = phoneNumberUtil.Parse(value,"");
+                int countryCode = numberProto.CountryCode;
+                PhoneNumbers.PhoneNumber? temp = new PhoneNumbers.PhoneNumber();
+                bool result =  phoneNumberUtil.IsValidNumber(numberProto);
                 PhoneNumberType phoneNumberType = phoneNumberUtil.GetNumberType(numberProto);
                 return result || phoneNumberType == PhoneNumberType.MOBILE;
                 //return result;

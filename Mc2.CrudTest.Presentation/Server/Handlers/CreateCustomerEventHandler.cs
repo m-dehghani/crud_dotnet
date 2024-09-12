@@ -1,12 +1,9 @@
-using Mc2.CrudTest.Presentation.DomainServices;
-using Mc2.CrudTest.Presentation.Infrastructure;
-using Mc2.CrudTest.Presentation.Shared;
+using Mc2.CrudTest.Presentation.Server.DomainServices;
 using Mc2.CrudTest.Presentation.Shared.Commands;
 using Mc2.CrudTest.Presentation.Shared.Entities;
-using Mc2.CrudTest.Presentation.Shared.Events;
 using MediatR;
 
-namespace Mc2.CrudTest.Presentation.Handlers;
+namespace Mc2.CrudTest.Presentation.Server.Handlers;
 
 public class CreateCustomerCommandHandler : IRequestHandler<CreateCustomerCommand>
 {

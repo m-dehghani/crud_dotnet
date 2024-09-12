@@ -1,9 +1,7 @@
-
-
 using Mc2.CrudTest.Presentation.Shared.Entities;
 using Mc2.CrudTest.Presentation.Shared.ViewModels;
 
-namespace Mc2.CrudTest.Presentation.DomainServices;
+namespace Mc2.CrudTest.Presentation.Server.DomainServices;
 
 public interface ICustomerService
 {

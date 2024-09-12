@@ -10,7 +10,7 @@ namespace AcceptanceTest.StepDefinitions
     [Binding]
     public class CustomerManagerStepDefinitions(CustomerDriver customerDriver)
     {
-        List<ErrorCodes> errors = new List<ErrorCodes>();
+        private List<ErrorCodes> errors = new List<ErrorCodes>();
 
         [Given("platform support following error codes")]
         public void GivenPlatformSupportFollowingErrorCodes(DataTable dataTable)

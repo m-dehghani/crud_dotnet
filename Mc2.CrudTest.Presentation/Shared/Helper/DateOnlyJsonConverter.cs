@@ -17,7 +17,7 @@ namespace Mc2.CrudTest.Presentation.Shared.Helper
 
         public override void Write(Utf8JsonWriter writer, DateOnly value, JsonSerializerOptions options)
         {
-            var isoDate = value.ToString("O");
+            string? isoDate = value.ToString("O");
             writer.WriteStringValue(isoDate);
         }
     }

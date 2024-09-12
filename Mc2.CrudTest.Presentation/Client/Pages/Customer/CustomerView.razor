@@ -1,6 +1,7 @@
 <!-- CustomerList.razor -->
 @using Mc2.CrudTest.Presentation.Client.services
 @using Mc2.CrudTest.Presentation.Shared.Entities
+@using Mc2.CrudTest.Presentation.Shared.ViewModels
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 @inject ILogger<CustomerView> Logger
@@ -29,7 +30,7 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var customer in Customers)
+            @foreach (CustomerViewModel? customer in Customers)
             {
                 <tr>
                     <td>@string.Join('\n', customer.History)</td>
@@ -58,7 +59,7 @@ else
     </table>
 }
 @code {
-    private List<ViewModels.CustomerViewModel>? Customers { get; set; }
+    private List<CustomerViewModel>? Customers { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -67,12 +68,12 @@ else
         StateHasChanged();
     }
 
-    private void UpdateCustomer(ViewModels.CustomerViewModel customer)
+    private void UpdateCustomer(CustomerViewModel customer)
     {
         NavigationManager.NavigateTo($"update-customer/{customer.Id}");
     }
 
-    private async Task DeleteCustomer(ViewModels.CustomerViewModel customer)
+    private async Task DeleteCustomer(CustomerViewModel customer)
     {
         bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
         if (confirmed)
@@ -82,7 +83,7 @@ else
         }
     }
 
-    private void GetCustomerHistory(ViewModels.CustomerViewModel customer)
+    private void GetCustomerHistory(CustomerViewModel customer)
     {
         NavigationManager.NavigateTo($"history-customer/{customer.Id}");
     }

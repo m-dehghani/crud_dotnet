@@ -1,8 +1,9 @@
-using Mc2.CrudTest.Presentation.Infrastructure;
+using Mc2.CrudTest.Presentation.Server.Infrastructure;
 using Mc2.CrudTest.Presentation.Shared.Commands;
 using Mc2.CrudTest.Presentation.Shared.Events;
 using MediatR;
-namespace Mc2.CrudTest.Presentation.Handlers;
+
+namespace Mc2.CrudTest.Presentation.Server.Handlers;
 
 public class DeleteCustomerCommandHandler: IRequestHandler<DeleteCustomerCommand>
 {
@@ -15,7 +16,7 @@ public class DeleteCustomerCommandHandler: IRequestHandler<DeleteCustomerCommand
     
     public async Task Handle(DeleteCustomerCommand command, CancellationToken cancellationToken)
     {
-        var @event = new CustomerDeletedEvent(command.Id);
+        CustomerDeletedEvent? @event = new CustomerDeletedEvent(command.Id);
         await _eventStore.SaveEventAsync(@event, () => {});
        
     }

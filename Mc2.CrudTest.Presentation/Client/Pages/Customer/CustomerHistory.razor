@@ -16,7 +16,7 @@ else
     <div class="row">
         @if (Model.Items?.Count != 0 && Model.Items != null)
         {
-            @foreach (var historyItem in Model.Items)
+            @foreach (CustomerHistoryViewModelItem? historyItem in Model.Items)
             {
                 <div class="col col-3">
                     <div class="card">

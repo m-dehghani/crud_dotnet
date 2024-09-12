@@ -1,17 +1,17 @@
 using Asp.Versioning;
-using Mc2.CrudTest.Presentation.DomainServices;
-using Mc2.CrudTest.Presentation.Infrastructure;
+using Mc2.CrudTest.Presentation.Server.DomainServices;
+using Mc2.CrudTest.Presentation.Server.Infrastructure;
 using Mc2.CrudTest.Presentation.Shared.Helper;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 
-namespace Mc2.CrudTest.Presentation
+namespace Mc2.CrudTest.Presentation.Server
 {
     public class Program
     {
         public static void Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
+            WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
            // builder.AddServiceDefaults();
 
             builder.Services.AddControllersWithViews().AddJsonOptions(options =>
@@ -61,19 +61,23 @@ namespace Mc2.CrudTest.Presentation
                 options.DefaultApiVersion = new ApiVersion(1, 0);
                 options.AssumeDefaultVersionWhenUnspecified = true;
             });
+            
+            builder.AddKafkaProducer<string, string>("messaging");
+           
+            builder.AddKafkaConsumer<string, string>("messaging");
 
-            var app = builder.Build();
+            WebApplication app = builder.Build();
 
             // run the required migration
-            using (var scope = app.Services.CreateScope())
+            using (IServiceScope scope = app.Services.CreateScope())
             {
-                var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                ApplicationDbContext db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                     db.Database.Migrate();
                
-                var readDb = scope.ServiceProvider.GetRequiredService<ReadModelDbContext>();
+                ReadModelDbContext readDb = scope.ServiceProvider.GetRequiredService<ReadModelDbContext>();
                     readDb.Database.Migrate();
-                }
-           // app.MapDefaultEndpoints();
+            }
+            // app.MapDefaultEndpoints();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

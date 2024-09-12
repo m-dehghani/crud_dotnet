@@ -1,6 +1,4 @@
-using Mc2.CrudTest.Presentation.Shared.ViewModels;
-
-namespace Mc2.CrudTest.Presentation.ViewModels;
+namespace Mc2.CrudTest.Presentation.Shared.ViewModels;
 
 public class CustomerViewModel : BaseViewModel
 {
