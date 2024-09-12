@@ -19,7 +19,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="Settings\AppSettings.json" />
+    <Content Include="Settings\AppSettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
