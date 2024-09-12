@@ -1,4 +1,5 @@
 using AcceptanceTest.Drivers;
+using Mc2.CrudTest.Presentation.Server.Pages;
 using Mc2.CrudTest.Presentation.Shared;
 using Mc2.CrudTest.Presentation.Shared.Commands;
 using Mc2.CrudTest.Presentation.Shared.Entities;
@@ -65,8 +66,6 @@ namespace AcceptanceTest.StepDefinitions
             
             await customerDriver.UpdateCustomer(new UpdateCustomerCommand(customers.FirstOrDefault()!.Id, customer.FirstName, customer.LastName, customer.PhoneNumber, customer.Email, customer.BankAccount,customer.DateOfBirth));
         }
-
-
       
     }
 }
