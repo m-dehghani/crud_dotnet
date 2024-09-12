@@ -3,19 +3,17 @@ using Mc2.CrudTest.Presentation.Server.Pages;
 using Mc2.CrudTest.Presentation.Shared;
 using Mc2.CrudTest.Presentation.Shared.Commands;
 using Mc2.CrudTest.Presentation.Shared.Entities;
-using Mc2.CrudTest.Presentation.ViewModels;
+using Mc2.CrudTest.Presentation.Shared.ViewModels;
 
 namespace AcceptanceTest.StepDefinitions
 {
     [Binding]
     public class CustomerManagerStepDefinitions(CustomerDriver customerDriver)
     {
-        private List<ErrorCodes> errors = new List<ErrorCodes>();
-
         [Given("platform support following error codes")]
         public void GivenPlatformSupportFollowingErrorCodes(DataTable dataTable)
         {
-            errors = dataTable.CreateSet<ErrorCodes>().ToList();
+            dataTable.CreateSet<ErrorCodes>().ToList();
         }
 
         [Given("platform has {string} record of customers")]
@@ -25,14 +23,20 @@ namespace AcceptanceTest.StepDefinitions
         }
 
         [When("When user send command to create new customer with following information")]
-        public async Task Whenusersendcommandtocreatenewcustomerwithfollowinginformation(DataTable dataTable)
+        public async Task Whenusersendcommandtocreatenewcustomerwithfollowinginformation
+            (DataTable dataTable)
         {
-
             List<ErrorCodes> errors = dataTable.CreateSet<ErrorCodes>().ToList();
+
             CustomerViewModel customerToCreate = dataTable.CreateInstance<CustomerViewModel>();
 
-
-           Exception ex = await Assert.ThrowsAsync(customerDriver.CreateCustomer(new CreateCustomerCommand(customerToCreate.FirstName, customerToCreate.LastName, customerToCreate.DateOfBirth, customerToCreate.PhoneNumber, customerToCreate.Email, customerToCreate.BankAccount)));
+            Exception ex = await 
+                Assert.ThrowsAsync<ArgumentNullException>
+                (()=> customerDriver.CreateCustomer(
+                
+                    new CreateCustomerCommand(customerToCreate.FirstName, customerToCreate.LastName,
+                    customerToCreate.DateOfBirth, customerToCreate.PhoneNumber, customerToCreate.Email,
+                    customerToCreate.BankAccount)));
 
             ex.Message.Should().Be(errors.ToArray()[0].ErrorCode.ToString());
         }
@@ -40,9 +44,11 @@ namespace AcceptanceTest.StepDefinitions
         [Then("user can send query and receive (.*) record of customer with following data")]
         public async Task ThenTheCustomerShouldBeCreatedSuccessfully(DataTable dataTable)
         {
-            CustomerViewModel customerToCreate = dataTable.CreateInstance<CustomerViewModel>();
+            CustomerViewModel customerToCreate = 
+                dataTable.CreateInstance<CustomerViewModel>();
             
-            List<CustomerViewModel> customerList = await customerDriver.GetAllCustomers();
+            List<CustomerViewModel> customerList = 
+                await customerDriver.GetAllCustomers();
           
             customerList.Should().NotBeNull();
           
@@ -58,13 +64,19 @@ namespace AcceptanceTest.StepDefinitions
         }
 
         [When("user send command to update customer with email of (.*) and with below information")]
-        public async Task UserSendCommandToUpdateCustomerWithEmailOfWithBelowInformation(DataTable dataTable)
+        public async Task UserSendCommandToUpdateCustomerWithEmailOfWithBelowInformation
+            (DataTable dataTable)
         {
-            CustomerUpdateViewModel customer = dataTable.CreateInstance<CustomerUpdateViewModel>();
+            CustomerUpdateViewModel customer = 
+                dataTable.CreateInstance<CustomerUpdateViewModel>();
             
-            List<CustomerViewModel> customers = await customerDriver.GetAllCustomers();
+            List<CustomerViewModel> customers = 
+                await customerDriver.GetAllCustomers();
             
-            await customerDriver.UpdateCustomer(new UpdateCustomerCommand(customers.FirstOrDefault()!.Id, customer.FirstName, customer.LastName, customer.PhoneNumber, customer.Email, customer.BankAccount,customer.DateOfBirth));
+            await customerDriver.UpdateCustomer
+                (new UpdateCustomerCommand(customers.FirstOrDefault()!.Id, customer.FirstName, 
+                    customer.LastName, customer.PhoneNumber, customer.Email, 
+                    customer.BankAccount,customer.DateOfBirth));
         }
       
     }

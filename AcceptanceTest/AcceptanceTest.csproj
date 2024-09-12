@@ -29,8 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\crud-test-dotnet\Mc2.CrudTest.AppHost\Mc2.CrudTest.AppHost.csproj" />
-    <ProjectReference Include="..\crud-test-dotnet\Mc2.CrudTest.Presentation\Server\Mc2.CrudTest.Presentation.Server.csproj" />
+    <ProjectReference Include="..\Mc2.CrudTest.Presentation\Server\Mc2.CrudTest.Presentation.Server.csproj" />
   </ItemGroup>
 
 </Project>

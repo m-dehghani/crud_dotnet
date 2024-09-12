@@ -4,7 +4,6 @@ using System.Text.Json.Serialization;
 using System.Diagnostics;
 using System.Text.Json;
 
-
 namespace Mc2.CrudTest.Presentation.Shared.Entities
 {
     public class Customer
@@ -16,15 +15,17 @@ namespace Mc2.CrudTest.Presentation.Shared.Entities
         public DateOfBirth DateOfBirth { get; private set; }
         public PhoneNumber PhoneNumber { get; private set; }
         public Email Email { get; private set; }
-        public int Version { get; private set; } = 0;
+        private int Version { get; set; } = 0;
         public bool IsDeleted { get; private set; }
         
         [JsonIgnore]
-        public List<string> History { get; private set; } = new();
+        public List<string> History { get; private set; } = [];
 
         
         // Constructor for rehydration(Deserialisation)
-        public Customer(Guid id, string firstName, string lastName, PhoneNumber phoneNumber, Email email, BankAccount bankAccount, DateOfBirth dateOfBirth)
+        public Customer(Guid id, string firstName, string lastName, 
+            PhoneNumber phoneNumber, Email email, BankAccount bankAccount, 
+            DateOfBirth dateOfBirth)
         {
             Id = id;
             FirstName = firstName;
@@ -33,33 +34,58 @@ namespace Mc2.CrudTest.Presentation.Shared.Entities
             Email = email;
             BankAccount = bankAccount;
             DateOfBirth = dateOfBirth;
-            History = new();
+            History = [];
             IsDeleted = false;
         }
 
         [JsonConstructor]
-        public Customer(Guid id, string firstName, string lastName, PhoneNumber phoneNumber, Email email, BankAccount bankAccount, DateOfBirth dateOfBirth, string[] history,  int version = 0, bool isDeleted = false)
+        public Customer(Guid id, string firstName, string lastName, 
+            PhoneNumber phoneNumber, Email email, BankAccount bankAccount, 
+            DateOfBirth dateOfBirth, string[] history,  int version = 0, 
+            bool isDeleted = false)
         {
             Id = id;
+            
             FirstName = firstName;
+            
             LastName = lastName;
+            
             PhoneNumber = phoneNumber;
+            
             Email = email;
+            
             BankAccount = bankAccount;
+            
             DateOfBirth = dateOfBirth;
-            History = new();
+            
+            History = [];
+            
             IsDeleted = IsDeleted;
         }
 
-        public Customer(string firstName, string lastName, string phoneNumber, string email, string bankAccount, string dateOfBirth)
+        public Customer(string firstName, string lastName, 
+            string phoneNumber, string email, string bankAccount, 
+            string dateOfBirth)
         {
-            FirstName = firstName ?? throw new ArgumentNullException(nameof(firstName));
-            LastName = lastName ?? throw new ArgumentNullException(nameof(lastName));
-            PhoneNumber = new PhoneNumber(phoneNumber) ?? throw new ArgumentNullException(nameof(phoneNumber));
-            Email = new Email(email) ?? throw new ArgumentNullException(nameof(email));
-            BankAccount = new BankAccount(bankAccount) ?? throw new ArgumentException(bankAccount);
+            FirstName = firstName ?? 
+                        throw new ArgumentNullException(nameof(firstName));
+          
+            LastName = lastName ?? 
+                       throw new ArgumentNullException(nameof(lastName));
+        
+            PhoneNumber = new PhoneNumber(phoneNumber) ?? 
+                          throw new ArgumentNullException(nameof(phoneNumber));
+           
+            Email = new Email(email) ?? 
+                    throw new ArgumentNullException(nameof(email));
+            
+            BankAccount = new BankAccount(bankAccount) ?? 
+                          throw new ArgumentException(bankAccount);
+            
             DateOfBirth = new DateOfBirth(dateOfBirth);
-            History = new();
+            
+            History = [];
+            
             IsDeleted = false;
         }
 
@@ -74,13 +100,20 @@ namespace Mc2.CrudTest.Presentation.Shared.Entities
             try
             {
                 Id = @event.AggregateId;
+                
                 FirstName = @event.FirstName;
+                
                 LastName = @event.LastName;
+                
                 Email = new Email(@event.Email);
                 PhoneNumber = new PhoneNumber(@event.PhoneNumber);
+                
                 BankAccount = new BankAccount(@event.BankAccount);
+                
                 DateOfBirth = new DateOfBirth(@event.DateOfBirth.ToString());
+                
                 History.Add($"Created at {@event.OccurredOn.LocalDateTime}");
+                
                 Version = 0;
             }
             catch (Exception ex)
@@ -93,21 +126,32 @@ namespace Mc2.CrudTest.Presentation.Shared.Entities
         protected void Apply(CustomerUpdatedEvent @event)
         {
             Id = @event.AggregateId;
+            
             FirstName = @event.FirstName;
+            
             LastName = @event.LastName;
+            
             Email = new Email(@event.Email);
+            
             PhoneNumber = new PhoneNumber(@event.PhoneNumber);
+            
             BankAccount = new BankAccount(@event.BankAccount);
+            
             DateOfBirth = new DateOfBirth(@event.DateOfBirth.ToString());
+            
             History.Add($"Updated at {@event.OccurredOn.LocalDateTime}");
+            
             Version += 1;
         }
 
         protected void Apply(CustomerDeletedEvent @event)
         {
             Id = @event.AggregateId;
+            
             IsDeleted = true;
+            
             History.Add($"Deleted at {@event.OccurredOn}");
+            
             Version += 1;
         }
 
@@ -115,6 +159,7 @@ namespace Mc2.CrudTest.Presentation.Shared.Entities
         public void Apply(object @event)
         {
             ((dynamic)this).Apply((dynamic)@event);
+            
             Version += 1;
         }
     }

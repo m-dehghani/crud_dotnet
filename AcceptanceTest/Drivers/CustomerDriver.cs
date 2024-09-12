@@ -1,8 +1,8 @@
-﻿using Mc2.CrudTest.Presentation.DomainServices;
-using Mc2.CrudTest.Presentation.Handlers;
-using Mc2.CrudTest.Presentation.Infrastructure;
+﻿using Mc2.CrudTest.Presentation.Server.DomainServices;
+using Mc2.CrudTest.Presentation.Server.Handlers;
+using Mc2.CrudTest.Presentation.Server.Infrastructure;
 using Mc2.CrudTest.Presentation.Shared.Commands;
-using Mc2.CrudTest.Presentation.ViewModels;
+using Mc2.CrudTest.Presentation.Shared.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using Testcontainers.PostgreSql;
 
@@ -13,11 +13,11 @@ namespace AcceptanceTest.Drivers
         private readonly CreateCustomerCommandHandler _createHandler;
         private readonly GetAllCustomerQueryHandler _getAllQueryHandler;
         private readonly UpdateCustomerCommandHandler _updateCustomerCommandHandler;
-        private readonly GetCustomerByIdQueryHandler _getCustomerByIdQueryHandler;
 
         protected CustomerDriver()
         {
-            DbContextOptions<ApplicationDbContext> options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            DbContextOptions<ApplicationDbContext> options =
+                new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseNpgsql("TestWriteDb",
             npgsqlOptionsAction: sqlOptions =>
             {
@@ -27,7 +27,8 @@ namespace AcceptanceTest.Drivers
                 errorCodesToAdd: null);
             }).Options;
 
-            DbContextOptions<ReadModelDbContext> readOptions = new DbContextOptionsBuilder<ReadModelDbContext>()
+            DbContextOptions<ReadModelDbContext> readOptions = 
+                new DbContextOptionsBuilder<ReadModelDbContext>()
                .UseNpgsql("TestReadDb",
                    npgsqlOptionsAction: sqlOptions =>
                        {
@@ -41,13 +42,14 @@ namespace AcceptanceTest.Drivers
 
             ReadModelDbContext readContext = new(readOptions);
 
-            SlowerCustomerService customerService = new(new EventStoreRepository(context, readContext));
+            SlowerCustomerService customerService = 
+                new(new EventStoreRepository(context, readContext), null);
 
             _createHandler = new CreateCustomerCommandHandler(customerService);
 
             _updateCustomerCommandHandler = new UpdateCustomerCommandHandler(customerService);
 
-            _getCustomerByIdQueryHandler = new GetCustomerByIdQueryHandler(customerService);
+            new GetCustomerByIdQueryHandler(customerService);
 
             _getAllQueryHandler = new GetAllCustomerQueryHandler(customerService);
         }
@@ -56,19 +58,18 @@ namespace AcceptanceTest.Drivers
             .WithImage("postgres:15-alpine")
             .Build();
         
-        public async  Task CreateCustomer(CreateCustomerCommand command)
+        public async  Task CreateCustomer(CreateCustomerCommand? command)
         {
             await _createHandler.Handle(command, CancellationToken.None);
         }
 
         public async Task<List<CustomerViewModel>> GetAllCustomers()
         {
-           return (await _getAllQueryHandler.Handle(new Mc2.CrudTest.Presentation.Shared.Queries.GetAllCustomersQuery(), CancellationToken.None)).ToList();
+            return (await _getAllQueryHandler.Handle(new Mc2.CrudTest.Presentation.Shared.Queries.GetAllCustomersQuery(), CancellationToken.None)).ToList();
         }
 
         public async Task UpdateCustomer(UpdateCustomerCommand command)
         {
-            
             await _updateCustomerCommandHandler.Handle(command, CancellationToken.None);
         }
 
