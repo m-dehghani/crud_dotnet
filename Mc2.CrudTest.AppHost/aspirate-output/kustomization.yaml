@@ -1,0 +1,11 @@
+resources:
+- cache
+- NpgsqlConnection
+- messaging
+- mc2-crudtest-presentation-server
+- dashboard.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+

@@ -23,7 +23,7 @@ namespace Mc2.CrudTest.Presentation.Server
             builder.Services.AddRazorPages();
             
             builder.Services.AddDbContext<ApplicationDbContext>(options => {
-                options.UseNpgsql(builder.Configuration["ConnectionStrings:EventStoreConnection"], 
+                options.UseNpgsql("customers", 
                     npgsqlOptionsAction: sqlOptions =>
                     {
                         sqlOptions.EnableRetryOnFailure(
@@ -36,7 +36,7 @@ namespace Mc2.CrudTest.Presentation.Server
             builder.Services.AddDbContext<ReadModelDbContext>(options =>
             {
                 options
-                    .UseNpgsql(builder.Configuration["ConnectionStrings:EventStoreConnection"],
+                    .UseNpgsql("customers",
                         npgsqlOptionsAction: sqlOptions =>
                         {
                             sqlOptions.EnableRetryOnFailure(
@@ -63,6 +63,7 @@ namespace Mc2.CrudTest.Presentation.Server
             });
 
             // builder.Services.AddTransient<ICustomerService, CustomerService>();
+            
             builder.Services.AddTransient<ICustomerService, SlowerCustomerService>();
             
             builder.Services.AddTransient<IEventRepository, EventStoreRepository>();
@@ -95,6 +96,7 @@ namespace Mc2.CrudTest.Presentation.Server
             // app.MapDefaultEndpoints();
 
             // Configure the HTTP request pipeline.
+            
             if (app.Environment.IsDevelopment())
             {
                 app.UseWebAssemblyDebugging();

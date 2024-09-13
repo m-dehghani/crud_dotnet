@@ -1,0 +1,33 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: npgsqlconnection
+  labels:
+    app: npgsqlconnection
+spec:
+  minReadySeconds: 60
+  replicas: 1
+  selector:
+    matchLabels:
+      app: npgsqlconnection
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: npgsqlconnection
+    spec:
+      containers:
+      - name: npgsqlconnection
+        image: docker.io/library/postgres:16.4
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: tcp
+          containerPort: 5432
+        envFrom:
+        - configMapRef:
+            name: npgsqlconnection-env
+        - secretRef:
+            name: npgsqlconnection-secrets
+      terminationGracePeriodSeconds: 180

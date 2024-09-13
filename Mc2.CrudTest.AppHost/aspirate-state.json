@@ -1,0 +1,36 @@
+{
+  "projectPath": ".",
+  "namespace": "crudprj",
+  "containerImageTags": [
+    "latest"
+  ],
+  "imagePullPolicy": "IfNotPresent",
+  "containerBuilder": "docker",
+  "kubeContext": "minikube",
+  "outputFormat": "kustomize",
+  "privateRegistryEmail": "aspir8@aka.ms",
+  "includeDashboard": true,
+  "useCustomNamespace": true,
+  "secrets": {
+    "salt": "lPoxm9jD4R4wlLXw",
+    "hash": "t/sQrMKhNVmSAeOuPkNMZZc3xZVBWV6xcf145BPv\u002BbQ=",
+    "secrets": {
+      "NpgsqlConnection-password": {
+        "value": "lPoxm9jD4R4wlLXwGStDIjf9jQubfnd9h0CvF4a45xNVAmcL\u002B3us0En3w3I/Qwv9j/Q="
+      },
+      "cache": {},
+      "NpgsqlConnection": {
+        "POSTGRES_PASSWORD": "lPoxm9jD4R4wlLXwGStDIjf9jQubfnd9h0CvF4a45xNVAmcL\u002B3us0En3w3I/Qwv9j/Q="
+      },
+      "customers": {},
+      "messaging": {},
+      "mc2-crudtest-presentation-server": {
+        "ConnectionStrings__cache": "lPoxm9jD4R4wlLXwyt24G\u002B2\u002BzYlCp5HwODSW4NajwTF9fTVwvAs=",
+        "ConnectionStrings__customers": "lPoxm9jD4R4wlLXwvFITT0O\u002BG1tjYn3ZGcdmav2t0S0lCXMk\u002BEOQ50XDlS41AzvTo/h6Vbs77z/cY9HW9OsyfYGKE4NbPqwQaH5EEcbqae6xRg8PG71UFMo9wfBidAu0FKfjHraBk9UpY83jScrWe2Xnk\u002BbJxw2cDupsagVQVug=",
+        "ConnectionStrings__messaging": "lPoxm9jD4R4wlLXwZGZYbeBmnV3YNowQG\u002Btze9in0Sp5IGot7AjFlBOf"
+      }
+    }
+  },
+  "processAllComponents": true,
+  "isRunning": true
+}
