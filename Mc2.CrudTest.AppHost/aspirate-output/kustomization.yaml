@@ -1,8 +1,11 @@
+namespace: crudprj
+
 resources:
 - cache
 - NpgsqlConnection
 - messaging
 - mc2-crudtest-presentation-server
+- namespace.yaml
 - dashboard.yaml
 
 generatorOptions:

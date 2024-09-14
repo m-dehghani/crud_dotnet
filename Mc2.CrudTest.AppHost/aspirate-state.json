@@ -1,16 +1,10 @@
 {
-  "projectPath": ".",
-  "namespace": "crudprj",
+  "inputPath": "aspirate-output",
   "containerImageTags": [
     "latest"
   ],
-  "imagePullPolicy": "IfNotPresent",
-  "containerBuilder": "docker",
   "kubeContext": "minikube",
-  "outputFormat": "kustomize",
-  "privateRegistryEmail": "aspir8@aka.ms",
-  "includeDashboard": true,
-  "useCustomNamespace": true,
+  "outputFormat": "docker",
   "secrets": {
     "salt": "lPoxm9jD4R4wlLXw",
     "hash": "t/sQrMKhNVmSAeOuPkNMZZc3xZVBWV6xcf145BPv\u002BbQ=",
@@ -30,7 +24,5 @@
         "ConnectionStrings__messaging": "lPoxm9jD4R4wlLXwZGZYbeBmnV3YNowQG\u002Btze9in0Sp5IGot7AjFlBOf"
       }
     }
-  },
-  "processAllComponents": true,
-  "isRunning": true
+  }
 }

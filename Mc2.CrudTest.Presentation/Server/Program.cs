@@ -20,31 +20,13 @@ namespace Mc2.CrudTest.Presentation.Server
                 options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
             }); 
             
+            builder.AddNpgsqlDataSource("customers");
+            
             builder.Services.AddRazorPages();
             
-            builder.Services.AddDbContext<ApplicationDbContext>(options => {
-                options.UseNpgsql("customers", 
-                    npgsqlOptionsAction: sqlOptions =>
-                    {
-                        sqlOptions.EnableRetryOnFailure(
-                        maxRetryCount: 10,
-                        maxRetryDelay: TimeSpan.FromSeconds(30),
-                        errorCodesToAdd: null);
-                    });
-            });
+            builder.AddNpgsqlDbContext<ApplicationDbContext>("EventStoreConnection");
             
-            builder.Services.AddDbContext<ReadModelDbContext>(options =>
-            {
-                options
-                    .UseNpgsql("customers",
-                        npgsqlOptionsAction: sqlOptions =>
-                        {
-                            sqlOptions.EnableRetryOnFailure(
-                                maxRetryCount: 10,
-                                maxRetryDelay: TimeSpan.FromSeconds(30),
-                                errorCodesToAdd: null);
-                        });
-            });
+            builder.AddNpgsqlDbContext<ReadModelDbContext>("EventStoreConnection");
 
 
             builder.Services.AddSwaggerGen();
