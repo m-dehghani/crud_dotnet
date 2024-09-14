@@ -13,18 +13,14 @@ namespace Mc2.CrudTest.Presentation.Server.DomainServices
     {
         private readonly IEventRepository _eventStore;
         
-        private readonly IProducer<string, string> _producer;
-        
         private readonly JsonSerializerOptions _options;
         
         public SlowerCustomerService
-            (IEventRepository eventStore, IProducer<string, string> producer)
+            (IEventRepository eventStore)
         {
             
             _eventStore = eventStore;
            
-            _producer = producer;
-
             _options = new JsonSerializerOptions
             {
                 

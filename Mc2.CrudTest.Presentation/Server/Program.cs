@@ -1,4 +1,5 @@
 using Asp.Versioning;
+using Confluent.Kafka;
 using Mc2.CrudTest.Presentation.Server.DomainServices;
 using Mc2.CrudTest.Presentation.Server.Infrastructure;
 using Mc2.CrudTest.Presentation.Shared.Helper;
@@ -20,7 +21,7 @@ namespace Mc2.CrudTest.Presentation.Server
                 options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
             }); 
             
-            builder.AddNpgsqlDataSource("customers");
+           // builder.AddNpgsqlDataSource("EventStoreConnection");
             
             builder.Services.AddRazorPages();
             
@@ -59,20 +60,29 @@ namespace Mc2.CrudTest.Presentation.Server
                 options.AssumeDefaultVersionWhenUnspecified = true;
             });
             
-            builder.AddKafkaProducer<string, string>("messaging");
-           
-            builder.AddKafkaConsumer<string, string>("messaging");
+            // builder.AddKafkaProducer<string, string>("kafka");
+            //
+            // builder.AddKafkaConsumer<string, string>("kafka");
 
             WebApplication app = builder.Build();
 
             // run the required migration
             using (IServiceScope scope = app.Services.CreateScope())
             {
+                // IProducer<string, string> producer = scope.ServiceProvider.GetRequiredService<IProducer<string, string>>();
+                // Message<string, string> msg = new Message<string, string>()
+                // {
+                //     Key = "testKey",
+                //     Value = "testValue",
+                // };
+                //
+                // producer.Produce(new TopicPartition("test",Partition.Any),msg);
+                
                 ApplicationDbContext db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                     db.Database.Migrate();
                
-                ReadModelDbContext readDb = scope.ServiceProvider.GetRequiredService<ReadModelDbContext>();
-                    readDb.Database.Migrate();
+                // ReadModelDbContext readDb = scope.ServiceProvider.GetRequiredService<ReadModelDbContext>();
+                //     readDb.Database.Migrate();
             }
             
             // app.MapDefaultEndpoints();

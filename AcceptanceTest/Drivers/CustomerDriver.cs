@@ -43,7 +43,7 @@ namespace AcceptanceTest.Drivers
             ReadModelDbContext readContext = new(readOptions);
 
             SlowerCustomerService customerService = 
-                new(new EventStoreRepository(context, readContext), null);
+                new(new EventStoreRepository(context, readContext));
 
             _createHandler = new CreateCustomerCommandHandler(customerService);
 
