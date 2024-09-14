@@ -87,16 +87,16 @@ namespace AcceptanceTest.Features
             await this.TestTearDownAsync();
         }
         
-        [Xunit.SkippableFactAttribute(DisplayName="Operator creates")]
+        [Xunit.SkippableFactAttribute(DisplayName="User can Create, Edit, Delete, and Read customer records")]
         [Xunit.TraitAttribute("FeatureTitle", "Customer Manager;")]
-        [Xunit.TraitAttribute("Description", "Operator creates")]
+        [Xunit.TraitAttribute("Description", "User can Create, Edit, Delete, and Read customer records")]
         [Xunit.TraitAttribute("Category", "mytag")]
-        public async System.Threading.Tasks.Task OperatorCreates()
+        public async System.Threading.Tasks.Task UserCanCreateEditDeleteAndReadCustomerRecords()
         {
             string[] tagsOfScenario = new string[] {
                     "mytag"};
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Operator creates", null, tagsOfScenario, argumentsOfScenario, featureTags);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("User can Create, Edit, Delete, and Read customer records", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 6
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
@@ -108,38 +108,123 @@ this.ScenarioInitialize(scenarioInfo);
             {
                 await this.ScenarioStartAsync();
                 global::Reqnroll.Table table1 = new global::Reqnroll.Table(new string[] {
-                            "FirstName",
-                            "LastName",
-                            "DateOfBirth",
-                            "PhoneNumber",
-                            "Email",
-                            "BankAccountNumber"});
+                            "Code",
+                            "Description"});
                 table1.AddRow(new string[] {
-                            "Mohammad",
-                            "Dehghani",
-                            "01/02/1989",
-                            "+989010596159",
-                            "\"dehghany.m@gmail.com\"",
-                            "123456"});
-#line 7
- await testRunner.WhenAsync("I create a Customer with following details", ((string)(null)), table1, "When ");
+                            "101",
+                            "Invalid Email"});
+                table1.AddRow(new string[] {
+                            "102",
+                            "Invalid Phonenumber"});
+                table1.AddRow(new string[] {
+                            "103",
+                            "Invalid BankAccountNumber"});
+                table1.AddRow(new string[] {
+                            "201",
+                            "Duplicated Email Address"});
+                table1.AddRow(new string[] {
+                            "202",
+                            "Duplicated Firstname, Lastname"});
+#line 8
+ await testRunner.GivenAsync("platform support following error codes", ((string)(null)), table1, "Given ");
+#line hidden
+#line 17
+ await testRunner.GivenAsync("platform has \"0\" record of customers", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
                 global::Reqnroll.Table table2 = new global::Reqnroll.Table(new string[] {
-                            "FirstName",
-                            "LastName",
-                            "DateOfBirth",
-                            "PhoneNumber",
                             "Email",
-                            "BankAccountNumber"});
+                            "BankAccountNumber",
+                            "Firstname",
+                            "Lastname",
+                            "DateOfBirth",
+                            "Phonenumber"});
                 table2.AddRow(new string[] {
-                            "Mohammad",
-                            "Dehghani",
-                            "01/02/1989",
-                            "+989010596159",
-                            "\"dehghany.m@gmail.com\"",
-                            "123456"});
-#line 10
- await testRunner.ThenAsync("The customer should be created successfully", ((string)(null)), table2, "Then ");
+                            "john.doe@email.com",
+                            "NL91RABO0312345678",
+                            "john",
+                            "doe",
+                            "19-JUN-1999",
+                            "+989087645543"});
+#line 19
+ await testRunner.WhenAsync("When user send command to create new customer with following information", ((string)(null)), table2, "When ");
+#line hidden
+                global::Reqnroll.Table table3 = new global::Reqnroll.Table(new string[] {
+                            "Email",
+                            "BankAccountNumber",
+                            "Firstname",
+                            "Lastname",
+                            "DateOfBirth",
+                            "Phonenumber"});
+                table3.AddRow(new string[] {
+                            "john.doe@email.com",
+                            "NL91RABO0312345678",
+                            "john",
+                            "doe",
+                            "19-JUN-1999",
+                            "+989087645543"});
+#line 23
+ await testRunner.ThenAsync("user can send query and receive \"1\" record of customer with following data", ((string)(null)), table3, "Then ");
+#line hidden
+                global::Reqnroll.Table table4 = new global::Reqnroll.Table(new string[] {
+                            "Email",
+                            "BankAccountNumber",
+                            "Firstname",
+                            "Lastname",
+                            "DateOfBirth",
+                            "Phonenumber"});
+                table4.AddRow(new string[] {
+                            "john.smith@email.com",
+                            "NL91RABO0312345679",
+                            "john",
+                            "smith",
+                            "19-JUN-1999",
+                            "+989087645541"});
+#line 27
+ await testRunner.WhenAsync("user send command to update customer with email of \"john.doe@email.com\" and with " +
+                        "below information", ((string)(null)), table4, "When ");
+#line hidden
+                global::Reqnroll.Table table5 = new global::Reqnroll.Table(new string[] {
+                            "Code"});
+                table5.AddRow(new string[] {
+                            "202"});
+                table5.AddRow(new string[] {
+                            "102"});
+#line 31
+  await testRunner.ThenAsync("user should receive following error codes", ((string)(null)), table5, "Then ");
+#line hidden
+                global::Reqnroll.Table table6 = new global::Reqnroll.Table(new string[] {
+                            "Email",
+                            "BankAccountNumber",
+                            "Firstname",
+                            "Lastname",
+                            "DateOfBirth",
+                            "Phonenumber"});
+                table6.AddRow(new string[] {
+                            "john.smith@email.com",
+                            "NL91RABO0312345679",
+                            "john",
+                            "smith",
+                            "19-JUN-1999",
+                            "+989087645541"});
+#line 36
+ await testRunner.ThenAsync("user can send query and receive \"1\" record of customer with following data", ((string)(null)), table6, "Then ");
+#line hidden
+                global::Reqnroll.Table table7 = new global::Reqnroll.Table(new string[] {
+                            "Email",
+                            "BankAccountNumber",
+                            "Firstname",
+                            "Lastname",
+                            "DateOfBirth",
+                            "Phonenumber"});
+                table7.AddRow(new string[] {
+                            "john.doe@email.com",
+                            "NL91RABO0312345678",
+                            "john",
+                            "doe",
+                            "19-JUN-1999",
+                            "+989087645543"});
+#line 40
+  await testRunner.AndAsync("user can send query and receive \"0\" record of customer with following data", ((string)(null)), table7, "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

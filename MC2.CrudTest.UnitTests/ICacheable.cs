@@ -1,5 +1,4 @@
 using Mc2.CrudTest.Presentation.Shared.Entities;
-using Mc2.CrudTest.Presentation.ViewModels;
 using StackExchange.Redis;
 
 namespace MC2.CrudTest.UnitTests;
@@ -20,8 +19,8 @@ public sealed class RedisCacheHandler : ICacheable
     public void SetCustomerData(Customer customer) 
     {
         
-        var _redisDB = multiplexer.GetDatabase(1);
-        var customerData = $"{customer.FirstName}-{customer.LastName}-{customer.DateOfBirth.Value}";
+        IDatabase? _redisDB = multiplexer.GetDatabase(1);
+        string? customerData = $"{customer.FirstName}-{customer.LastName}-{customer.DateOfBirth.Value}";
         if (!string.IsNullOrEmpty(_redisDB.StringGet(customer.Email.Value)))
             throw new ArgumentException("Email address already exists");
 

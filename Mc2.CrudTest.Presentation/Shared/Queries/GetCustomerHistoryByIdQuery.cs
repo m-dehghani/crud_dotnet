@@ -1,5 +1,4 @@
 ﻿using Mc2.CrudTest.Presentation.Shared.ViewModels;
-using Mc2.CrudTest.Presentation.ViewModels;
 using MediatR;
 using System;
 using System.Collections.Generic;

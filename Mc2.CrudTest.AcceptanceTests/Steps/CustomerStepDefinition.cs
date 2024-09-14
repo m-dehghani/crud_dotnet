@@ -1,14 +1,4 @@
-using FluentAssertions;
-using Mc2.CrudTest.Presentation.Server.Controllers;
-using MediatR;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
-using NUnit.Framework;
-using SpecFlow.Internal.Json;
-using System;
-
-namespace Mc2.CrudTest.AcceptanceTests.Steps;
+namespace Mc2.CrudTest.AcceptanceTests.old.Steps;
 
 [Binding]
 public sealed class CustomerStepDefinition

@@ -1,6 +1,5 @@
 ﻿using Mc2.CrudTest.Presentation.Client.Models;
 using Mc2.CrudTest.Presentation.Shared.ViewModels;
-using Mc2.CrudTest.Presentation.ViewModels;
 
 namespace Mc2.CrudTest.Presentation.Client.services
 {

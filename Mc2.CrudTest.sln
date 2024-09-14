@@ -21,9 +21,9 @@ Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-co
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReqnrollProject1", "..\ReqnrollProject1\ReqnrollProject1.csproj", "{0A263CE6-FEB5-42F8-991F-E7E028A828DE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AcceptanceTest", "..\AcceptanceTest\AcceptanceTest.csproj", "{3EAB75F0-64B5-497F-91DE-6E7A6791A68D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "e2e", "e2e\e2e.csproj", "{DFB647E9-8E83-4B32-8842-18A941D73ACC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "e2e", "e2e\e2e.csproj", "{DFB647E9-8E83-4B32-8842-18A941D73ACC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AcceptanceTest", "AcceptanceTest\AcceptanceTest.csproj", "{30C98A6A-A32B-403B-84CE-D0B6CC51C9C1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -67,14 +67,14 @@ Global
 		{0A263CE6-FEB5-42F8-991F-E7E028A828DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0A263CE6-FEB5-42F8-991F-E7E028A828DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0A263CE6-FEB5-42F8-991F-E7E028A828DE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3EAB75F0-64B5-497F-91DE-6E7A6791A68D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3EAB75F0-64B5-497F-91DE-6E7A6791A68D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3EAB75F0-64B5-497F-91DE-6E7A6791A68D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3EAB75F0-64B5-497F-91DE-6E7A6791A68D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DFB647E9-8E83-4B32-8842-18A941D73ACC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DFB647E9-8E83-4B32-8842-18A941D73ACC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DFB647E9-8E83-4B32-8842-18A941D73ACC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DFB647E9-8E83-4B32-8842-18A941D73ACC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{30C98A6A-A32B-403B-84CE-D0B6CC51C9C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30C98A6A-A32B-403B-84CE-D0B6CC51C9C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30C98A6A-A32B-403B-84CE-D0B6CC51C9C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30C98A6A-A32B-403B-84CE-D0B6CC51C9C1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,5 +1,6 @@
 using Mc2.CrudTest.Presentation.Shared.Events;
-namespace Mc2.CrudTest.Presentation.Infrastructure;
+
+namespace Mc2.CrudTest.Presentation.Server.Infrastructure;
 
 public interface IEventRepository
 {

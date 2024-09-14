@@ -1,10 +1,12 @@
-using Mc2.CrudTest.Presentation.DomainServices;
+using Mc2.CrudTest.Presentation.Server.DomainServices;
+using Mc2.CrudTest.Presentation.Shared.Entities;
 using Mc2.CrudTest.Presentation.Shared.Queries;
+using Mc2.CrudTest.Presentation.Shared.ViewModels;
 using MediatR;
 
-namespace Mc2.CrudTest.Presentation.Handlers;
+namespace Mc2.CrudTest.Presentation.Server.Handlers;
 
-public class GetCustomerByIdQueryHandler : IRequestHandler<GetCustomerByIdQuery, ViewModels.CustomerViewModel>
+public class GetCustomerByIdQueryHandler : IRequestHandler<GetCustomerByIdQuery, CustomerViewModel>
 {
     private readonly ICustomerService  _readService;
 
@@ -12,9 +14,9 @@ public class GetCustomerByIdQueryHandler : IRequestHandler<GetCustomerByIdQuery,
     {
         _readService = readService;
     }
-    public async Task<ViewModels.CustomerViewModel> Handle(GetCustomerByIdQuery request, CancellationToken cancellationToken)
+    public async Task<CustomerViewModel> Handle(GetCustomerByIdQuery request, CancellationToken cancellationToken)
     {
-        var customer = await _readService.GetCustomer(request.Id);
-        return new ViewModels.CustomerViewModel(customer.Id,customer.History.ToArray(), customer.FirstName, customer.LastName, customer.PhoneNumber.Value, customer.Email.Value, customer.BankAccount.Value, customer.DateOfBirth?.Value.ToString());
+        Customer? customer = await _readService.GetCustomer(request.Id);
+        return new CustomerViewModel(customer.Id,customer.History.ToArray(), customer.FirstName, customer.LastName, customer.PhoneNumber.Value, customer.Email.Value, customer.BankAccount.Value, customer.DateOfBirth?.Value.ToString());
     }
 }

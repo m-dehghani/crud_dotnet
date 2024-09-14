@@ -1,7 +1,7 @@
 using Mc2.CrudTest.Presentation.Shared.Events;
 using Microsoft.EntityFrameworkCore;
 
-namespace Mc2.CrudTest.Presentation.Infrastructure;
+namespace Mc2.CrudTest.Presentation.Server.Infrastructure;
 
 // creating another Dbcontext for reading in CQRS
 public class ReadModelDbContext : DbContext

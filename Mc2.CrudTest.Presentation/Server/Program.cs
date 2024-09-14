@@ -1,90 +1,106 @@
 using Asp.Versioning;
-using Mc2.CrudTest.Presentation.DomainServices;
-using Mc2.CrudTest.Presentation.Infrastructure;
+using Confluent.Kafka;
+using Mc2.CrudTest.Presentation.Server.DomainServices;
+using Mc2.CrudTest.Presentation.Server.Infrastructure;
 using Mc2.CrudTest.Presentation.Shared.Helper;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 
-namespace Mc2.CrudTest.Presentation
+namespace Mc2.CrudTest.Presentation.Server
 {
     public class Program
     {
         public static void Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
+            WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+            
            // builder.AddServiceDefaults();
 
             builder.Services.AddControllersWithViews().AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
-            }); ;
-            builder.Services.AddRazorPages();
-            builder.Services.AddDbContext<ApplicationDbContext>(options => {
-                options.UseNpgsql(builder.Configuration["ConnectionStrings:EventStoreConnection"], 
-                    npgsqlOptionsAction: sqlOptions =>
-                    {
-                        sqlOptions.EnableRetryOnFailure(
-                        maxRetryCount: 10,
-                        maxRetryDelay: TimeSpan.FromSeconds(30),
-                        errorCodesToAdd: null);
-                    });
-            });
+            }); 
             
-            builder.Services.AddDbContext<ReadModelDbContext>(options => { 
-                options.UseNpgsql(builder.Configuration["ConnectionStrings:EventStoreConnection"],
-                npgsqlOptionsAction: sqlOptions =>
-                {
-                    sqlOptions.EnableRetryOnFailure(
-                    maxRetryCount: 10,
-                    maxRetryDelay: TimeSpan.FromSeconds(30),
-                    errorCodesToAdd: null);
-                });
-        });
+           // builder.AddNpgsqlDataSource("EventStoreConnection");
+            
+            builder.Services.AddRazorPages();
+            
+            builder.AddNpgsqlDbContext<ApplicationDbContext>("EventStoreConnection");
+            
+            builder.AddNpgsqlDbContext<ReadModelDbContext>("EventStoreConnection");
 
 
             builder.Services.AddSwaggerGen();
-            builder.Services.AddMediatR(cfg => {
-                cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
-            });
+            
+            builder.Services.
+                AddMediatR(cfg =>
+                {
+                    cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
+                });
+            
             builder.Services.AddScoped<IDatabase>(cfg =>
             {
                 IConnectionMultiplexer multiplexer = ConnectionMultiplexer.Connect($"{builder.Configuration["RedisUrl"]}");
+            
                 return multiplexer.GetDatabase();
             });
 
             // builder.Services.AddTransient<ICustomerService, CustomerService>();
+            
             builder.Services.AddTransient<ICustomerService, SlowerCustomerService>();
+            
             builder.Services.AddTransient<IEventRepository, EventStoreRepository>();
+          
             builder.Services.AddApiVersioning(options =>
             {
                 options.ReportApiVersions = true;
+           
                 options.DefaultApiVersion = new ApiVersion(1, 0);
+           
                 options.AssumeDefaultVersionWhenUnspecified = true;
             });
+            
+            // builder.AddKafkaProducer<string, string>("kafka");
+            //
+            // builder.AddKafkaConsumer<string, string>("kafka");
 
-            var app = builder.Build();
+            WebApplication app = builder.Build();
 
             // run the required migration
-            using (var scope = app.Services.CreateScope())
+            using (IServiceScope scope = app.Services.CreateScope())
             {
-                var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                // IProducer<string, string> producer = scope.ServiceProvider.GetRequiredService<IProducer<string, string>>();
+                // Message<string, string> msg = new Message<string, string>()
+                // {
+                //     Key = "testKey",
+                //     Value = "testValue",
+                // };
+                //
+                // producer.Produce(new TopicPartition("test",Partition.Any),msg);
+                
+                ApplicationDbContext db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                     db.Database.Migrate();
                
-                var readDb = scope.ServiceProvider.GetRequiredService<ReadModelDbContext>();
-                    readDb.Database.Migrate();
-                }
-           // app.MapDefaultEndpoints();
+                // ReadModelDbContext readDb = scope.ServiceProvider.GetRequiredService<ReadModelDbContext>();
+                //     readDb.Database.Migrate();
+            }
+            
+            // app.MapDefaultEndpoints();
 
             // Configure the HTTP request pipeline.
+            
             if (app.Environment.IsDevelopment())
             {
                 app.UseWebAssemblyDebugging();
+          
                 app.UseSwagger();
+         
                 app.UseSwaggerUI();
             }
             else
             {
                 app.UseExceptionHandler("/Error");
+           
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
@@ -92,13 +108,15 @@ namespace Mc2.CrudTest.Presentation
             app.UseHttpsRedirection();
 
             app.UseBlazorFrameworkFiles();
+         
             app.UseStaticFiles();
 
             app.UseRouting();
 
-
             app.MapRazorPages();
+         
             app.MapControllers();
+       
             app.MapFallbackToFile("index.html");
 
             app.Run();

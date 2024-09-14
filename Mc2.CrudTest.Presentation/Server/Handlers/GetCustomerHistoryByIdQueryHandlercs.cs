@@ -1,5 +1,5 @@
-﻿using Mc2.CrudTest.Presentation.Shared.Queries;
-using Mc2.CrudTest.Presentation.DomainServices;
+﻿using Mc2.CrudTest.Presentation.Server.DomainServices;
+using Mc2.CrudTest.Presentation.Shared.Queries;
 using Mc2.CrudTest.Presentation.Shared.ViewModels;
 using MediatR;
 

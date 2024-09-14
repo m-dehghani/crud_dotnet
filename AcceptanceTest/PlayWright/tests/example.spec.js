@@ -19,7 +19,7 @@ const { test, expect } = require('@playwright/test');
 // });
 
 
-const CustomerPageUrl = 'https://localhost:7239/customers';
+const CustomerPageUrl = 'http://localhost:5090/customers';
 
 test("CRUD on a new customer", async({page}) => {
   await page.goto(CustomerPageUrl);

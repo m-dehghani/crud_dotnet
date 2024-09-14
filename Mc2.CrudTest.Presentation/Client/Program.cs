@@ -14,13 +14,13 @@ namespace Mc2.CrudTest.Presentation.Client
     {
         public static async Task Main(string[] args)
         {
-            var builder = WebAssemblyHostBuilder.CreateDefault(args);
+            WebAssemblyHostBuilder? builder = WebAssemblyHostBuilder.CreateDefault(args);
             
             builder.RootComponents.Add<App>("#app");
             builder.RootComponents.Add<HeadOutlet>("head::after");
             builder.Services.AddTransient<ICustomerService, CustomerService>();
 
-            var circuitBreakerPolicy = GetCircuitBreakerPolicy();
+            IAsyncPolicy<HttpResponseMessage>? circuitBreakerPolicy = GetCircuitBreakerPolicy();
             builder.Services.AddHttpClient<ICustomerService, CustomerService>(client =>
             {
                 client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress);
@@ -31,7 +31,7 @@ namespace Mc2.CrudTest.Presentation.Client
             await builder.Build().RunAsync();
         }
 
-        static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
+        private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
         {
             return HttpPolicyExtensions
                 .HandleTransientHttpError()
@@ -39,7 +39,7 @@ namespace Mc2.CrudTest.Presentation.Client
                 .WaitAndRetryAsync(6, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
         }
 
-        static IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy()
+        private static IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy()
         {
             return HttpPolicyExtensions
                 .HandleTransientHttpError()

@@ -1,0 +1,35 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mc2-crudtest-presentation-server
+  labels:
+    app: mc2-crudtest-presentation-server
+spec:
+  minReadySeconds: 60
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mc2-crudtest-presentation-server
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mc2-crudtest-presentation-server
+    spec:
+      containers:
+      - name: mc2-crudtest-presentation-server
+        image: mc2-crudtest-presentation-server:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8080
+        - name: https
+          containerPort: 8443
+        envFrom:
+        - configMapRef:
+            name: mc2-crudtest-presentation-server-env
+        - secretRef:
+            name: mc2-crudtest-presentation-server-secrets
+      terminationGracePeriodSeconds: 180

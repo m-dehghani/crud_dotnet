@@ -1,13 +1,33 @@
-var builder = DistributedApplication.CreateBuilder(args);
+IDistributedApplicationBuilder builder = 
+       DistributedApplication.CreateBuilder(args);
+
+IResourceBuilder<RedisResource> redis = 
+       builder.AddRedis("cache");
+
+IResourceBuilder<ParameterResource> username = 
+       builder.AddParameter("username", secret: true);
+
+IResourceBuilder<ParameterResource> password = 
+       builder.AddParameter("password", secret: true);
+
+IResourceBuilder<PostgresServerResource> postgres = 
+       builder.AddPostgres("postgres", username, password)
+       .WithPgAdmin();
+
+IResourceBuilder<PostgresDatabaseResource> postgresdb = 
+       postgres.AddDatabase("customers");
 
 
-var redis = builder.AddRedis("cache");
+IResourceBuilder<KafkaServerResource> messaging = 
+       builder.AddKafka("messaging")
+       .WithKafkaUI();
 
-var postgres = builder.AddPostgres("NpgsqlConnection");
-var postgresdb = postgres.AddDatabase("customers");
+builder.AddProject<Projects.Mc2_CrudTest_Presentation_Server>
+              ("server")
+       //.WithReference(redis)
+       .WithReference(postgresdb)
+       .WithReference(messaging);
 
-builder.AddProject<Projects.Mc2_CrudTest_Presentation_Server>("mc2-crudtest-presentation-server").WithReference(redis).WithReference(postgresdb).WithHttpEndpoint(port: 5066)
-       .WithHttpsEndpoint(port: 7239); ; ;
-
-
-builder.Build().Run();
+builder
+       .Build()
+       .Run();

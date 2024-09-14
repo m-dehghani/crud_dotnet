@@ -86,7 +86,7 @@
         editContext = new(Model);
         editContext.OnValidationRequested += HandleValidationRequested;
         messageStore = new(editContext);
-        var model = await CustomerService.Get(new Guid(Id));
+        CustomerUpdateModel? model = await CustomerService.Get(new Guid(Id));
         Model = model;
         StateHasChanged();
     }
