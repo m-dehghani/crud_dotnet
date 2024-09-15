@@ -1,7 +1,6 @@
-using Reqnroll;
 using Testcontainers.PostgreSql;
 
-namespace AcceptanceTest.Hooks
+namespace ReqnrollProject1.Hooks
 {
     [Binding]
     public sealed class CustomerHook
@@ -10,7 +9,7 @@ namespace AcceptanceTest.Hooks
         private readonly PostgreSqlContainer _postgres = new PostgreSqlBuilder()
             .WithImage("postgres:15-alpine")
             .Build();
-        
+
         [BeforeScenario("@tag1")]
         public async Task BeforeScenarioWithTag()
         {

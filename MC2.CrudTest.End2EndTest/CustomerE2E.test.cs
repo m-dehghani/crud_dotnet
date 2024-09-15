@@ -1,5 +1,5 @@
 using Microsoft.Playwright;
-// Added for e2e testing
+// Added for MC2.CrudTest.End2EndTest testing
 namespace e2e
 {
     [Parallelizable(ParallelScope.Self)]
