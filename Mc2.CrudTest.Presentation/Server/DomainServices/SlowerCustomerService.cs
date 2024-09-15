@@ -38,7 +38,7 @@ namespace Mc2.CrudTest.Presentation.Server.DomainServices
 
             bool dataUnique = false;
 
-            IEnumerable<Customer>? customers = await GetAllCustomers();
+            IEnumerable<Customer> customers = await GetAllCustomers();
             
             IEnumerable<Customer> enumerable = customers.ToList();
             
@@ -70,12 +70,12 @@ namespace Mc2.CrudTest.Presentation.Server.DomainServices
             if (!isUnique.emailIsUnique)
             {
                 throw new DuplicateEmailException("This email address was taken" +
-                                                  " by another user. Please select another one ");
+                                                  " by another user. Please select another one ", email: customer.Email.Value);
             }
 
             if (!isUnique.firstAndLastNameISUnique)
             {
-                throw new ("This user has registered before");
+                throw new DuplicatedFirstnameAndLastnameException("This user has registered before");
             }
 
             if (customer.Id == Guid.Empty)
@@ -83,12 +83,12 @@ namespace Mc2.CrudTest.Presentation.Server.DomainServices
                 customer.Id = Guid.NewGuid();
             }
             
-            CustomerCreatedEvent? customerCreatedEvent = 
-                new CustomerCreatedEvent(customer.Id, customer.FirstName, customer.LastName,
+            CustomerCreatedEvent customerCreatedEvent = 
+                new(customer.Id, customer.FirstName, customer.LastName,
                 customer.PhoneNumber.Value, customer.Email.Value, customer.BankAccount.Value,
                 customer.DateOfBirth.Value)
             {
-                Data = System.Text.Json.JsonSerializer.Serialize(customer,_options),
+                Data = JsonSerializer.Serialize(customer,_options),
          
                 OccurredOn = DateTimeOffset.UtcNow
             };
@@ -98,10 +98,11 @@ namespace Mc2.CrudTest.Presentation.Server.DomainServices
         
         public async Task DeleteCustomerAsync(Guid customerId)
         {
-            CustomerDeletedEvent? customerDeletedEvent = new CustomerDeletedEvent(customerId);
-        
-            customerDeletedEvent.OccurredOn = DateTimeOffset.UtcNow;
-            
+            CustomerDeletedEvent customerDeletedEvent = new(customerId)
+            {
+                OccurredOn = DateTimeOffset.UtcNow
+            };
+
             await _eventStore.SaveEventAsync(customerDeletedEvent, () => { });
         }
 
@@ -109,9 +110,9 @@ namespace Mc2.CrudTest.Presentation.Server.DomainServices
         public async Task<Customer> GetCustomer(Guid customerId)
         {
 
-            List<EventBase>? events = await _eventStore.GetEventsAsync(customerId);
+            List<EventBase> events = await _eventStore.GetEventsAsync(customerId);
 
-            Customer? customer = new Customer();
+            Customer customer = new();
          
             foreach (EventBase? @event in events)
             {
@@ -123,20 +124,20 @@ namespace Mc2.CrudTest.Presentation.Server.DomainServices
 
         public async Task<CustomerHistoryViewModel> GetCustomerHistory(Guid customerId)
         {
-            List<EventBase>? events = await _eventStore.GetEventsAsync(customerId);
+            List<EventBase> events = await _eventStore.GetEventsAsync(customerId);
           
-            CustomerHistoryViewModel? history = new CustomerHistoryViewModel(events);
+            CustomerHistoryViewModel history = new(events);
          
             return history;
         }
 
         public async Task<IEnumerable<Customer>> GetAllCustomers()
         {
-            Dictionary<Guid, Customer>? customers = new Dictionary<Guid, Customer>();
+            Dictionary<Guid, Customer> customers = new();
 
             try
             {
-                List<EventBase>? events =
+                List<EventBase> events =
                     await _eventStore.GetAllEvents().ToListAsync();
 
                 foreach (EventBase? @event in events)
@@ -148,7 +149,7 @@ namespace Mc2.CrudTest.Presentation.Server.DomainServices
 
                     else
                     {
-                        Customer? customer = new Customer();
+                        Customer customer = new();
 
                         customer.Apply(@event);
 
@@ -180,12 +181,12 @@ namespace Mc2.CrudTest.Presentation.Server.DomainServices
                 throw new ArgumentException("202");
             }
             
-            CustomerUpdatedEvent? customerUpdatedEvent = 
-                new CustomerUpdatedEvent(customer.Id, customer.FirstName
+            CustomerUpdatedEvent customerUpdatedEvent = 
+                new(customer.Id, customer.FirstName
                     , customer.LastName, customer.Email.Value, customer.PhoneNumber.Value
                     , customer.BankAccount.Value, customer.DateOfBirth.Value)
             {
-                Data = System.Text.Json.JsonSerializer.Serialize(customer, _options),
+                Data = JsonSerializer.Serialize(customer, _options),
                 AggregateId = customer.Id,
                 OccurredOn = DateTimeOffset.UtcNow
             };

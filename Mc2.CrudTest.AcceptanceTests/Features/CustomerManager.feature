@@ -8,8 +8,9 @@ Scenario: User can Create, Edit, Delete, and Read customer records
 	Given platform support following error codes
       | Code | Description                    |
       | 101  | Invalid Email                  |
-      | 102  | Invalid Phonenumber            |
+      | 102  | Invalid PhoneNumber            |
       | 103  | Invalid BankAccountNumber      |
+      | 104  | Invalid DateOfBirth            |
       | 201  | Duplicated Email Address       |
       | 202  | Duplicated Firstname, Lastname |
 
@@ -20,7 +21,7 @@ Scenario: User can Create, Edit, Delete, and Read customer records
 		| Email              | BankAccountNumber  | Firstname | Lastname | DateOfBirth | Phonenumber   |
         | john.doe@email.com | NL91RABO0312345678 | john      | doe      | 19-JUN-1999 | +989087645543 |
 	
-	Then user can send query and receive "1" record of customer with following data
+	Then user can send query and receive 1 record of customer with following data
 		| Email              | BankAccountNumber  | Firstname | Lastname | DateOfBirth | Phonenumber   |
         | john.doe@email.com | NL91RABO0312345678 | john      | doe      | 19-JUN-1999 | +989087645543 |
 
@@ -33,10 +34,10 @@ Scenario: User can Create, Edit, Delete, and Read customer records
         | 202  |
         | 102  |
 
-	Then user can send query and receive "1" record of customer with following data
+	Then user can send query and receive 1 record of customer with following data
         | Email                | BankAccountNumber  | Firstname | Lastname   | DateOfBirth | Phonenumber   |
         | john.smith@email.com | NL91RABO0312345679 | john      | smith      | 19-JUN-1999 | +989087645541 |
 
-	 And user can send query and receive "0" record of customer with following data
+	 And user can send query and receive 0 record of customer with following data
         | Email              | BankAccountNumber  | Firstname | Lastname | DateOfBirth | Phonenumber   |
         | john.doe@email.com | NL91RABO0312345678 | john      | doe      | 19-JUN-1999 | +989087645543 |

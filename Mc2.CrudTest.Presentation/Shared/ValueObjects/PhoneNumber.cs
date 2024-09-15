@@ -1,39 +1,46 @@
 using PhoneNumbers;
 using System.Text.Json.Serialization;
+using Mc2.CrudTest.Presentation.Shared.DomainExceptions;
 
 namespace Mc2.CrudTest.Presentation.Shared.ValueObjects
 {
+    // using google's libPhoneNumber package for validating phone numbers
     public class PhoneNumber
     {
-        public string Value { get; set; }
+        public string Value { get; }
 
         [JsonConstructor]
         public PhoneNumber(string value)
         {
             char plusSign = '\u002B';
-           // value = value.Trim(['\"']);
-            String temp = value.StartsWith("\\u002B") ?  (char)plusSign + value.Substring(6, value.Length - 6) : value;
+           
+           string temp = value.StartsWith("\\u002B") 
+               ?  plusSign + value.Substring(6, value.Length - 6)
+               : value;
+          
             if (!IsValidNumber(temp))
-                throw new ArgumentException("102", nameof(value));
+                throw new InvalidPhonenumberException("bad phone number"
+                    , nameof(value));
 
             Value = temp;
         }
 
-        private bool IsValidNumber(string value)
+      
+        private static bool IsValidNumber(string value)
         {
-            // using google's libPhoneNumber package for validating phone numbers
-            PhoneNumberUtil? phoneNumberUtil = PhoneNumbers.PhoneNumberUtil.GetInstance();
+            
+            PhoneNumberUtil? phoneNumberUtil = PhoneNumberUtil.GetInstance();
             try
             {
                 PhoneNumbers.PhoneNumber? numberProto = phoneNumberUtil.Parse(value,"");
-                int countryCode = numberProto.CountryCode;
-                PhoneNumbers.PhoneNumber? temp = new PhoneNumbers.PhoneNumber();
+            
                 bool result =  phoneNumberUtil.IsValidNumber(numberProto);
+                
                 PhoneNumberType phoneNumberType = phoneNumberUtil.GetNumberType(numberProto);
+                
                 return result || phoneNumberType == PhoneNumberType.MOBILE;
-                //return result;
             }
-            catch (PhoneNumbers.NumberParseException)
+            catch (NumberParseException)
             {
                 return false;
             }

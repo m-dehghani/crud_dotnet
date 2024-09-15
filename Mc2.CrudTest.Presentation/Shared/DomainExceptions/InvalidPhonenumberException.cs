@@ -4,24 +4,17 @@ public class InvalidPhonenumberException : Exception
 {
     public string? Phonenumber { get; }
 
-    public InvalidPhonenumberException()
-    {
-       
-    }
+    public string ErrorCode => "102";
 
-    public InvalidPhonenumberException(string message)
+
+    private InvalidPhonenumberException(string message)
         : base(message)
     {
    
     }
+    
 
-    public InvalidPhonenumberException(string message, Exception inner)
-        : base(message, inner)
-    {
-     
-    }
-
-    public InvalidPhonenumberException(string message, string phonenumber)
+    public InvalidPhonenumberException(string message, string phoneNumber)
         : this(message) =>
-        Phonenumber = phonenumber;
+        Phonenumber = phoneNumber;
 }

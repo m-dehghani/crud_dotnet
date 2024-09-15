@@ -1,25 +1,10 @@
 namespace Mc2.CrudTest.Presentation.Shared.DomainExceptions;
 
-public class InvalidBankAccountNumberException : Exception
+public class InvalidBankAccountNumberException(string message) : Exception(message)
 {
     public string? BankAccount { get; }
 
-    public InvalidBankAccountNumberException()
-    {
-       
-    }
-
-    public InvalidBankAccountNumberException(string message)
-        : base(message)
-    {
-   
-    }
-
-    public InvalidBankAccountNumberException(string message, Exception inner)
-        : base(message, inner)
-    {
-     
-    }
+    public string ErrorCode => "103";
 
     public InvalidBankAccountNumberException(string message, string bankAccount)
         : this(message) =>

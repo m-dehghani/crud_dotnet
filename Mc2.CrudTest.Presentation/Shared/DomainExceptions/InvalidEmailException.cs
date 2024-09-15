@@ -1,25 +1,9 @@
 namespace Mc2.CrudTest.Presentation.Shared.DomainExceptions;
 
-public class InvalidEmailException : Exception
+public class InvalidEmailException(string message) : Exception(message)
 {
    public string? Email { get; }
-
-   public InvalidEmailException()
-   {
-       
-   }
-
-   public InvalidEmailException(string message)
-      : base(message)
-   {
-   
-   }
-
-   public InvalidEmailException(string message, Exception inner)
-      : base(message, inner)
-   {
-     
-   }
+   public string ErrorCode => "101";
 
    public InvalidEmailException(string message, string email)
       : this(message) =>
