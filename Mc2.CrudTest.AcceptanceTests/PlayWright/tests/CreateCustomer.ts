@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test('test', async ({ page }) => {
+test('CreateCustomerE2ETest', async ({ page }) => {
   await page.goto('https://localhost:5090/customers');
   await page.getByRole('link', { name: 'New Customer' }).click();
   await page.getByPlaceholder('First name').click();

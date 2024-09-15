@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test('test', async ({ page }) => {
+test('CustomerHistoryE2ETest', async ({ page }) => {
   await page.goto('https://localhost:57872/customers');
   await page.getByRole('button', { name: 'History' }).click();
   await expect(page.getByText('CustomerCreatedEvent')).toBeVisible();

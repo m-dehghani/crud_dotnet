@@ -7,6 +7,7 @@
 
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <RootNamespace>e2e</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

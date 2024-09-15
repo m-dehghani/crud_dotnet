@@ -5,17 +5,12 @@ using MediatR;
 
 namespace Mc2.CrudTest.Presentation.Server.Handlers
 {
-    public class GetCustomerHistoryByIdQueryHandlercs : IRequestHandler<GetCustomerHistoryByIdQuery, CustomerHistoryViewModel>
+    public class GetCustomerHistoryByIdQueryHandlercs(ICustomerService readService)
+        : IRequestHandler<GetCustomerHistoryByIdQuery, CustomerHistoryViewModel>
     {
-        private readonly ICustomerService _readService;
-
-        public GetCustomerHistoryByIdQueryHandlercs(ICustomerService readService)
-        {
-            _readService = readService;
-        }
         public async Task<CustomerHistoryViewModel> Handle(GetCustomerHistoryByIdQuery request, CancellationToken cancellationToken)
         {
-            return await _readService.GetCustomerHistory(request.Id);
+            return await readService.GetCustomerHistory(request.Id);
         }
     }
 }
