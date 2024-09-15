@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using Confluent.Kafka;
 using Mc2.CrudTest.Presentation.Server.Infrastructure;
+using Mc2.CrudTest.Presentation.Shared.DomainExceptions;
 using Mc2.CrudTest.Presentation.Shared.Entities;
 using Mc2.CrudTest.Presentation.Shared.Events;
 using Mc2.CrudTest.Presentation.Shared.Helper;
@@ -64,17 +65,17 @@ namespace Mc2.CrudTest.Presentation.Server.DomainServices
 
         public async Task CreateCustomerAsync(Customer customer)
         {
-            (bool, bool) isUnique = await CheckUniqueness(customer);
+            (bool emailIsUnique, bool firstAndLastNameISUnique) isUnique = await CheckUniqueness(customer);
 
-            if (!isUnique.Item1)
+            if (!isUnique.emailIsUnique)
             {
-                throw new ArgumentException("This email address was taken" +
-                                         " by another user. Please select another one ");
+                throw new DuplicateEmailException("This email address was taken" +
+                                                  " by another user. Please select another one ");
             }
 
-            if (!isUnique.Item2)
+            if (!isUnique.firstAndLastNameISUnique)
             {
-                throw new ArgumentException("This user has registered before");
+                throw new ("This user has registered before");
             }
 
             if (customer.Id == Guid.Empty)

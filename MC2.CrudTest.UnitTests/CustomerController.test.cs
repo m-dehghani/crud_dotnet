@@ -19,7 +19,7 @@ namespace MC2.CrudTest.UnitTests
     {
         private readonly ApplicationDbContext _context;
         private readonly RedisCacheHandler _cacheHandler;
-        private readonly Mock<IDatabase> _mockDatabase;
+        private readonly Mock<IDatabase?> _mockDatabase;
         private readonly CustomerViewModel _newCustomer;
         private readonly CreateCustomerCommandHandler _createHandler;
         private readonly UpdateCustomerCommandHandler _updateHandler;
@@ -40,7 +40,7 @@ namespace MC2.CrudTest.UnitTests
 
             mockMultiplexer.Setup(_ => _.IsConnected).Returns(false);
 
-            _mockDatabase = new Mock<IDatabase>();
+            _mockDatabase = new Mock<IDatabase?>();
 
             mockMultiplexer
                 .Setup(_ => _.GetDatabase

@@ -10,10 +10,10 @@ namespace Mc2.CrudTest.Presentation.Server.DomainServices
     public class CustomerService: ICustomerService
     {
         private readonly IEventRepository _eventStore;
-        private static  IDatabase _redisDB; 
-        public CustomerService(IEventRepository eventStore, IDatabase redis)
+        private static  IDatabase? _redisDb; 
+        public CustomerService(IEventRepository eventStore, IDatabase? redis)
         {
-            _redisDB = redis;
+            _redisDb = redis;
             _eventStore = eventStore;
         }
        
@@ -27,32 +27,32 @@ namespace Mc2.CrudTest.Presentation.Server.DomainServices
                 customer.Id = Guid.NewGuid();
             }
 
-            CustomerCreatedEvent? customerCreatedEvent = new CustomerCreatedEvent(customer.Id, customer.FirstName, customer.LastName,
+            CustomerCreatedEvent? customerCreatedEvent = 
+                new(customer.Id, customer.FirstName, customer.LastName,
                 customer.PhoneNumber.Value, customer.Email.Value, customer.BankAccount.Value,
                 customer.DateOfBirth.Value)
             {
                 Data = System.Text.Json.JsonSerializer.Serialize(customer),
+                OccurredOn = DateTimeOffset.UtcNow
             };
-          
-            customerCreatedEvent.OccurredOn = DateTimeOffset.UtcNow;
-          
+
             await _eventStore.SaveEventAsync(customerCreatedEvent, () => SetCustomerInRedis(customer));
         }
 
-        public static void SetCustomerInRedis(Customer customer)
+        private static void SetCustomerInRedis(Customer customer)
         {
             string? customerData = $"{customer.FirstName}-{customer.LastName}-{customer.DateOfBirth.Value}";
 
-            if (!string.IsNullOrEmpty(_redisDB.StringGet(customer.Email.Value)))
+            if (_redisDb != null && !string.IsNullOrEmpty(_redisDb.StringGet(customer.Email.Value)))
                 throw new ArgumentException("This email address was taken by another user. Please select another one ");
 
-            if (!string.IsNullOrEmpty(_redisDB.StringGet(customerData)))
+            if (_redisDb != null && !string.IsNullOrEmpty(_redisDb.StringGet(customerData)))
                 throw new ArgumentException("This user has registered before");
 
 
-            _redisDB.StringSet(customer.Email.Value, $"{customer.Id}");
+            _redisDb.StringSet(customer.Email.Value, $"{customer.Id}");
 
-            _redisDB.StringSet(customerData, $"{customer.Id}");
+            _redisDb.StringSet(customerData, $"{customer.Id}");
         }
 
         private static bool IsEmailUnique(IDatabase db, string email)
@@ -76,15 +76,15 @@ namespace Mc2.CrudTest.Presentation.Server.DomainServices
         private static void UpdateCustomerInRedis(Customer customer)
         {
             string? customerData = $"{customer.FirstName}-{customer.LastName}-{customer.DateOfBirth.Value}";
-            RedisValue redisEmail = _redisDB.StringGet(customer.Email.Value);
+            RedisValue redisEmail = _redisDb.StringGet(customer.Email.Value);
             if (!string.IsNullOrEmpty(redisEmail) && redisEmail != new RedisValue(customer.Id.ToString()))
                 throw new ArgumentException("This email address was taken by another user. Please select another one ");
 
-            if (!string.IsNullOrEmpty(_redisDB.StringGet(customerData)) && customerData != new RedisValue(customer.Id.ToString()))
+            if (!string.IsNullOrEmpty(_redisDb.StringGet(customerData)) && customerData != new RedisValue(customer.Id.ToString()))
                 throw new ArgumentException("This user has registered before");
 
-            _redisDB.StringSet(customer.Email.Value, 1);
-            _redisDB.StringSet(customerData, 1);
+            _redisDb.StringSet(customer.Email.Value, 1);
+            _redisDb.StringSet(customerData, 1);
         }
 
         // Command: Delete a customer

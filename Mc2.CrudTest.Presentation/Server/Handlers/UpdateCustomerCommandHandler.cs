@@ -5,18 +5,11 @@ using MediatR;
 
 namespace Mc2.CrudTest.Presentation.Server.Handlers;
 
-public class UpdateCustomerCommandHandler : IRequestHandler<UpdateCustomerCommand>
+public class UpdateCustomerCommandHandler(ICustomerService service) : IRequestHandler<UpdateCustomerCommand>
 {
-    private readonly ICustomerService _service;
-
-    public UpdateCustomerCommandHandler(ICustomerService service)
-    {
-        _service = service;
-    }
-
     public async Task Handle(UpdateCustomerCommand command, CancellationToken cancellationToken)
     {
-        await _service.UpdateCustomerAsync(new Customer(command.FirstName, command.LastName, command.PhoneNumber,
+        await service.UpdateCustomerAsync(new Customer(command.FirstName, command.LastName, command.PhoneNumber,
             command.Email, command.BankAccount, command.DateOfBirth), command.Id);
     }
 }
