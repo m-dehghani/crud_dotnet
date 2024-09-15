@@ -5,7 +5,6 @@ namespace ReqnrollProject1.Hooks
     [Binding]
     public sealed class CustomerHook
     {
-        // For additional details on Reqnroll hooks see https://go.reqnroll.net/doc-hooks
         private readonly PostgreSqlContainer _postgres = new PostgreSqlBuilder()
             .WithImage("postgres:15-alpine")
             .Build();
