@@ -1,4 +1,3 @@
-using Mc2.CrudTest.Presentation.Shared.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using ILogger = Serilog.ILogger;

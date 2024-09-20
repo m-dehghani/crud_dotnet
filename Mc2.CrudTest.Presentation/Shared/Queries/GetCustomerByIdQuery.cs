@@ -1,4 +1,3 @@
-using Mc2.CrudTest.Presentation.Shared.Entities;
 using Mc2.CrudTest.Presentation.Shared.ViewModels;
 using MediatR;
 

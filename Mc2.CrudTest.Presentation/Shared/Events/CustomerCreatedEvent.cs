@@ -1,5 +1,4 @@
 using MediatR;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Mc2.CrudTest.Presentation.Shared.Events;
 

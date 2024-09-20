@@ -1,6 +1,3 @@
-using System.Data.SqlTypes;
-using System.Text.Json.Serialization;
-using Mc2.CrudTest.Presentation.Shared.Entities;
 using MediatR;
 
 namespace Mc2.CrudTest.Presentation.Shared.Commands;

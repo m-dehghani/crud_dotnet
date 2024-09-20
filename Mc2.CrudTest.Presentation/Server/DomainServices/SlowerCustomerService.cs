@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using Confluent.Kafka;
 using Mc2.CrudTest.Presentation.Server.Infrastructure;
 using Mc2.CrudTest.Presentation.Shared.DomainExceptions;
 using Mc2.CrudTest.Presentation.Shared.Entities;
@@ -21,7 +20,7 @@ namespace Mc2.CrudTest.Presentation.Server.DomainServices
         {
             
             _eventStore = eventStore;
-           
+            
             _options = new JsonSerializerOptions
             {
                 
@@ -65,6 +64,31 @@ namespace Mc2.CrudTest.Presentation.Server.DomainServices
 
         public async Task CreateCustomerAsync(Customer customer)
         {
+            await Validate(customer);
+
+            if (customer.Id == Guid.Empty)
+            {
+                customer.Id = Guid.NewGuid();
+            }
+
+            if (customer.BankAccount.Value != null)
+            {
+                CustomerCreatedEvent customerCreatedEvent = 
+                    new(customer.Id, customer.FirstName, customer.LastName,
+                        customer.PhoneNumber.Value, customer.Email.Value, customer.BankAccount.Value,
+                        customer.DateOfBirth.Value.Value)
+                    {
+                        Data = JsonSerializer.Serialize(customer,_options),
+         
+                        OccurredOn = DateTimeOffset.UtcNow
+                    };
+
+                await _eventStore.SaveEventAsync(customerCreatedEvent, () => { });
+            }
+        }
+
+        private async Task Validate(Customer customer)
+        {
             (bool emailIsUnique, bool firstAndLastNameISUnique) isUnique = await CheckUniqueness(customer);
 
             if (!isUnique.emailIsUnique)
@@ -77,25 +101,8 @@ namespace Mc2.CrudTest.Presentation.Server.DomainServices
             {
                 throw new DuplicatedFirstnameAndLastnameException("This user has registered before");
             }
-
-            if (customer.Id == Guid.Empty)
-            {
-                customer.Id = Guid.NewGuid();
-            }
-            
-            CustomerCreatedEvent customerCreatedEvent = 
-                new(customer.Id, customer.FirstName, customer.LastName,
-                customer.PhoneNumber.Value, customer.Email.Value, customer.BankAccount.Value,
-                customer.DateOfBirth.Value)
-            {
-                Data = JsonSerializer.Serialize(customer,_options),
-         
-                OccurredOn = DateTimeOffset.UtcNow
-            };
-
-            await _eventStore.SaveEventAsync(customerCreatedEvent, () => { });
         }
-        
+
         public async Task DeleteCustomerAsync(Guid customerId)
         {
             CustomerDeletedEvent customerDeletedEvent = new(customerId)
@@ -168,23 +175,13 @@ namespace Mc2.CrudTest.Presentation.Server.DomainServices
         public async Task UpdateCustomerAsync(Customer customer, Guid customerId)
         {
             customer.Id = customerId;
-         
-            (bool, bool) isUnique = await CheckUniqueness(customer);
 
-            if (!isUnique.Item1)
-            {
-                throw new ArgumentException("201");
-            }
-
-            if (!isUnique.Item2)
-            {
-                throw new ArgumentException("202");
-            }
+            await Validate(customer);
             
             CustomerUpdatedEvent customerUpdatedEvent = 
                 new(customer.Id, customer.FirstName
                     , customer.LastName, customer.Email.Value, customer.PhoneNumber.Value
-                    , customer.BankAccount.Value, customer.DateOfBirth.Value)
+                    , customer.BankAccount.Value, customer.DateOfBirth.Value.Value)
             {
                 Data = JsonSerializer.Serialize(customer, _options),
                 AggregateId = customer.Id,

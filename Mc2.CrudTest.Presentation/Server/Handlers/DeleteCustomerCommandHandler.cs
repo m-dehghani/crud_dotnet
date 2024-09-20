@@ -5,19 +5,12 @@ using MediatR;
 
 namespace Mc2.CrudTest.Presentation.Server.Handlers;
 
-public class DeleteCustomerCommandHandler: IRequestHandler<DeleteCustomerCommand>
+public class DeleteCustomerCommandHandler(IEventRepository eventStore) : IRequestHandler<DeleteCustomerCommand>
 {
-    private readonly IEventRepository _eventStore;
-
-    public DeleteCustomerCommandHandler(IEventRepository eventStore)
-    {
-        _eventStore = eventStore;
-    }
-    
     public async Task Handle(DeleteCustomerCommand command, CancellationToken cancellationToken)
     {
         CustomerDeletedEvent? @event = new(command.Id);
-        await _eventStore.SaveEventAsync(@event, () => {});
+        await eventStore.SaveEventAsync(@event, () => {});
        
     }
     

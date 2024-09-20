@@ -1,6 +1,7 @@
 using Mc2.CrudTest.Presentation.Server.Infrastructure;
 using Mc2.CrudTest.Presentation.Shared.Entities;
 using Mc2.CrudTest.Presentation.Shared.Events;
+using Mc2.CrudTest.Presentation.Shared.Factories;
 using Mc2.CrudTest.Presentation.Shared.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
@@ -10,11 +11,16 @@ namespace Mc2.CrudTest.Presentation.Server.DomainServices
     public class CustomerService: ICustomerService
     {
         private readonly IEventRepository _eventStore;
-        private static  IDatabase? _redisDb; 
+        
+        private static  IDatabase? _redisDb;
+
+        
         public CustomerService(IEventRepository eventStore, IDatabase? redis)
         {
             _redisDb = redis;
+            
             _eventStore = eventStore;
+
         }
        
         // Command: Create a new customer
@@ -30,7 +36,7 @@ namespace Mc2.CrudTest.Presentation.Server.DomainServices
             CustomerCreatedEvent? customerCreatedEvent = 
                 new(customer.Id, customer.FirstName, customer.LastName,
                 customer.PhoneNumber.Value, customer.Email.Value, customer.BankAccount.Value,
-                customer.DateOfBirth.Value)
+                customer.DateOfBirth.Value.Value)
             {
                 Data = System.Text.Json.JsonSerializer.Serialize(customer),
                 OccurredOn = DateTimeOffset.UtcNow
@@ -63,13 +69,18 @@ namespace Mc2.CrudTest.Presentation.Server.DomainServices
         // Command: Update an existing customer
         public async Task UpdateCustomerAsync(Customer customer, Guid customerId)
         {
-            CustomerUpdatedEvent? customerUpdatedEvent = new CustomerUpdatedEvent(customer.Id, customer.FirstName, customer.LastName, customer.Email.Value, customer.PhoneNumber.Value, customer.BankAccount.Value, customer.DateOfBirth.Value)
+            CustomerUpdatedEvent? customerUpdatedEvent =
+                new CustomerUpdatedEvent(customer.Id, customer.FirstName, 
+                    customer.LastName, customer.Email.Value, customer.PhoneNumber.Value,
+                    customer.BankAccount.Value, customer.DateOfBirth.Value.Value)
             {
                 Data = System.Text.Json.JsonSerializer.Serialize(customer),
                 AggregateId = customer.Id
             };
             customerUpdatedEvent.OccurredOn = DateTimeOffset.UtcNow;
-            await _eventStore.SaveEventAsync(customerUpdatedEvent, () => UpdateCustomerInRedis(customer));
+            
+            await _eventStore.SaveEventAsync(customerUpdatedEvent, () => 
+                UpdateCustomerInRedis(customer));
             
         }
 
@@ -78,20 +89,23 @@ namespace Mc2.CrudTest.Presentation.Server.DomainServices
             string? customerData = $"{customer.FirstName}-{customer.LastName}-{customer.DateOfBirth.Value}";
             RedisValue redisEmail = _redisDb.StringGet(customer.Email.Value);
             if (!string.IsNullOrEmpty(redisEmail) && redisEmail != new RedisValue(customer.Id.ToString()))
-                throw new ArgumentException("This email address was taken by another user. Please select another one ");
+                throw new ArgumentException("This email address was taken by another user. " +
+                                            "Please select another one ");
 
-            if (!string.IsNullOrEmpty(_redisDb.StringGet(customerData)) && customerData != new RedisValue(customer.Id.ToString()))
+            if (!string.IsNullOrEmpty(_redisDb.StringGet(customerData)) 
+                && customerData != new RedisValue(customer.Id.ToString()))
                 throw new ArgumentException("This user has registered before");
 
             _redisDb.StringSet(customer.Email.Value, 1);
+            
             _redisDb.StringSet(customerData, 1);
         }
 
         // Command: Delete a customer
         public async Task DeleteCustomerAsync(Guid customerId)
         {
-            CustomerDeletedEvent? customerDeletedEvent = new CustomerDeletedEvent(customerId);
-            customerDeletedEvent.OccurredOn = DateTimeOffset.UtcNow;
+            CustomerDeletedEvent? customerDeletedEvent = new(customerId);
+            
             await _eventStore.SaveEventAsync(customerDeletedEvent, () => {});
         }
 

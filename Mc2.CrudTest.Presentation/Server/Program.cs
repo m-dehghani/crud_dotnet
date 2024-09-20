@@ -1,8 +1,10 @@
 using Asp.Versioning;
-using Confluent.Kafka;
 using Mc2.CrudTest.Presentation.Server.DomainServices;
 using Mc2.CrudTest.Presentation.Server.Infrastructure;
+using Mc2.CrudTest.Presentation.Shared.Factories;
 using Mc2.CrudTest.Presentation.Shared.Helper;
+using Mc2.CrudTest.Presentation.Shared.Validators.Abstract;
+using Mc2.CrudTest.Presentation.Shared.Validators.Concrete;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 
@@ -45,11 +47,14 @@ namespace Mc2.CrudTest.Presentation.Server
                 return multiplexer.GetDatabase();
             });
 
-            // builder.Services.AddTransient<ICustomerService, CustomerService>();
             
             builder.Services.AddTransient<ICustomerService, SlowerCustomerService>();
             
             builder.Services.AddTransient<IEventRepository, EventStoreRepository>();
+
+            builder.Services.AddSingleton<ICustomerValidator, CustomerValidator>();
+
+            builder.Services.AddSingleton<ICustomerFactory, CustomerFactory>();
           
             builder.Services.AddApiVersioning(options =>
             {

@@ -1,7 +1,5 @@
-using Asp.Versioning;
 using Mc2.CrudTest.Presentation.Shared.Commands;
 using Mc2.CrudTest.Presentation.Shared.Queries;
-using Mc2.CrudTest.Presentation.Shared.ViewModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using ILogger = Serilog.ILogger;
@@ -13,7 +11,9 @@ namespace Mc2.CrudTest.Presentation.Server.Controllers;
 public class CustomerController : Controller
 {
     private readonly IMediator _mediator;
+ 
     private static readonly ILogger Log = Serilog.Log.ForContext<CustomerController>();
+ 
     public CustomerController(IMediator mediator)
     {
         _mediator = mediator;
@@ -24,7 +24,9 @@ public class CustomerController : Controller
     public async Task<IActionResult> Get(string id)
     {
         GetCustomerByIdQuery getCustomerByIdQuery = new (Guid.Parse(id)); 
+       
         IActionResult? result = await RequestHandler.HandleQuery(getCustomerByIdQuery, _mediator, Log);
+   
         return result;
     }
 
@@ -32,7 +34,9 @@ public class CustomerController : Controller
     public async Task<IActionResult> GetHistory(string id)
     {
         GetCustomerHistoryByIdQuery getCustomerHistoryByIdQuery = new(Guid.Parse(id));
+        
         IActionResult? result = await RequestHandler.HandleQuery(getCustomerHistoryByIdQuery, _mediator, Log);
+     
         return result;
     }
 
@@ -51,7 +55,8 @@ public class CustomerController : Controller
     [HttpPut("V1/{id}")]
     public async Task<IActionResult> UpdateCustomer(string id, UpdateCustomerCommand customerUpdateCmd)
     {
-        if (new Guid(id) != customerUpdateCmd.Id) { return new BadRequestResult(); }
+        if (new Guid(id) != customerUpdateCmd.id) { return new BadRequestResult(); }
+        
         return await RequestHandler.HandleCommand(customerUpdateCmd, _mediator, Log);
     }
 

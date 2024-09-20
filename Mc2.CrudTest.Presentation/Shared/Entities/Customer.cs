@@ -1,8 +1,7 @@
-using Mc2.CrudTest.Presentation.Shared.Events;
 using Mc2.CrudTest.Presentation.Shared.ValueObjects;
 using System.Text.Json.Serialization;
-using System.Diagnostics;
-using System.Text.Json;
+using Mc2.CrudTest.Presentation.Shared.Validators.Abstract;
+using Mc2.CrudTest.Presentation.Shared.Validators.Concrete;
 
 namespace Mc2.CrudTest.Presentation.Shared.Entities
 {
@@ -17,6 +16,8 @@ namespace Mc2.CrudTest.Presentation.Shared.Entities
         public Email Email { get; private set; }
         private int Version { get; set; } = 0;
         public bool IsDeleted { get; private set; }
+        
+        private readonly ICustomerValidator _validator;
         
         [JsonIgnore]
         public List<string> History { get; private set; } = [];
@@ -63,96 +64,35 @@ namespace Mc2.CrudTest.Presentation.Shared.Entities
             IsDeleted = IsDeleted;
         }
 
+        public Dictionary<string, string> Errors =new Dictionary<string, string>();
+
+        
         public Customer(string firstName, string lastName, 
             string phoneNumber, string email, string bankAccount, 
-            string dateOfBirth)
+            string dateOfBirth, ICustomerValidator validator)
         {
-            FirstName = firstName ?? 
-                        throw new ArgumentNullException(nameof(firstName));
-          
-            LastName = lastName ?? 
-                       throw new ArgumentNullException(nameof(lastName));
-        
-            PhoneNumber = new PhoneNumber(phoneNumber) ?? 
-                          throw new ArgumentNullException(nameof(phoneNumber));
-           
-            Email = new Email(email) ?? 
-                    throw new ArgumentNullException(nameof(email));
+            _validator = validator ?? throw new ArgumentNullException(nameof(validator));
+
+            var validationResult = _validator.ValidateCustomer(firstName, lastName, phoneNumber, email, bankAccount, dateOfBirth);
+
+            if (!validationResult.IsValid)
+            {
+                throw new ArgumentException(validationResult.ErrorMessage);
+            }
             
-            BankAccount = new BankAccount(bankAccount) ?? 
-                          throw new ArgumentException(bankAccount);
-            
+            FirstName = firstName;
+            LastName = lastName;
+            PhoneNumber = new PhoneNumber(phoneNumber);
+            Email = new Email(email);
+            BankAccount = new BankAccount(bankAccount);
             DateOfBirth = new DateOfBirth(dateOfBirth);
-            
-            History = [];
-            
+            History = new List<string>();
             IsDeleted = false;
         }
 
         public Customer()
         {
-
-        }
-
-        // Apply methods
-        protected void Apply(CustomerCreatedEvent @event)
-        {
-            try
-            {
-                Id = @event.AggregateId;
-                
-                FirstName = @event.FirstName;
-                
-                LastName = @event.LastName;
-                
-                Email = new Email(@event.Email);
-                PhoneNumber = new PhoneNumber(@event.PhoneNumber);
-                
-                BankAccount = new BankAccount(@event.BankAccount);
-                
-                DateOfBirth = new DateOfBirth(@event.DateOfBirth.ToString());
-                
-                History.Add($"Created at {@event.OccurredOn.LocalDateTime}");
-                
-                Version = 0;
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message);
-            }
-        }
-
-
-        protected void Apply(CustomerUpdatedEvent @event)
-        {
-            Id = @event.AggregateId;
             
-            FirstName = @event.FirstName;
-            
-            LastName = @event.LastName;
-            
-            Email = new Email(@event.Email);
-            
-            PhoneNumber = new PhoneNumber(@event.PhoneNumber);
-            
-            BankAccount = new BankAccount(@event.BankAccount);
-            
-            DateOfBirth = new DateOfBirth(@event.DateOfBirth.ToString());
-            
-            History.Add($"Updated at {@event.OccurredOn.LocalDateTime}");
-            
-            Version += 1;
-        }
-
-        protected void Apply(CustomerDeletedEvent @event)
-        {
-            Id = @event.AggregateId;
-            
-            IsDeleted = true;
-            
-            History.Add($"Deleted at {@event.OccurredOn}");
-            
-            Version += 1;
         }
 
         // Method to apply events generically
@@ -161,6 +101,11 @@ namespace Mc2.CrudTest.Presentation.Shared.Entities
             ((dynamic)this).Apply((dynamic)@event);
             
             Version += 1;
+        }
+        
+        public ValidationResult Validate()
+        {
+            return _validator.ValidateCustomer(FirstName, LastName, PhoneNumber.Value, Email.Value, BankAccount.Value, DateOfBirth.Value?.ToString());
         }
     }
 }

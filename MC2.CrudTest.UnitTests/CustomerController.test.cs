@@ -5,12 +5,13 @@ using Mc2.CrudTest.Presentation.Server.DomainServices;
 using Mc2.CrudTest.Presentation.Server.Handlers;
 using Mc2.CrudTest.Presentation.Server.Infrastructure;
 using Mc2.CrudTest.Presentation.Shared.Commands;
-using MediatR;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using StackExchange.Redis;
 using Mc2.CrudTest.Presentation.Shared.Events;
+using Mc2.CrudTest.Presentation.Shared.Factories;
+using Mc2.CrudTest.Presentation.Shared.Validators.Concrete;
 using Mc2.CrudTest.Presentation.Shared.ViewModels;
 
 namespace MC2.CrudTest.UnitTests
@@ -19,10 +20,11 @@ namespace MC2.CrudTest.UnitTests
     {
         private readonly ApplicationDbContext _context;
         private readonly RedisCacheHandler _cacheHandler;
-        private readonly Mock<IDatabase?> _mockDatabase;
+        private readonly Mock<IDatabase> _mockDatabase;
         private readonly CustomerViewModel _newCustomer;
         private readonly CreateCustomerCommandHandler _createHandler;
         private readonly UpdateCustomerCommandHandler _updateHandler;
+        private readonly ICustomerFactory _customerFactory;
 
 
         public CustomerControllerTests(WebApplicationFactory<Program> factory)
@@ -40,7 +42,7 @@ namespace MC2.CrudTest.UnitTests
 
             mockMultiplexer.Setup(_ => _.IsConnected).Returns(false);
 
-            _mockDatabase = new Mock<IDatabase?>();
+            _mockDatabase = new Mock<IDatabase>();
 
             mockMultiplexer
                 .Setup(_ => _.GetDatabase
@@ -49,6 +51,8 @@ namespace MC2.CrudTest.UnitTests
 
             _cacheHandler = new RedisCacheHandler(mockMultiplexer.Object);
 
+            _customerFactory = new CustomerFactory(new CustomerValidator());
+         
             ICustomerService customerService = 
                 new CustomerService(new EventStoreRepository(_context, null),
                     _mockDatabase.Object);
@@ -59,9 +63,9 @@ namespace MC2.CrudTest.UnitTests
                 "dehghany.m@gmail.com",
                "1231564654", "2015-02-04");
 
-            _createHandler = new CreateCustomerCommandHandler(customerService);
+            _createHandler = new CreateCustomerCommandHandler(customerService, _customerFactory);
 
-            _updateHandler = new UpdateCustomerCommandHandler(customerService);
+            _updateHandler = new UpdateCustomerCommandHandler(customerService, _customerFactory);
 
         }
 
@@ -72,9 +76,10 @@ namespace MC2.CrudTest.UnitTests
                 CreateCustomerCommand(_newCustomer.FirstName, _newCustomer.LastName,
                     _newCustomer.PhoneNumber, _newCustomer.Email, _newCustomer.BankAccount,
                     _newCustomer.DateOfBirth), CancellationToken.None);
-
-            _cacheHandler.SetCustomerData(new Customer(_newCustomer.FirstName,
-                _newCustomer.LastName, _newCustomer.PhoneNumber, _newCustomer.Email, 
+           
+            
+            _cacheHandler.SetCustomerData(_customerFactory.CreateCustomer(_newCustomer.FirstName,
+                _newCustomer.LastName, _newCustomer.PhoneNumber, _newCustomer.Email,
                 _newCustomer.BankAccount, _newCustomer.DateOfBirth));
 
             _mockDatabase.Setup((x) => x.StringGet(_newCustomer.Email, 
@@ -101,8 +106,8 @@ namespace MC2.CrudTest.UnitTests
                     _newCustomer.PhoneNumber, _newCustomer.Email, _newCustomer.BankAccount,
                     _newCustomer.DateOfBirth), CancellationToken.None);
 
-            _cacheHandler.SetCustomerData(new Customer(_newCustomer.FirstName,
-                _newCustomer.LastName, _newCustomer.PhoneNumber, _newCustomer.Email, 
+            _cacheHandler.SetCustomerData(_customerFactory.CreateCustomer(_newCustomer.FirstName,
+                _newCustomer.LastName, _newCustomer.PhoneNumber, _newCustomer.Email,
                 _newCustomer.BankAccount, _newCustomer.DateOfBirth));
 
             _mockDatabase.Setup((x) => x.StringGet(_newCustomer.Email,
@@ -110,7 +115,8 @@ namespace MC2.CrudTest.UnitTests
 
             _mockDatabase.Setup((x) => x.StringGet(
                 $"{_newCustomer.FirstName}-{_newCustomer.LastName}" +
-                $"-{DateOnly.Parse(_newCustomer.DateOfBirth)}", It.IsAny<CommandFlags>()))
+                $"-{DateOnly.Parse(_newCustomer.DateOfBirth)}", 
+                It.IsAny<CommandFlags>()))
                 .Returns(() => "true");
 
             CustomerViewModel? anotherCustomer = 
@@ -139,9 +145,9 @@ namespace MC2.CrudTest.UnitTests
                     _newCustomer.DateOfBirth), CancellationToken.None);
 
             _cacheHandler.SetCustomerData(
-                new Customer(_newCustomer.FirstName, _newCustomer.LastName, 
-                    _newCustomer.PhoneNumber, _newCustomer.Email, _newCustomer.BankAccount,
-                    _newCustomer.DateOfBirth));
+                _customerFactory.CreateCustomer(_newCustomer.FirstName,
+                    _newCustomer.LastName, _newCustomer.PhoneNumber, _newCustomer.Email,
+                    _newCustomer.BankAccount, _newCustomer.DateOfBirth));
 
             _mockDatabase.Setup((x) => x.StringGet(
                 _newCustomer.Email, It.IsAny<CommandFlags>()))
@@ -203,9 +209,8 @@ namespace MC2.CrudTest.UnitTests
                     _newCustomer.PhoneNumber, _newCustomer.Email, _newCustomer.BankAccount, 
                     _newCustomer.DateOfBirth), CancellationToken.None);
 
-            _cacheHandler.SetCustomerData(new Customer(
-                _newCustomer.FirstName, _newCustomer.LastName,
-                _newCustomer.PhoneNumber, _newCustomer.Email, 
+            _cacheHandler.SetCustomerData(_customerFactory.CreateCustomer(_newCustomer.FirstName,
+                _newCustomer.LastName, _newCustomer.PhoneNumber, _newCustomer.Email,
                 _newCustomer.BankAccount, _newCustomer.DateOfBirth));
 
             _mockDatabase.Setup((x) => x.StringGet(
@@ -261,11 +266,10 @@ namespace MC2.CrudTest.UnitTests
                 CancellationToken.None);
 
             _cacheHandler.SetCustomerData(
-                new Customer(_newCustomer.FirstName, 
-                    _newCustomer.LastName, _newCustomer.PhoneNumber,
-                    _newCustomer.Email, _newCustomer.BankAccount, 
-                    _newCustomer.DateOfBirth));
-
+                _customerFactory.CreateCustomer(_newCustomer.FirstName,
+                _newCustomer.LastName, _newCustomer.PhoneNumber, _newCustomer.Email,
+                _newCustomer.BankAccount, _newCustomer.DateOfBirth));
+            
             _mockDatabase.Setup((x) => x.StringGet(
                 _newCustomer.Email, It.IsAny<CommandFlags>()))
                 .Returns(() => "true");
@@ -306,10 +310,9 @@ namespace MC2.CrudTest.UnitTests
                     _newCustomer.DateOfBirth), CancellationToken.None);
 
             _cacheHandler.SetCustomerData(
-                new Customer(_newCustomer.FirstName, 
-                    _newCustomer.LastName, _newCustomer.PhoneNumber, 
-                    _newCustomer.Email, _newCustomer.BankAccount,
-                    _newCustomer.DateOfBirth));
+                    _customerFactory.CreateCustomer(_newCustomer.FirstName,
+                    _newCustomer.LastName, _newCustomer.PhoneNumber, _newCustomer.Email,
+                    _newCustomer.BankAccount, _newCustomer.DateOfBirth));
 
             _mockDatabase.Setup(
                 (x) => x.StringGet(
@@ -364,10 +367,9 @@ namespace MC2.CrudTest.UnitTests
                 CancellationToken.None);
 
             _cacheHandler.SetCustomerData(
-                new Customer(_newCustomer.FirstName, 
-                    _newCustomer.LastName, _newCustomer.PhoneNumber, 
-                    _newCustomer.Email, _newCustomer.BankAccount,
-                    _newCustomer.DateOfBirth));
+                _customerFactory.CreateCustomer(_newCustomer.FirstName,
+                    _newCustomer.LastName, _newCustomer.PhoneNumber, _newCustomer.Email,
+                    _newCustomer.BankAccount, _newCustomer.DateOfBirth));
 
             _mockDatabase.Setup(
                 (x) => x.StringGet(
@@ -421,10 +423,9 @@ namespace MC2.CrudTest.UnitTests
                     _newCustomer.DateOfBirth), CancellationToken.None);
 
             _cacheHandler.SetCustomerData(
-                new Customer(_newCustomer.FirstName, 
-                    _newCustomer.LastName, _newCustomer.PhoneNumber, 
-                    _newCustomer.Email, _newCustomer.BankAccount,
-                    _newCustomer.DateOfBirth));
+                _customerFactory.CreateCustomer(_newCustomer.FirstName,
+                    _newCustomer.LastName, _newCustomer.PhoneNumber, _newCustomer.Email,
+                    _newCustomer.BankAccount, _newCustomer.DateOfBirth));
 
             _mockDatabase.Setup(
                 (x) => x.StringGet(

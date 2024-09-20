@@ -1,13 +1,8 @@
 ﻿using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.Logging;
-using static System.Net.WebRequestMethods;
-using System.Reflection;
 using System.Net.Http.Json;
 using Mc2.CrudTest.Presentation.Client.Models;
-using Mc2.CrudTest.Presentation.Shared.Entities;
 using Mc2.CrudTest.Presentation.Shared.ViewModels;
 using Polly.CircuitBreaker;
-using System.Collections.Generic;
 using Mc2.CrudTest.Presentation.Shared.Helper;
 using System.Text.Json;
 

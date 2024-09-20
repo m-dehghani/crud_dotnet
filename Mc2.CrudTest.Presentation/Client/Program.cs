@@ -1,12 +1,8 @@
 using Mc2.CrudTest.Presentation.Client.services;
-using Mc2.CrudTest.Presentation.Shared.Helper;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Polly;
 using Polly.Extensions.Http;
-using static Mc2.CrudTest.Presentation.Client.Program;
-using System.Net.Http.Json;
-using System.Text.Json;
 
 namespace Mc2.CrudTest.Presentation.Client
 {
