@@ -1,11 +1,12 @@
-A very simple project, leveraging Event sourcing and cqrs patterns. Backend has written with .net core and the frontend is Blazor.
+## Description 
+A simple project, leveraging Event sourcing and cqrs patterns. Backend has written with .net core and the frontend is Blazor.
 
-the project has a complete set of tests(Bdd, unit tests, ui test)
-
-the project has developed with microsoft Aspire for easy containerization and deployment into the clouds.
+The project has a complete set of tests(Bdd, unit tests, ui test. It's developed with microsoft Aspire for easy containerization and deployment into the clouds.
 
 Logics, entities and services are based on DDD(domain driven design) and are event oriented.
 
+## projects
+The main projects are in presentation folder (both the backend and frontend)
 ## Practices and patterns:
 
 - [TDD](https://docs.microsoft.com/en-us/visualstudio/test/quick-start-test-driven-development-with-test-explorer?view=vs-2022)
