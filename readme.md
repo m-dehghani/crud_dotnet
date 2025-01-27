@@ -1,5 +1,5 @@
 ## Description 
-A simple project, leveraging Event sourcing and cqrs patterns. Backend has written with .net core and the frontend is Blazor.
+A simple project, leveraging Event sourcing and cqrs patterns. Backend has written with .net core and the frontend is Blazor. Also it can be used as a base project for developing bigger and more complex projects.
 
 The project has a complete set of tests(Bdd, unit tests, ui test. It's developed with microsoft Aspire for easy containerization and deployment into the clouds.
 
